@@ -4,7 +4,7 @@ esbuild
   .build({
     bundle: true,
     minify: true,
-    entryPoints: ['src/app/index.ts'],
+    entryPoints: ['src/app/server.ts'],
     outfile: 'dist/index.js',
     format: 'esm',
     platform: 'node',
