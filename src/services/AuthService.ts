@@ -12,6 +12,7 @@ type Member = {
   name: string;
   email: string;
   password?: string;
+  avatar?: string;
 };
 
 export class AuthService {
@@ -25,6 +26,7 @@ export class AuthService {
     // get possible members
     const { email, password } = options;
     const member = await AuthService.getMemberByAccountOrEmail(email);
+    console.log('member', member);
     if (!member) {
       throw appError({ code: 401, message: 'no such member', next });
     }
@@ -38,6 +40,7 @@ export class AuthService {
       id: member.id,
       email: member.email,
       name: member.name,
+      avatar: member.avatar,
     };
     const authToken = generateToken({ userId: member.id });
     return { authToken, member: publicMember };
@@ -84,17 +87,10 @@ export class AuthService {
     }
   };
 
-  static getMemberByAccountOrEmail = async (query: string): Promise<Member | null> =>
+  static getMemberByAccountOrEmail = async (email: string): Promise<Member | null> =>
   {
-    const userDocument = await User.findOne({
-      where: {
-        OR: [
-          {
-            email: query,
-          },
-        ],
-      },
-    });
+    const userDocument = await User.findOne({ email }).select('email name password avatar').exec();
+
     if (!userDocument) return null;
 
     const member: Member = {
@@ -102,6 +98,7 @@ export class AuthService {
       name: userDocument.name,
       email: userDocument.email,
       password: userDocument.password,
+      avatar: userDocument.avatar,
     };
 
     return member || null;

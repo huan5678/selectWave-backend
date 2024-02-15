@@ -5,8 +5,6 @@ import { isAuthor } from '@/middleware';
 
 const authRouter = Router();
 
-authRouter.post('/mail', handleErrorAsync(MailServiceController.sendMail))
-
 authRouter.post(
   /**
    * #swagger.tags = ['Auth - 認證']

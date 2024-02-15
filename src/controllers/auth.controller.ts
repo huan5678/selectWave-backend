@@ -76,7 +76,6 @@ class AuthController {
       if (!isValidate) throw appError({ code: 400, message: 'invalid input' });
 
       const { email, password } = inputSchema.cast(req.body);
-
       const { authToken, member } = await AuthService.login({ email, password }, next);
       return successHandle(res, 'success', { authToken, member });
     } catch (error) {

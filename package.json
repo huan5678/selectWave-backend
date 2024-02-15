@@ -5,9 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/app/server.ts",
-    "build": "npm run build:client && npm run build:server",
-    "build:client": "vite build --ssrManifest --outDir dist/client",
-    "build:server": "vite build --ssr src/entry-server.ts --outDir dist/server",
+    "build": "npm run build:server",
+    "build:server": "vite build --ssr src/app/server.ts --outDir dist/server",
     "preview": "cross-env NODE_ENV=production node server",
     "swagger-autogen": "tsx develop/swagger.ts"
   },
