@@ -19,6 +19,7 @@ app.use(
   '/',
   verifyMiddleware(
     [
+      { path: '/', method: 'GET' },
       { path: '/swagger', method: 'GET' },
       { path: '/api/auth/login', method: 'POST' },
       { path: '/api/auth/register', method: 'POST' },

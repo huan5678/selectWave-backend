@@ -7,7 +7,7 @@
     "dev": "tsx watch src/app/server.ts",
     "build": "pnpm swagger-autogen && tsc && node develop/build.js",
     "start": "node dist/index.js",
-    "preview": "cross-env NODE_ENV=production node server",
+    "preview": "cross-env NODE_ENV=production node dist/index.js",
     "swagger-autogen": "tsx develop/swagger.ts"
   },
   "dependencies": {

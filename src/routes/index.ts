@@ -27,6 +27,17 @@ apiRouter.use((error: Error, _req: Request, res, next: NextFunction) => {
   }
 });
 
+apiRouter.get('/', (req, res) => {
+    const healthCheck = {
+        status: true,
+        message: 'OK',
+        uptime: process.uptime(),
+        timestamp: Date.now(),
+        host: req.headers.host
+    };
+    res.send(healthCheck);
+})
+
 apiRouter.use('/api/auth/', authRouter);
 apiRouter.use('/api/imgur/', imgurRouter);
 apiRouter.use('/api/member/', memberRouter);
