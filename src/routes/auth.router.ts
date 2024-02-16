@@ -24,10 +24,10 @@ authRouter.post(
           status: true,
           message: '註冊成功',
           result: {
-            token: 'eyJhbGciOi.....,
+            token: 'eyJhbGciOi.....',
           },
         },
-        description: "註冊成功"
+        description: "註冊成功",
       }
     * #swagger.responses[400] = {
         schema: {

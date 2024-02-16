@@ -1,5 +1,5 @@
 import { NextFunction, RequestHandler, Response } from 'express';
-import { AuthRequest, TokenPayload } from '@/types';
+import { TokenPayload } from '@/types';
 import { object, string } from 'yup';
 import { AuthService } from '@/services';
 import { appError, getToken, successHandle, verifyToken } from '@/utils';

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/app/server.ts",
-    "build": "tsc && node develop/build.js",
+    "build": "pnpm swagger-autogen && tsc && node develop/build.js",
     "start": "node dist/index.js",
     "preview": "cross-env NODE_ENV=production node server",
     "swagger-autogen": "tsx develop/swagger.ts"

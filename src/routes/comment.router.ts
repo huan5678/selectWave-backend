@@ -1,5 +1,4 @@
 import CommentController from "@/controllers/comment.controller";
-import { isAuthor } from "@/middleware";
 import { handleErrorAsync } from "@/utils";
 import { Router } from "express";
 

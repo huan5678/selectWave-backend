@@ -55,44 +55,20 @@
             "schema": {
               "type": "object",
               "properties": {
-                "type": {
-                  "type": "string",
-                  "example": "object"
+                "status": {
+                  "type": "boolean",
+                  "example": true
                 },
-                "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "註冊成功"
+                },
+                "result": {
                   "type": "object",
                   "properties": {
-                    "message": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    },
-                    "result": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "object"
-                        },
-                        "properties": {
-                          "type": "object",
-                          "properties": {
-                            "authToken": {
-                              "type": "object",
-                              "properties": {
-                                "type": {
-                                  "type": "string",
-                                  "example": "string"
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOi....."
                     }
                   }
                 }
@@ -107,53 +83,20 @@
             "schema": {
               "type": "object",
               "properties": {
-                "type": {
+                "message": {
                   "type": "string",
-                  "example": "object"
+                  "example": "密碼強度不足，請確認是否具至少有 1 個數字， 1 個大寫英文， 1 個小寫英文， 1 個特殊符號，且長度至少為 8 個字元"
                 },
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    },
-                    "result": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "object"
-                        },
-                        "properties": {
-                          "type": "object",
-                          "properties": {
-                            "authToken": {
-                              "type": "object",
-                              "properties": {
-                                "type": {
-                                  "type": "string",
-                                  "example": "string"
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
+                "status": {
+                  "type": "boolean",
+                  "example": false
                 }
               },
               "xml": {
                 "name": "main"
               }
             },
-            "description": "註冊失敗"
+            "description": "Bad Request"
           }
         }
       }
@@ -347,7 +290,7 @@
       }
     },
     "/api/auth/logout": {
-      "post": {
+      "get": {
         "tags": [
           "Auth - 認證"
         ],
@@ -355,9 +298,55 @@
         "responses": {
           "200": {
             "schema": {
-              "$ref": "#/definitions/Success"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "登出成功"
+                },
+                "result": {
+                  "type": "boolean",
+                  "example": true
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
             "description": "登出成功"
+          },
+          "400": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "object"
+                },
+                "properties": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "登出失敗"
           },
           "500": {
             "schema": {
@@ -407,73 +396,35 @@
             "schema": {
               "type": "object",
               "properties": {
-                "type": {
-                  "type": "string",
-                  "example": "object"
+                "status": {
+                  "type": "boolean",
+                  "example": true
                 },
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "success"
-                    },
-                    "result": {
-                      "$ref": "#/definitions/User"
-                    }
-                  }
+                "message": {
+                  "type": "string",
+                  "example": "驗證成功取得使用者資訊"
+                },
+                "result": {
+                  "$ref": "#/definitions/User"
                 }
               },
               "xml": {
                 "name": "main"
               }
             },
-            "description": "取得使用者資訊成功"
-          },
-          "400": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "type": "string",
-                  "example": "object"
-                },
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "example": "Token 已經過期或無效"
-                    }
-                  }
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            },
-            "description": "Token 已經過期或無效"
+            "description": "取得使用者資訊"
           },
           "401": {
             "schema": {
               "type": "object",
               "properties": {
-                "type": {
-                  "type": "string",
-                  "example": "object"
+                "status": {
+                  "type": "boolean",
+                  "example": false
                 },
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "example": "驗證碼已過期，請重新登入！"
-                    }
-                  }
+                "message": {
+                  "type": "string",
+                  "example": "驗證碼已過期，請重新登入！"
                 }
               },
               "xml": {
@@ -486,23 +437,13 @@
             "schema": {
               "type": "object",
               "properties": {
-                "type": {
-                  "type": "string",
-                  "example": "object"
+                "status": {
+                  "type": "boolean",
+                  "example": false
                 },
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    }
-                  }
+                "message": {
+                  "type": "string",
+                  "example": "請重新登入"
                 }
               },
               "xml": {
@@ -515,29 +456,18 @@
             "schema": {
               "type": "object",
               "properties": {
-                "type": {
-                  "type": "string",
-                  "example": "object"
+                "status": {
+                  "type": "boolean",
+                  "example": false
                 },
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "example": "Invalid token"
-                    }
-                  }
+                "message": {
+                  "type": "string",
+                  "example": "已無此使用者請重新註冊"
                 }
               },
               "xml": {
                 "name": "main"
               }
-            },
-            "description": "token 驗證失敗"
-          },
-          "500": {
-            "schema": {
-              "$ref": "#/definitions/Error"
             },
             "description": "取得使用者資訊失敗"
           }
@@ -564,19 +494,9 @@
             "schema": {
               "type": "object",
               "properties": {
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "email": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    }
-                  }
+                "email": {
+                  "type": "string",
+                  "example": "example@example.com"
                 }
               }
             }
@@ -585,23 +505,197 @@
         "responses": {
           "200": {
             "schema": {
-              "$ref": "#/definitions/Success"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "成功送出重設密碼信件，請收信並進行重設步驟"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
-            "description": "重設密碼成功"
+            "description": "成功送出重設密碼信件"
           },
           "400": {
             "schema": {
-              "$ref": "#/definitions/Error"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Email 格式有誤，請確認輸入是否正確"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
             "description": "重設密碼失敗"
           },
-          "500": {
+          "404": {
             "schema": {
-              "$ref": "#/definitions/Error"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "此 Email 未註冊"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
             "description": "重設密碼失敗"
           }
         }
+      }
+    },
+    "/api/auth/change-password": {
+      "post": {
+        "tags": [
+          "Auth - 認證"
+        ],
+        "description": "更新帳號密碼",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "更新帳號密碼",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "example@example.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "Abc@12345"
+                },
+                "confirmPassword": {
+                  "type": "string",
+                  "example": "Abc@12345"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "成功更新密碼"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "成功更新密碼"
+          },
+          "400": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "密碼不一致"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "更新密碼失敗"
+          },
+          "401": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "驗證碼已過期，請重新登入！"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "token 驗證失敗"
+          },
+          "403": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "請重新登入"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "更新密碼失敗"
+          },
+          "404": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "已無此使用者請重新註冊"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "更新密碼失敗"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       }
     },
     "/api/auth/verify": {
@@ -613,9 +707,7 @@
         "parameters": [
           {
             "name": "query",
-            "token": {
-              "type": "string"
-            },
+            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MjY",
             "in": "query",
             "type": "string"
           }
@@ -623,19 +715,80 @@
         "responses": {
           "200": {
             "schema": {
-              "$ref": "#/definitions/Success"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "驗證成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/User"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
             "description": "使用者成功驗證"
           },
           "400": {
             "schema": {
-              "$ref": "#/definitions/Error"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "無效的 token"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "驗證帳號失敗"
+          },
+          "404": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "無效的驗證連結或已過期"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
             "description": "驗證帳號失敗"
           },
           "500": {
             "schema": {
-              "$ref": "#/definitions/Error"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "驗證失敗"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
             "description": "驗證帳號失敗"
           }
