@@ -11,11 +11,17 @@ export const generateToken = (payload: { userId?: string }) => {
   });
 };
 
+export const getToken = (req: Request) =>
+{
+  const token = req.header('Authorization')?.split('Bearer ').pop();
+  return token;
+};
+
 export const verifyToken = (token: string) => {
   try {
     return jsonWebToken.verify(token, JWT_SECRET as unknown as string) as JwtPayload;
   } catch (error) {
-    throw appError({
+    return appError({
       code: 403,
       message: '請重新登入',
     });
@@ -105,7 +111,7 @@ export const getDefaultDate = () => {
 export const appError = (options: {
   code?: number;
   message: string;
-  next?;
+  next?: NextFunction;
 }) => {
   const { code, message, next } = options;
   const error: ResponseError = new Error(message);
@@ -153,4 +159,3 @@ export const randomPassword = () => {
 export const handleErrorAsync = (func: Function) => {
   return (req: Request, res: Response, next: NextFunction) => func(req, res, next).catch((err: Error) => next(err));
 };
-

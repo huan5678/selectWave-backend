@@ -1,5 +1,5 @@
 import OptionController from '@/controllers/option.controller';
-import { isAuthor } from '@/middleware';
+
 import { handleErrorAsync } from '@/utils';
 
 import { Router } from 'express';
@@ -40,7 +40,7 @@ optionRouter.post(
         }]
   */
   '/vote',
-  isAuthor,
+  
   handleErrorAsync(OptionController.vote),
 );
 
@@ -78,7 +78,7 @@ optionRouter.put(
       }]
    */
   '/vote',
-  isAuthor,
+  
   handleErrorAsync(OptionController.updateVote),
 );
 
@@ -115,7 +115,7 @@ optionRouter.delete(
       }]
    */
   '/vote',
-  isAuthor,
+  
   handleErrorAsync(OptionController.cancelVote),
 );
 optionRouter.post(
@@ -149,7 +149,7 @@ optionRouter.post(
       }]
    */
   '/',
-  isAuthor,
+  
   handleErrorAsync(OptionController.createOption),
 );
 optionRouter.put(
@@ -185,7 +185,7 @@ optionRouter.put(
       }]
    */
   '/',
-  isAuthor,
+  
   handleErrorAsync(OptionController.updateOption),
 );
 
@@ -216,7 +216,7 @@ optionRouter.delete(
   }]
   */
   '/:id',
-  isAuthor,
+  
   handleErrorAsync(OptionController.deleteOption),
 );
 

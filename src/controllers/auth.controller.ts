@@ -1,14 +1,20 @@
 import { NextFunction, RequestHandler, Response } from 'express';
-import { AuthRequest } from '@/types';
+import { AuthRequest, TokenPayload } from '@/types';
 import { object, string } from 'yup';
 import { AuthService } from '@/services';
-import { appError, successHandle, verifyToken } from '@/utils';
+import { appError, getToken, successHandle, verifyToken } from '@/utils';
 import MailServiceController from './mailer.controller';
 import { TokenBlacklist, User } from '@/models';
 
 class AuthController {
-  public static decodeTokenHandler = async (req: AuthRequest, res) => {
-    return successHandle(res, 'success', { result: req.auth });
+  public static decodeTokenHandler = async (req, res: Response, next: NextFunction) =>
+  {
+    try {
+      const { user } = req;
+      return successHandle(res, '驗證成功取得使用者資訊', { result: user });
+    } catch (error) {
+      return appError({ code: 500, message: (error as Error).message, next });
+    }
   };
 
   public static verifyAccount: RequestHandler = async (req, res, next) => {
@@ -17,7 +23,7 @@ class AuthController {
     if (!token) {
       return appError({ code: 400, message: '缺少 token', next });
     }
-    const decoded = verifyToken(token as string);
+    const decoded = verifyToken(token as string) as TokenPayload;
     if (!decoded) {
       return appError({ code: 400, message: '無效的 token', next });
     }
@@ -31,7 +37,7 @@ class AuthController {
     user.isValidator = true;
     await user.save();
 
-    res.send({ message: '使用者成功驗證' });
+    return successHandle(res, '使用者成功驗證', { result: user });
   } catch (error) {
     console.log('Verification error:', error);
     appError({ code: 500, message: '驗證失敗', next });
@@ -45,13 +51,13 @@ class AuthController {
       confirmPassword: string().required(),
     });
     if (req.body.password !== req.body.confirmPassword)
-      throw appError({ code: 400, message: 'password not match', next });
+      throw appError({ code: 400, message: '密碼不一致', next });
     const isValidate = await inputSchema.validate(req.body);
-    if (!isValidate) throw appError({ code: 400, message: 'invalid input', next});
+    if (!isValidate) throw appError({ code: 400, message: '請確認輸入的欄位格式是否正確', next});
     const { email, password } = inputSchema.cast(req.body);
     // check member existence
     if (await AuthService.getMemberByAccountOrEmail(email)) {
-      appError({ code: 400, message: 'member already exists', next });
+      appError({ code: 400, message: '此 Email 已註冊', next });
     } else {
       const { authToken } = await AuthService.registerMember({
         email,
@@ -60,9 +66,8 @@ class AuthController {
       req.body.token = authToken;
       req.body.email = email;
       MailServiceController.sendVerificationEmail(req, res, next);
-      return successHandle(res, 'success', { result: authToken });
+      return successHandle(res, '註冊成功', { result: { token: authToken } });
     }
-    return appError({ code: 400, message: 'invalid input', next });
   };
 
   public static loginHandler: RequestHandler = async (req, res, next) => {
@@ -84,11 +89,11 @@ class AuthController {
   };
   public static logoutHandler: RequestHandler = async (req, res, next: NextFunction) =>
   {
-    if (!req.headers.authorization) {
-      return appError({ code: 400, message: 'no token', next });
+    const token = getToken(req);
+    if (!token) {
+      return appError({ code: 400, message: '缺少 token', next });
     }
-    const token = req.headers.authorization.split(' ')[ 1 ];
-    const decodedToken = verifyToken(token) as { exp: number };
+    const decodedToken = verifyToken(token) as TokenPayload;
     const expiresAt = new Date(decodedToken.exp * 1000);
     await TokenBlacklist.create({ token, expiresAt });
 
@@ -105,15 +110,15 @@ class AuthController {
     });
 
     const isValidate = await inputSchema.validate(req.body);
-    if (!isValidate) throw appError({ code: 400, message: 'invalid input' });
+    if (!isValidate) throw appError({ code: 400, message: 'Email 格式有誤，請確認輸入是否正確' });
     const { email } = inputSchema.cast(req.body);
     const member = await AuthService.getMemberByAccountOrEmail(email);
     if (!member) {
-      throw appError({ code: 401, message: 'no such member', next });
+      throw appError({ code: 404, message: '此 Email 未註冊', next });
     }
     try {
       MailServiceController.sendResetEmail(req, res, next);
-      successHandle(res, 'success', { result: true });
+      successHandle(res, '成功送出重設密碼信件，請收信並進行重設步驟', { result: true });
     } catch (error) {
       appError({ code: 500, message: 'Internal server error', next });
     }
@@ -130,7 +135,7 @@ class AuthController {
       confirmPassword: string().required(),
     });
     if (req.body.password !== req.body.confirmPassword)
-      throw appError({ code: 400, message: 'password not match', next });
+      throw appError({ code: 400, message: '密碼不一致', next });
 
     const isValidate = await inputSchema.validate(req.body);
     if (!isValidate) throw appError({ code: 400, message: 'invalid input', next });
@@ -138,7 +143,7 @@ class AuthController {
     const { email, password } = inputSchema.cast(req.body);
     const member = await AuthService.getMemberByAccountOrEmail(email);
     if (!member) {
-      throw appError({ code: 401, message: 'no such member' });
+      throw appError({ code: 404, message: '已無此使用者請重新註冊' });
     }
     await AuthService.updatePassword({ email, password, next });
     successHandle(res, 'success', { result: true });

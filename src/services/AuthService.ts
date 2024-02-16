@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import cron from 'node-cron';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { appError, generateToken, passwordCheck } from '@/utils';
@@ -26,9 +27,8 @@ export class AuthService {
     // get possible members
     const { email, password } = options;
     const member = await AuthService.getMemberByAccountOrEmail(email);
-    console.log('member', member);
     if (!member) {
-      throw appError({ code: 401, message: 'no such member', next });
+      throw appError({ code: 404, message: 'no such member', next });
     }
 
     // check password
@@ -150,4 +150,28 @@ export class AuthService {
       throw appError({ message: (error as Error).message, next });
     }
   };
+
+  static updateValidationToken = () =>
+  {
+    cron.schedule('0 1 * * *', async () =>
+    {
+      console.log('Running a job at 01:00 to update verification tokens');
+      const users = await User.find({ isValidator: false, verificationToken: { $ne: '' } });
+
+      users.forEach(async (user) =>
+      {
+        const newVerificationToken = jwt.sign(
+          { userId: user._id },
+          process.env.JWT_SECRET as string,
+          { expiresIn: '24h' } // 根據需要調整過期時間
+        );
+        user.verificationToken = newVerificationToken;
+        await user.save();
+      });
+    }, {
+      scheduled: true,
+      timezone: "Asia/Taipei"
+    });
+  };
 }
+

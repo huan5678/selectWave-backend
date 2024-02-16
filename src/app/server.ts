@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import 'dotenv/config';
 
 import app from './index';
+import { AuthService } from '@/services';
 
 const { DATABASE_PASSWORD, DATABASE_PATH } = process.env;
 const isProduction = process.env.NODE_ENV === 'production';
@@ -20,6 +21,7 @@ const port = parseInt(process.env.PORT || '8081');
 
 app.set('port', port);
 
+AuthService.updateValidationToken();
 
 let vite
 if (!isProduction) {

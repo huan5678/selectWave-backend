@@ -1,10 +1,9 @@
-import type { NextFunction, Request, Response } from 'express';
-import type { JwtPayload } from 'jsonwebtoken';
+import type { NextFunction, Response } from 'express';
 import session from 'express-session';
 import { object, string, number } from 'yup';
-import { ApiExcludeProps } from '@/types';
+import { ApiExcludeProps, TokenPayload } from '@/types';
 import { TokenBlacklist, User } from '@/models';
-import { appError, handleErrorAsync, verifyToken } from '@/utils';
+import { appError, getToken, verifyToken } from '@/utils';
 
 export const verifyAdminSchema = object({
   iat: number().required(),
@@ -26,7 +25,7 @@ export const sessionMiddleware = session({
 });
 
 export const verifyMiddleware =
-  (excludes: ApiExcludeProps[]) => async (req, res, next) => {
+  (excludes: ApiExcludeProps[]) => async (req, _res: Response, next: NextFunction) => {
     const isExcluded = excludes.some(({ path, method }) =>
       req.originalUrl.startsWith(path) && (!method || req.method.toLowerCase() === method.toLowerCase())
     );
@@ -34,48 +33,34 @@ export const verifyMiddleware =
       return next();
     }
 
-    const token = req.headers.authorization?.split('Bearer ')[1]; // 提取 Token
+    const token = getToken(req); // 提取 Token
     if (!token) {
-      return res.status(401).send({ message: 'Invalid token', result: null });
+      return appError({ code: 401, message: '請先登入', next });
     }
 
     // 檢查 Token 是否在黑名單中
     const isBlacklisted = await TokenBlacklist.findOne({ token });
     if (isBlacklisted) {
-      return res.status(401).send({ message: 'Token is blacklisted', result: null });
+      return appError({ code: 401, message: 'Token 已經過期或無效', next });
     }
 
     try {
-      const decoded = verifyToken(token) as JwtPayload;
-      if (!decoded.sub) {
-        throw new Error('Invalid token payload');
+      const decoded = verifyToken(token) as TokenPayload;
+      const { userId, exp } = decoded;
+      if (!userId) {
+        return appError({ code:401, message: '驗證失敗，請重新登入！', next });
       }
-      const user = await User.findOne({ where: { id: decoded.sub } });
-      req.user = user?.id ?? undefined;
+      if (!exp || exp < Date.now().valueOf() / 1000) {
+        await TokenBlacklist.create({ token });
+        return appError({ code:401, message: '驗證碼已過期，請重新登入！', next });
+      }
+      const currentUser = await User.findById(userId).exec();
+      if (!currentUser) {
+        return appError({ code: 404, message: '無此使用者', next });
+      }
+      req.user = currentUser;
       next();
     } catch (error: unknown) {
-      return res.status(403).send({ message: `JWT error: ${(error as Error).message}`, result: null });
+      return appError({ code: 403, message: `JWT error: ${(error as Error).message}`, next });
     }
   };
-
-export const errorMiddleware = (error: Error, _req: Request, res: Response, _next: NextFunction) => {
-  return res.status(500).send({ message: `${error.name} ${error.message}`, result: null });
-};
-
-
-export const isAuthor = handleErrorAsync(async (req, _res: Response, next) => {
-  const accessToken = req.header('Authorization')?.split('Bearer ').pop();
-  if (!accessToken) {
-    return appError({ code:401, message:'未帶入驗證碼，請重新登入！', next });
-  }
-  try {
-    const decoded = verifyToken(accessToken);
-    const currentUser = await User.findById(decoded.id).exec();
-    req.user = currentUser;
-    next();
-  } catch (err) {
-    return appError({ code:401, message: '驗證失敗，請重新登入！', next });
-  }
-});
-
-

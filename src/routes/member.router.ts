@@ -1,5 +1,5 @@
 import MemberController from '@/controllers/member.controller';
-import { isAuthor } from '@/middleware';
+
 import { handleErrorAsync } from '@/utils';
 import { Router } from 'express';
 
@@ -87,7 +87,7 @@ memberRouter.put(
         "Bearer": []
       }]
    */
-  '/', isAuthor, handleErrorAsync(MemberController.updateProfile));
+  '/',  handleErrorAsync(MemberController.updateProfile));
 memberRouter.delete(
   /**
    * #swagger.tags = ['Member - 會員']
@@ -114,7 +114,7 @@ memberRouter.delete(
       "Bearer": []
     }]
     */
-  '/:id', isAuthor, handleErrorAsync(MemberController.deleteMemberById));
+  '/:id',  handleErrorAsync(MemberController.deleteMemberById));
 memberRouter.get(
   /**
    * #swagger.tags = ['Member - 會員']
@@ -141,7 +141,7 @@ memberRouter.get(
       "Bearer": []
     }]
     */
-  '/follow', isAuthor, handleErrorAsync(MemberController.getFollowers));
+  '/follow',  handleErrorAsync(MemberController.getFollowers));
 memberRouter.get(
   /**
    * #swagger.tags = ['Member - 會員']
@@ -168,7 +168,7 @@ memberRouter.get(
       "Bearer": []
     }]
     */
-  '/follow/:id', isAuthor, handleErrorAsync(MemberController.addFollower));
+  '/follow/:id',  handleErrorAsync(MemberController.addFollower));
 memberRouter.delete(
   /**
    * #swagger.tags = ['Member - 會員']
@@ -195,6 +195,6 @@ memberRouter.delete(
       "Bearer": []
     }]
     */
-  '/follow/:id', isAuthor, handleErrorAsync(MemberController.deleteFollower));
+  '/follow/:id',  handleErrorAsync(MemberController.deleteFollower));
 
 export default memberRouter;

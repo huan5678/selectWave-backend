@@ -7,10 +7,11 @@ export const sendNotFoundError: RequestHandler = (_req, res) => {
   });
 };
 
-export const catchCustomError: ErrorRequestHandler = (err, _req, res, _next) => {
+export const catchCustomError: ErrorRequestHandler = (err, _req, res, _next) =>
+{
   const message = getErrorMessage(err);
 
-  return res.status(err?.status || 400).send({
+  return res.status(err.code || 400).send({
     ...message,
     status: false,
   });

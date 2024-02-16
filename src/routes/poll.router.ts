@@ -1,5 +1,5 @@
 import PollController from '@/controllers/poll.controller';
-import { isAuthor } from '@/middleware';
+
 import { handleErrorAsync } from '@/utils';
 
 import { Router } from 'express';
@@ -120,7 +120,7 @@ pollRouter.post(
     }]
    */
   '/',
-  isAuthor,
+  
   handleErrorAsync(PollController.createPoll),
 );
 
@@ -184,7 +184,7 @@ pollRouter.put(
     }]
    */
   '/:id',
-  isAuthor,
+  
     handleErrorAsync(PollController.updatePoll),
   );
 
@@ -229,7 +229,7 @@ pollRouter.delete(
     }]
    */
   '/:id',
-  isAuthor,
+  
   handleErrorAsync(PollController.deletePoll),
 );
 

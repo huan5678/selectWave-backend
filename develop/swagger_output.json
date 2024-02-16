@@ -396,24 +396,150 @@
         ]
       }
     },
-    "/api/auth/user-info": {
+    "/api/auth/check-out": {
       "get": {
         "tags": [
           "Auth - 認證"
         ],
-        "description": "解碼 token",
+        "description": "由 Token 取得使用者資訊",
         "responses": {
           "200": {
             "schema": {
-              "$ref": "#/definitions/Success"
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "object"
+                },
+                "properties": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "result": {
+                      "$ref": "#/definitions/User"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
-            "description": "解碼成功"
+            "description": "取得使用者資訊成功"
+          },
+          "400": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "object"
+                },
+                "properties": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Token 已經過期或無效"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "Token 已經過期或無效"
+          },
+          "401": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "object"
+                },
+                "properties": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "驗證碼已過期，請重新登入！"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "token 驗證失敗"
+          },
+          "403": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "object"
+                },
+                "properties": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "取得使用者資訊失敗"
+          },
+          "404": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "object"
+                },
+                "properties": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid token"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "token 驗證失敗"
           },
           "500": {
             "schema": {
               "$ref": "#/definitions/Error"
             },
-            "description": "解碼失敗"
+            "description": "取得使用者資訊失敗"
           }
         },
         "security": [

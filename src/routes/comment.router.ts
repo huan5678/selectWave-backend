@@ -60,7 +60,7 @@ commentRouter.post(
   "Bearer": []
 }] */
   "/",
-  isAuthor,
+  
   handleErrorAsync(CommentController.createComment)
 );
 
@@ -101,7 +101,7 @@ commentRouter.put(
   "Bearer": []
 }] */
   "/:id",
-  isAuthor,
+  
   handleErrorAsync(CommentController.updateComment)
 );
 
@@ -132,7 +132,7 @@ commentRouter.delete(
 }]
 */
   "/:id",
-  isAuthor,
+  
   handleErrorAsync(CommentController.deleteComment)
 );
 

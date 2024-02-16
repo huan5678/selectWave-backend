@@ -135,3 +135,9 @@ export type ThirdPartyProfile = {
   email: string;
   picture: string;
 };
+
+export type TokenPayload = {
+  userId: string;
+  iat: number;
+  exp: number;
+};
