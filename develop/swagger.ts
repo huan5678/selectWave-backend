@@ -6,12 +6,14 @@ const doc = {
     title: "Select Wave 選集 API 系統 - Swagger",
     description: `部分API需求 \n注意事項：登入成功後請點「Authorize」輸入 Token。\n\n範例程式碼 :
 
-    fetch('/api/member/', { method: 'GET' })
-        .then(response => response.json())
-        .then(res => {
-            // { status: 'true', result: [{...}] }
-            console.log(res);
-        });
+    fetch('/api/auth/check', { method: 'GET', headers: {
+        'Authorization': 'Bearer ' + token
+    }})
+      .then(response => response.json())
+      .then(res => {
+          // { status: 'true', result: [{...}] }
+          console.log(res);
+      });
     `,
   },
   securityDefinitions: {
@@ -69,7 +71,7 @@ const doc = {
       title: "最喜歡的水果？",
       description: "請選擇您最喜歡的水果",
       imageUrl: "https://i.imgur.com/xcLTrkV.png",
-      tags: [ "水果", "投票" ],
+      tags: ["水果", "投票"],
       createdBy: {
         _id: "62e348927278654321000001",
         name: "John Doe",
@@ -114,19 +116,19 @@ const doc = {
         },
       ],
     },
-      Option: {
-        _id: "637b24267525423242675259",
-        optionTitle: "Red",
-        optionImageUrl: "https://i.imgur.com/xcLTrkV.png",
-        pollId: "637b24267525423242675257",
-        voters: [
-          {
-            userId: "637b24267525423242675255",
-            createdTime: "2023-11-16T07:52:54.232Z",
-            updatedTime: "2023-11-16T07:52:54.232Z",
-          },
-        ],
-      },
+    Option: {
+      _id: "637b24267525423242675259",
+      optionTitle: "Red",
+      optionImageUrl: "https://i.imgur.com/xcLTrkV.png",
+      pollId: "637b24267525423242675257",
+      voters: [
+        {
+          userId: "637b24267525423242675255",
+          createdTime: "2023-11-16T07:52:54.232Z",
+          updatedTime: "2023-11-16T07:52:54.232Z",
+        },
+      ],
+    },
     Comment: {
       _id: "637b24267525423242675258",
       pollId: "637b24267525423242675257",

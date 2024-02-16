@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Select Wave 選集 API 系統 - Swagger",
-    "description": "部分API需求 \n注意事項：登入成功後請點「Authorize」輸入 Token。\n\n範例程式碼 :\n\n    fetch('/api/member/', { method: 'GET' })\n        .then(response => response.json())\n        .then(res => {\n            // { status: 'true', result: [{...}] }\n            console.log(res);\n        });\n    ",
+    "description": "部分API需求 \n注意事項：登入成功後請點「Authorize」輸入 Token。\n\n範例程式碼 :\n\n    fetch('/api/auth/check', { method: 'GET', headers: {\n        'Authorization': 'Bearer ' + token\n    }})\n      .then(response => response.json())\n      .then(res => {\n          // { status: 'true', result: [{...}] }\n          console.log(res);\n      });\n    ",
     "version": "1.0.0"
   },
   "host": "localhost:3000",
@@ -385,7 +385,7 @@
         ]
       }
     },
-    "/api/auth/check-out": {
+    "/api/auth/check": {
       "get": {
         "tags": [
           "Auth - 認證"

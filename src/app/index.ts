@@ -15,12 +15,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 app.use(morgan('dev'));
 
+app.use(swaggerRouter);
 app.use(
   '/',
   verifyMiddleware(
     [
-      { path: '/', method: 'GET' },
-      { path: '/swagger', method: 'GET' },
       { path: '/api/auth/login', method: 'POST' },
       { path: '/api/auth/register', method: 'POST' },
       { path: '/api/auth/verify', method: 'GET' },
@@ -32,7 +31,6 @@ app.use(
   ]),
   Routes,
 );
-app.use(swaggerRouter);
 
 app.use(Exception.sendNotFoundError);
 app.use(Exception.catchCustomError);

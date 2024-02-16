@@ -10,7 +10,7 @@ import optionRouter from './option.router';
 
 const apiRouter = Router();
 
-apiRouter.use((req, _, next: NextFunction) => {
+apiRouter.use((req: Request, _, next: NextFunction) => {
   Logger.trace(
     `req ${req.path} query ${JSON.stringify(req.query)} body ${JSON.stringify(
       req.body,
@@ -18,19 +18,6 @@ apiRouter.use((req, _, next: NextFunction) => {
   );
   next();
 });
-
-
-
-apiRouter.get('/', (req, res) => {
-    const healthCheck = {
-        status: true,
-        message: 'OK',
-        uptime: process.uptime(),
-        timestamp: Date.now(),
-        host: req.headers.host
-    };
-    res.send(healthCheck);
-})
 
 apiRouter.use('/api/auth/', authRouter);
 apiRouter.use('/api/imgur/', imgurRouter);

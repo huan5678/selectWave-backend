@@ -28,12 +28,9 @@ export const verifyMiddleware =
   (excludes: ApiExcludeProps[]) =>
   async (req, _res: Response, next: NextFunction) => {
     try {
-      const isExcluded = req.originalUrl.length === 1 && excludes.some(
-        ({ path, method }) =>
-        {
-          return req.originalUrl.startsWith(path) &&
+      const isExcluded = excludes.some(
+        ({ path, method }) => req.originalUrl.startsWith(path) &&
             (!method || req.method.toLowerCase() === method.toLowerCase())
-        }
       );
       if (isExcluded) {
         return next();
