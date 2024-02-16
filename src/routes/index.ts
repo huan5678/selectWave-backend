@@ -19,13 +19,7 @@ apiRouter.use((req, _, next: NextFunction) => {
   next();
 });
 
-apiRouter.use((error: Error, _req: Request, res, next: NextFunction) => {
-  if (error.name === 'UnauthorizedError') {
-    res.status(401).send({ message: error.message, result: null });
-  } else {
-    next(error);
-  }
-});
+
 
 apiRouter.get('/', (req, res) => {
     const healthCheck = {

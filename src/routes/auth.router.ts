@@ -213,7 +213,7 @@ authRouter.get(
   }
   * #swagger.security = [{ "Bearer": [] }]
    */
-  '/check-out',  handleErrorAsync(AuthController.decodeTokenHandler));
+  '/check', handleErrorAsync(AuthController.decodeTokenHandler));
 authRouter.post(
   /**
    * #swagger.tags = ['Auth - 認證']
