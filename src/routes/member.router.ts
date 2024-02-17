@@ -26,9 +26,7 @@ memberRouter.get(
           status: true,
           message: "成功取得使用者列表",
           result: {
-              users: [
-            {$ref: "#/definitions/Member"},
-            ],
+              users: {$ref: "#/definitions/Members"},
             totalPages: 1,
             currentPage: 1,
             totalCount: 1,
@@ -53,7 +51,7 @@ memberRouter.get(
           status: true,
           message: "成功取的使用者資訊",
           result: {
-          $ref: "#/definitions/Member"
+          $ref: "#/definitions/User"
           }
         },
         description: "獲取會員詳情成功"
@@ -74,7 +72,7 @@ memberRouter.put(
       type: 'object',
       description: '更新會員資料',
       schema: {
-        $ref: "#/definitions/MemberProfile",
+        $ref: "#/definitions/UserProfile",
       },
     }
     * #swagger.responses[200] = {
@@ -159,10 +157,14 @@ memberRouter.get(
       schema: {
       status: true,
         message: "您已成功追蹤",
-        result: { $ref: "#/definitions/Member" },
+        result: { $ref: "#/definitions/User" },
       },
       description: "成功加入會員追蹤中的人"
     }
+  * #swagger.responses[400] = {
+    schema: { $ref: "#/definitions/ErrorNoneMemberId" },
+    description: "沒有提供會員 ID"
+  }
   * #swagger.responses[401] = {
     schema: {
         status: false,
@@ -193,10 +195,14 @@ memberRouter.delete(
       schema: {
         status: true,
         message: "取消追蹤成功",
-        result: { $ref: "#/definitions/Member" },
+        result: { $ref: "#/definitions/User" },
       },
       description: "取消追蹤成功"
     }
+  * #swagger.responses[400] = {
+    schema: { $ref: "#/definitions/ErrorNoneMemberId" },
+    description: "沒有提供會員 ID"
+  }
   * #swagger.responses[401] = {
     schema: {
         status: false,

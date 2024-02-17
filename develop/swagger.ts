@@ -72,6 +72,50 @@ const doc = {
       gender: 'male',
       socialMedia: [ { type: 'facebook', id: '1234567890' }, { type: 'twitter', id: 'johndoe' } ],
     },
+    Member: {
+      _id: "62e348927278654321000001",
+      name: "John Doe",
+      avatar: "https://i.imgur.com/xcLTrkV.png",
+      gender: "male",
+      follwing: [
+        {
+          user: {
+            _id: "62e348927278654321000003",
+            name: "Bob Smith",
+            avatar: "https://i.imgur.com/xcLTrkV.png",
+          },
+          createdAt: "2023-12-01T00:00:00.000Z",
+        },
+      ],
+      followers: [
+        {
+          user: {
+            _id: "62e348927278654321000002",
+            name: "Mary Johnson",
+            avatar: "https://i.imgur.com/xcLTrkV.png",
+          },
+          createdAt: "2023-12-01T00:00:00.000Z",
+        },
+      ],
+      socialMedia: [
+        {
+          type: "facebook",
+          id: "1234567890",
+        },
+        {
+          type: "twitter",
+          id: "johndoe",
+        },
+      ],
+      id: "62e348927278654321000001",
+    },
+    Members: [
+      {
+      id: "62e348927278654321000001",
+      name: "John Doe",
+      avatar: "https://i.imgur.com/",
+      },
+    ],
     Poll: {
       _id: "62e348927278654321000004",
       title: "最喜歡的水果？",
@@ -197,6 +241,10 @@ const doc = {
     ErrorMemberNotFound: {
       status: false,
       message: "無此使用者請確認使用者 id 是否正確",
+    },
+    ErrorNoneMemberId: {
+      status: false,
+      message: "請提供使用者 id",
     },
   },
 };

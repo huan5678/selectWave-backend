@@ -21,7 +21,7 @@ export const verifyToken = (token: string) => {
   try {
     return jsonWebToken.verify(token, JWT_SECRET as unknown as string) as JwtPayload;
   } catch (error) {
-    return appError({
+    throw appError({
       code: 403,
       message: '驗證失敗，請重新登入！',
     });
@@ -124,6 +124,9 @@ export const appError = (options: {
       };
 };
 
+export const catchError = (error: Error, next: NextFunction) =>
+  appError({ code: 500, message: error.message as string, next });
+
 export const successHandle = (res, message = '', data: Data[] | Data) => {
   res.send({
     status: true,
@@ -157,5 +160,5 @@ export const randomPassword = () => {
 };
 
 export const handleErrorAsync = (func: Function) => {
-  return (req: Request, res: Response, next: NextFunction) => func(req, res, next).catch((err: Error) => next(err));
+  return (req: Request, res: Response, next: NextFunction) => func(req, res, next).catch((error) => catchError((error as Error), next));
 };

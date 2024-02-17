@@ -141,3 +141,14 @@ export type TokenPayload = {
   iat: number;
   exp: number;
 };
+
+export type RequestWithPath = Request & {
+  path: string;
+};
+
+export type RequestWithAuth = Request & {
+  headers: {
+    authorization: string;
+  };
+  user: IUser;
+};
