@@ -28,7 +28,7 @@ pollRouter.get(
       message: "獲取投票列表成功",
       result: {
         $ref: "#/definitions/Poll"
-      }
+      },
     },
     description: "獲取投票列表成功"
   }
@@ -48,7 +48,13 @@ pollRouter.get(
     description: '投票ID'
     }
    * #swagger.responses[200] = {
-    schema: { $ref: "#/definitions/Poll" },
+    schema: {
+      status: true,
+      message: "獲取投票詳細資訊成功",
+      result: {
+        $ref: "#/definitions/Poll"
+      }
+    },
     description: "獲取投票詳細資訊成功"
     }
    * #swagger.responses[404] = {

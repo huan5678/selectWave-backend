@@ -1164,7 +1164,23 @@
         "responses": {
           "200": {
             "schema": {
-              "$ref": "#/definitions/Poll"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "獲取投票詳細資訊成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Poll"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
             "description": "獲取投票詳細資訊成功"
           },
