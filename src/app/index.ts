@@ -22,6 +22,7 @@ app.use(
     [
       { path: '/api/auth/login', method: 'POST' },
       { path: '/api/auth/register', method: 'POST' },
+      { path: '/api/auth/reset-password', method: 'PUT' },
       { path: '/api/auth/verify', method: 'GET' },
       { path: '/api/auth/verify', method: 'POST' },
       { path: '/api/member', method: 'GET' },

@@ -6,6 +6,9 @@ import { appError, getToken, successHandle, verifyToken } from '@/utils';
 import MailServiceController from './mailer.controller';
 import { TokenBlacklist, User } from '@/models';
 
+const emailInputSchema = object({
+  email: string().required().email(),
+});
 class AuthController {
   public static decodeTokenHandler = async (req, res: Response, next: NextFunction) =>
   {
@@ -105,13 +108,10 @@ class AuthController {
     res: Response,
     next: NextFunction,
   ) => {
-    const inputSchema = object({
-      email: string().required().email(),
-    });
 
-    const isValidate = await inputSchema.validate(req.body);
+    const isValidate = await emailInputSchema.validate(req.body);
     if (!isValidate) throw appError({ code: 400, message: 'Email 格式有誤，請確認輸入是否正確' });
-    const { email } = inputSchema.cast(req.body);
+    const { email } = emailInputSchema.cast(req.body);
     const member = await AuthService.getMemberByAccountOrEmail(email);
     if (!member) {
       throw appError({ code: 404, message: '此 Email 未註冊', next });
@@ -123,6 +123,36 @@ class AuthController {
       appError({ code: 500, message: 'Internal server error', next });
     }
   };
+
+  public static verifyResetPasswordHandler: RequestHandler = async (
+    req,
+    _res: Response,
+    next: NextFunction,
+  ) =>
+  {
+    try {
+      const { token, password, confirmPassword } = req.body;
+      if (password !== confirmPassword) {
+        return appError({ code: 400, message: '密碼不一致', next });
+      }
+    const isValidate = await emailInputSchema.validate(req.body);
+    if (!isValidate) throw appError({ code: 400, message: 'Email 格式有誤，請確認輸入是否正確' });
+    if (!token) {
+      return appError({ code: 400, message: '缺少 token', next });
+    }
+    const decoded = verifyToken(token as string) as TokenPayload;
+    if (!decoded) {
+      return appError({ code: 400, message: '無效的 token', next });
+    }
+      const user = await User.findOne({ resetToken: token });
+      if (!user) {
+        return appError({ code: 404, message: '無效的重設連結或已過期', next });
+      }
+      await User.findByIdAndUpdate(user._id, { resetToken: '', password });
+    } catch (error) {
+      appError({ code: 500, message: 'Internal server error', next });
+    }
+  }
 
   public static changePasswordHandler: RequestHandler = async (
     req,

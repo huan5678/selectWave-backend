@@ -9,9 +9,7 @@ import resetPasswordTemplate from '@/views/resetPassword';
 
 const mailSchema = object().shape({
   from: string(),
-  to: string().required('缺少收件者地址'),
-  cc: string(),
-  bcc: string(),
+  to: string().email().required().required('缺少收件者地址'),
   subject: string().required('缺少主旨'),
   text: string(),
   html: string().required('缺少內容'),
@@ -56,13 +54,14 @@ export class MailServiceController {
         <p>請點擊以下連結以驗證您的 Email 帳號</p>
         <a href="${verificationUrl}">驗證 Email</a>
       `;
-      await MailServiceController.transporter.verify();
-      const info = await MailServiceController.transporter.sendMail({
+      const mailConfig = {
         from: `"選集客戶幫助中心" <${process.env.GMAIL_ACCOUNT}>`,
-        to: email,
+        to: email.trim().toLowerCase(),
         subject: '選集會員帳號驗證信',
         html,
-      });
+      }
+      await MailServiceController.transporter.verify();
+      const info = await MailServiceController.transporter.sendMail(mailConfig);
       successHandle(_res, '驗證信已寄出', { result: info });
     } catch (error) {
       console.log('catch err:', error);
@@ -70,14 +69,13 @@ export class MailServiceController {
     }
   };
 
-  public static resendVerificationEmail: RequestHandler = async (req, res) => {
+  public static resendVerificationEmail: RequestHandler = async (req: Request, res: Response, next:NextFunction) => {
     try {
       const { email } = req.body;
-      const user = await User.findOne({ email });
+      const user = await User.findOne({ email: email.trim().toLowerCase() });
       if (!user) {
-        throw new Error('找不到使用者');
+        return appError({code: 400, message: '無此帳號，請再次確認註冊 Email 帳號，或是重新註冊新帳號', next});
       }
-
       // 生成新的 token
       const newVerificationToken = jwt.sign(
         { userId: user._id },
@@ -89,21 +87,28 @@ export class MailServiceController {
       user.verificationToken = newVerificationToken;
       await user.save();
 
-      const transporter = MailServiceController.transporter;
-      await transporter.verify();
       const verificationUrl = `${process.env.FRONTEND_DOMAIN}/verify-account?token=${newVerificationToken}`;
       const html = `
         <h1>感謝您註冊選集會員</h1>
         <p>請點擊以下連結以驗證您的 Email 帳號</p>
         <a href="${verificationUrl}">驗證 Email</a>
       `;
-      const info = await transporter.sendMail({
+      const mailConfig = {
         from: `"選集客戶幫助中心" <${process.env.GMAIL_ACCOUNT}>`,
-        to: email,
+        to: email.trim().toLowerCase(),
         subject: '選集會員帳號驗證信',
         html,
-      });
-      successHandle(res, '驗證信已寄出', { result: info });
+      };
+
+      const mailIsValidated = mailSchema.validateSync(mailConfig);
+      if (!mailIsValidated) {
+        return appError({ code: 400, message: '信件格式錯誤', next });
+      }
+
+      const transporter = MailServiceController.transporter;
+      await transporter.verify();
+      const info =await transporter.sendMail(mailConfig);
+      successHandle(res, '驗證信已寄出', { result: `以成功寄送重新驗證信件至 Email: ${info.accepted}` });
     } catch (error) {
       throw new Error('Internal server error');
     }
@@ -114,7 +119,8 @@ export class MailServiceController {
     res: Response,
     next: NextFunction,
   ) => {
-    const { email } = req.body;
+    let { email } = req.body;
+    email = email.trim().toLowerCase();
     if (!email) {
       return appError({
         code: 400,
@@ -156,7 +162,7 @@ export class MailServiceController {
           next,
         });
       }
-      successHandle(res, '信件已寄出', { });
+      successHandle(res, '信件已寄出', { result: `以成功寄送驗證信件至 Email: ${info.accepted}` });
     } catch (error) {
       console.log('catch err:', error);
       appError({ code: 500, message: 'Internal server error' });

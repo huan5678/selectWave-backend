@@ -561,6 +561,96 @@
             "description": "重設密碼失敗"
           }
         }
+      },
+      "put": {
+        "tags": [
+          "Auth - 認證"
+        ],
+        "description": "重設密碼",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "重設密碼",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string",
+                  "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MjY"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "Abc@12345"
+                },
+                "confirmPassword": {
+                  "type": "string",
+                  "example": "Abc@12345"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "成功重設密碼"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "成功重設密碼"
+          },
+          "400": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "無效的 token"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "重設密碼失敗"
+          },
+          "404": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "無效的重設連結或已過期"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "重設密碼失敗"
+          }
+        }
       }
     },
     "/api/auth/change-password": {
@@ -706,10 +796,15 @@
         "description": "驗證帳號",
         "parameters": [
           {
-            "name": "query",
-            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MjY",
+            "name": "parameterName",
             "in": "query",
-            "type": "string"
+            "type": "string",
+            "required": true,
+            "description": "驗證碼",
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MjY"
+            }
           }
         ],
         "responses": {
@@ -793,9 +888,7 @@
             "description": "驗證帳號失敗"
           }
         }
-      }
-    },
-    "/api/auth/re-verify-email": {
+      },
       "post": {
         "tags": [
           "Auth - 認證"
@@ -804,9 +897,7 @@
         "parameters": [
           {
             "name": "body",
-            "email": {
-              "type": "string"
-            },
+            "email": "example@example.com",
             "in": "query",
             "type": "string"
           }
@@ -814,19 +905,43 @@
         "responses": {
           "200": {
             "schema": {
-              "$ref": "#/definitions/Success"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "驗證信已寄出"
+                },
+                "result": {
+                  "type": "string",
+                  "example": "以成功寄送重新驗證信件至 Email: example@example.com"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
             "description": "重新發送驗證 Email 成功"
           },
           "400": {
             "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "description": "重新發送驗證 Email 失敗"
-          },
-          "500": {
-            "schema": {
-              "$ref": "#/definitions/Error"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "信件格式錯誤"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
             "description": "重新發送驗證 Email 失敗"
           }

@@ -20,6 +20,10 @@ export class AuthService {
   static BCRYPT_SALT = process.env.BCRYPT_SALT || 8;
   static FRONTEND_DOMAIN = process.env.FRONTEND_DOMAIN || 'http://localhost:3000';
 
+  static verifyPassword = (password: string, passhash: string): boolean => {
+    return bcrypt.compareSync(password, passhash);
+  }
+
   static login = async (options: {
     email: string;
     password: string;
@@ -32,7 +36,7 @@ export class AuthService {
     }
 
     // check password
-    if (member.password && !bcrypt.compareSync(password, member.password)) {
+    if (member.password && !AuthService.verifyPassword(password, member.password)) {
       throw appError({ code: 403, message: 'password does not match', next });
     }
 
@@ -53,7 +57,6 @@ export class AuthService {
   }, next: NextFunction): Promise<{ authToken: string; member: Omit<Member, 'passhash'> }> => {
     const memberId = uuidv4();
     const { email, password } = profile;
-    console.log('profile', profile);
     if (!passwordCheck(password as string))
       throw appError({
         code: 400,
@@ -141,7 +144,7 @@ export class AuthService {
     try {
       const user = await User.findById(email);
       if (!user) {
-        throw new Error('User not found');
+        throw appError({ code: 404, message: '此 Email 未註冊', next });
       }
       user.password = password;
       await user.save();

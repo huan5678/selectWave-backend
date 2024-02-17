@@ -317,12 +317,68 @@ authRouter.post(
   * #swagger.security = [{ "Bearer": [] }]
    */
   '/change-password', handleErrorAsync(AuthController.changePasswordHandler));
+authRouter.put(
+  /**
+   * #swagger.tags = ['Auth - 認證']
+   * #swagger.description = '重設密碼'
+   * #swagger.parameters['body'] = {
+    in: 'body',
+    required: true,
+    type: 'object',
+    description: '重設密碼',
+    schema: {
+      token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MjY',
+      password: 'Abc@12345',
+      confirmPassword: 'Abc@12345',
+    },
+  }
+  * #swagger.responses[200] = {
+    schema: {
+      status: true,
+      message: '成功重設密碼',
+    },
+    description: "成功重設密碼"
+  }
+  * #swagger.responses[400] = {
+    schema: {
+      status: false,
+      message: '密碼不一致',
+    },
+    description: "重設密碼失敗"
+  }
+  * #swagger.responses[400] = {
+    schema: {
+      status: false,
+      message: '缺少 token',
+    },
+    description: "重設密碼失敗"
+  }
+  * #swagger.responses[400] = {
+    schema: {
+      status: false,
+      message: '無效的 token',
+    },
+    description: "重設密碼失敗"
+  }
+  * #swagger.responses[404] = {
+    schema: {
+      status: false,
+      message: '無效的重設連結或已過期',
+    },
+    description: "重設密碼失敗"
+  }
+   */
+  '/reset-password', handleErrorAsync(AuthController.verifyResetPasswordHandler));
 authRouter.get(
   /**
    * #swagger.tags = ['Auth - 認證']
    * #swagger.description = '驗證帳號'
-   * #swagger.parameters['query'] = {
-    token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MjY'
+   * #swagger.parameters['parameterName'] = {
+    in: 'query',
+    type: 'string',
+    required: true,
+    description: '驗證碼',
+    schema: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MjY'
   }
   * #swagger.responses[200] = {
     schema: {
@@ -369,23 +425,32 @@ authRouter.post(
    * #swagger.tags = ['Auth - 認證']
    * #swagger.description = '重新發送驗證 Email'
    * #swagger.parameters['body'] = {
-    email: { type: 'string' }
-  }
-  * #swagger.responses[200] = {
-    schema: { $ref: "#/definitions/Success" },
-    description: "重新發送驗證 Email 成功"
+      email: 'example@example.com',
+    }
+   * #swagger.responses[200] = {
+    schema: {
+      status: true,
+      message: '驗證信已寄出',
+      result: '以成功寄送重新驗證信件至 Email: example@example.com',
+    },
+    description: '重新發送驗證 Email 成功',
   }
   * #swagger.responses[400] = {
-    schema: { $ref: "#/definitions/Error" },
+    schema: {
+      status: false,
+      message: '無此帳號，請再次確認註冊 Email 帳號，或是重新註冊新帳號',
+    },
     description: "重新發送驗證 Email 失敗"
   }
-  * #swagger.responses[500] = {
-    schema: { $ref: "#/definitions/Error" },
+  * #swagger.responses[400] = {
+    schema: {
+      status: false,
+      message: '信件格式錯誤',
+    },
     description: "重新發送驗證 Email 失敗"
   }
    */
-  '/re-verify-email', handleErrorAsync(MailServiceController.resendVerificationEmail));
-
+  '/verify', handleErrorAsync(MailServiceController.resendVerificationEmail));
 
 authRouter.get(
   /**
