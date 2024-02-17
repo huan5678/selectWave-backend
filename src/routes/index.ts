@@ -12,9 +12,10 @@ const apiRouter = Router();
 
 apiRouter.use((req: Request, _, next: NextFunction) => {
   Logger.trace(
-    `req ${req.path} query ${JSON.stringify(req.query)} body ${JSON.stringify(
-      req.body,
-    )} in api router`,
+    `req ${req.path} query ${JSON.stringify(req.query)} ${ process.env.NODE_ENV === 'development' ? `body ${
+      JSON.stringify(
+        req.body,
+      )}` : ''} ${JSON.stringify(req.params)} in api router`,
   );
   next();
 });

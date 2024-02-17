@@ -31,32 +31,28 @@ authRouter.post(
       }
     * #swagger.responses[400] = {
         schema: {
-            message: '此 Email 已註冊',
-            status: false,
+            $ref: "#/definitions/ErrorEmailExist",
           },
         },
         description: "註冊失敗"
       }
     * #swagger.responses[400] = {
         schema: {
-            message: '密碼不一致',
-            status: false,
+            $ref: "#/definitions/ErrorPasswordNotMatch",
           },
         },
         description: "註冊失敗"
       }
     * #swagger.responses[400] = {
         schema: {
-            message: '請確認輸入的欄位格式是否正確',
-            status: false,
+            $ref: "#/definitions/ErrorInputFormat",
           },
         },
         description: "註冊失敗"
       }
     * #swagger.responses[400] = {
         schema: {
-            message: '密碼強度不足，請確認是否具至少有 1 個數字， 1 個大寫英文， 1 個小寫英文， 1 個特殊符號，且長度至少為 8 個字元',
-            status: false,
+            $ref: "#/definitions/ErrorPasswordFormat",
           },
         },
         description: "註冊失敗"
@@ -85,11 +81,8 @@ authRouter.post(
           properties: {
             message: { type: 'string' },
             result: {
-              type: 'object',
-              properties: {
-                authToken: { type: 'string' },
-                member: { $ref: "#/definitions/User" },
-              },
+              authToken: { type: 'string' },
+              member: { $ref: "#/definitions/User" },
             },
           },
         },
@@ -97,30 +90,21 @@ authRouter.post(
       }
     * #swagger.responses[400] = {
         schema: {
-          type: 'object',
-          properties: {
-            message: { type: 'string' },
-          },
+          $ref: "#/definitions/ErrorInputFormat"
         },
         description: "登入失敗"
       }
-    * #swagger.responses[401] = {
-        schema: {
-          type: 'object',
-          properties: {
-            message: { type: 'string' },
+      * #swagger.responses[403] = {
+          schema: {
+            $ref: "#/definitions/ErrorPasswordNotMatch"
           },
+          description: "登入失敗"
+        }
+    * #swagger.responses[404] = {
+        schema: {
+          $ref: "#/definitions/ErrorEmailNotFound"
         },
         description: "帳號或密碼錯誤"
-      }
-    * #swagger.responses[500] = {
-        schema: {
-          type: 'object',
-          properties: {
-            message: { type: 'string' },
-          },
-        },
-        description: "登入失敗"
       }
    */
   '/login', handleErrorAsync(AuthController.loginHandler));
@@ -138,26 +122,13 @@ authRouter.get(
   }
   * #swagger.responses[400] = {
     schema: {
-      status: false,
-      message: '缺少 token',
+      $ref: "#/definitions/ErrorTokenNotFound"
     },
     description: "登出失敗"
   }
-  * #swagger.responses[400] = {
+  * #swagger.responses[403] = {
     schema: {
-      type: 'object',
-      properties: {
-        message: { type: 'string' },
-      },
-    },
-    description: "登出失敗"
-  }
-  * #swagger.responses[500] = {
-    schema: {
-      type: 'object',
-      properties: {
-        message: { type: 'string' },
-      },
+    $ref: "#/definitions/ErrorJsonWebToken"
     },
     description: "登出失敗"
   }
@@ -178,36 +149,13 @@ authRouter.get(
     }
   * #swagger.responses[401] = {
     schema: {
-        status: false,
-        message: 'Token 已經過期或無效',
+        $ref: "#/definitions/ErrorTokenExpired"
     },
     description: "Token 已經過期或無效"
   }
-  * #swagger.responses[401] = {
-    schema: {
-      status: false,
-      message: '驗證失敗，請重新登入！',
-    },
-    description: "token 驗證失敗"
-  }
-  * #swagger.responses[401] = {
-    schema: {
-      status: false,
-      message: '驗證碼已過期，請重新登入！',
-    },
-    description: "token 驗證失敗"
-  }
-  * #swagger.responses[403] = {
-    schema: {
-      status: false,
-      message: '請重新登入',
-    },
-    description: "取得使用者資訊失敗"
-  }
   * #swagger.responses[404] = {
     schema: {
-      status: false,
-      message: '已無此使用者請重新註冊',
+      $ref: "#/definitions/ErrorUserNotFound"
     },
     description: "取得使用者資訊失敗"
   }
@@ -236,15 +184,13 @@ authRouter.post(
   }
   * #swagger.responses[404] = {
     schema: {
-      status: false,
-      message: '此 Email 未註冊',
+      $ref: "#/definitions/ErrorUserNotFound"
     },
     description: "重設密碼失敗"
   }
   * #swagger.responses[400] = {
     schema: {
-      status: false,
-      message: 'Email 格式有誤，請確認輸入是否正確',
+      $ref: "#/definitions/ErrorEmailFormat"
     },
     description: "重設密碼失敗"
   }
@@ -274,43 +220,25 @@ authRouter.post(
     }
     * #swagger.responses[400] = {
       schema: {
-        status: false,
-        message: '密碼不一致',
+        $ref: "#/definitions/ErrorPasswordNotMatch"
       },
       description: "更新密碼失敗"
     }
     * #swagger.responses[401] = {
     schema: {
-        status: false,
-        message: 'Token 已經過期或無效',
+        $ref: "#/definitions/ErrorTokenExpired"
     },
     description: "Token 已經過期或無效"
   }
-  * #swagger.responses[401] = {
-    schema: {
-      status: false,
-      message: '驗證失敗，請重新登入！',
-    },
-    description: "token 驗證失敗"
-  }
-  * #swagger.responses[401] = {
-    schema: {
-      status: false,
-      message: '驗證碼已過期，請重新登入！',
-    },
-    description: "token 驗證失敗"
-  }
   * #swagger.responses[403] = {
     schema: {
-      status: false,
-      message: '請重新登入',
+      $ref: "#/definitions/ErrorJsonWebToken"
     },
-    description: "更新密碼失敗"
+    description: "驗證失敗"
   }
   * #swagger.responses[404] = {
     schema: {
-      status: false,
-      message: '已無此使用者請重新註冊',
+    $ref: "#/definitions/ErrorUserNotFound"
     },
     description: "更新密碼失敗"
   }
@@ -341,29 +269,25 @@ authRouter.put(
   }
   * #swagger.responses[400] = {
     schema: {
-      status: false,
-      message: '密碼不一致',
+    $ref: "#/definitions/ErrorPasswordNotMatch"
     },
     description: "重設密碼失敗"
   }
   * #swagger.responses[400] = {
     schema: {
-      status: false,
-      message: '缺少 token',
+    $ref: "#/definitions/ErrorTokenNotFound"
     },
     description: "重設密碼失敗"
   }
   * #swagger.responses[400] = {
     schema: {
-      status: false,
-      message: '無效的 token',
+    $ref: "#/definitions/ErrorJsonWebToken"
     },
     description: "重設密碼失敗"
   }
   * #swagger.responses[404] = {
     schema: {
-      status: false,
-      message: '無效的重設連結或已過期',
+    $ref: "#/definitions/ErrorVerificationUrlExpired"
     },
     description: "重設密碼失敗"
   }
@@ -392,31 +316,22 @@ authRouter.get(
   }
   * #swagger.responses[400] = {
     schema: {
-      status: false,
-      message: '缺少 token',
+      $ref: "#/definitions/ErrorTokenNotFound"
     },
     description: "驗證帳號失敗"
   }
   * #swagger.responses[400] = {
     schema: {
-      status: false,
-      message: '無效的 token',
+    $ref: "#/definitions/ErrorJsonWebToken"
     },
     description: "驗證帳號失敗"
   }
   * #swagger.responses[404] = {
     schema: {
-      status: false,
-      message: '無效的驗證連結或已過期',
+    $ref: "#/definitions/ErrorVerificationUrlExpired"
     },
     description: "驗證帳號失敗"
   }
-  * #swagger.responses[500] = {
-    schema: {
-      status: false,
-      message: '驗證失敗',
-    },
-    description: "驗證帳號失敗"
   }
    */
   '/verify', handleErrorAsync(AuthController.verifyAccount));
@@ -437,15 +352,13 @@ authRouter.post(
   }
   * #swagger.responses[400] = {
     schema: {
-      status: false,
-      message: '無此帳號，請再次確認註冊 Email 帳號，或是重新註冊新帳號',
+    $ref: "#/definitions/ErrorEmailNotFound"
     },
     description: "重新發送驗證 Email 失敗"
   }
   * #swagger.responses[400] = {
     schema: {
-      status: false,
-      message: '信件格式錯誤',
+    $ref: "#/definitions/ErrorEmailFormat"
     },
     description: "重新發送驗證 Email 失敗"
   }

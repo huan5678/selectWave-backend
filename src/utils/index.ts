@@ -23,7 +23,7 @@ export const verifyToken = (token: string) => {
   } catch (error) {
     return appError({
       code: 403,
-      message: '請重新登入',
+      message: '驗證失敗，請重新登入！',
     });
   }
 };

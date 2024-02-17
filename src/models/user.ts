@@ -123,8 +123,11 @@ const userSchema = new Schema<IUser>(
   {
     versionKey: false,
     timestamps: true,
+    toJSON: {
+      virtuals: true
+    },
     toObject: {
-      virtuals: true,
+        virtuals: true
     },
   },
 );

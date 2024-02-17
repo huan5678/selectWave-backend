@@ -22,12 +22,19 @@ memberRouter.get(
         description: '每頁記錄數',
       }
     * #swagger.responses[200] = {
-        schema: { $ref: "#/definitions/Member" },
+        schema: {
+          status: true,
+          message: "成功取得使用者列表",
+          result: {
+              users: [
+            {$ref: "#/definitions/Member"},
+            ],
+            totalPages: 1,
+            currentPage: 1,
+            totalCount: 1,
+          },
+        },
         description: "獲取會員列表成功"
-      }
-    * #swagger.responses[500] = {
-        schema: { $ref: "#/definitions/Error" },
-        description: "獲取會員列表失敗"
       }
    */
   '/', handleErrorAsync(MemberController.getAllMembers));
@@ -42,16 +49,18 @@ memberRouter.get(
     description: '會員ID'
     }
     * #swagger.responses[200] = {
-        schema: { $ref: "#/definitions/Member" },
+        schema: {
+          status: true,
+          message: "成功取的使用者資訊",
+          result: {
+          $ref: "#/definitions/Member"
+          }
+        },
         description: "獲取會員詳情成功"
       }
     * #swagger.responses[404] = {
-        schema: { $ref: "#/definitions/Error" },
+        schema: { $ref: "#/definitions/ErrorMemberNotFound" },
         description: "找不到會員"
-      }
-    * #swagger.responses[500] = {
-        schema: { $ref: "#/definitions/Error" },
-        description: "獲取會員詳情失敗"
       }
    */
   '/:id', handleErrorAsync(MemberController.getMemberById));
@@ -65,24 +74,33 @@ memberRouter.put(
       type: 'object',
       description: '更新會員資料',
       schema: {
-        properties: {
-          id: { type: 'string' },
-          updateData: { type: 'object' },
-        },
+        $ref: "#/definitions/MemberProfile",
       },
     }
     * #swagger.responses[200] = {
-        schema: { $ref: "#/definitions/Member" },
+        schema: {
+          status: true,
+          message: "成功更新使用者資訊！",
+          $ref: "#/definitions/Member"
+        },
         description: "更新會員資料成功"
       }
     * #swagger.responses[404] = {
-        schema: { $ref: "#/definitions/Error" },
+        schema: { $ref: "#/definitions/ErrorUserNotFound" },
         description: "找不到會員"
       }
-    * #swagger.responses[500] = {
-        schema: { $ref: "#/definitions/Error" },
-        description: "更新會員資料失敗"
-      }
+    * #swagger.responses[401] = {
+    schema: {
+        $ref: "#/definitions/ErrorTokenExpired"
+    },
+    description: "Token 已經過期或無效"
+  }
+  * #swagger.responses[403] = {
+    schema: {
+      $ref: "#/definitions/ErrorJsonWebToken"
+    },
+    description: "驗證失敗"
+  }
     * #swagger.security = [{
         "Bearer": []
       }]
@@ -99,17 +117,29 @@ memberRouter.delete(
     description: '會員ID'
   }
   * #swagger.responses[200] = {
-      schema: { $ref: "#/definitions/Member" },
+      schema: {
+        status: true,
+        message: "成功刪除使用者",
+        result: null,
+      },
       description: "刪除會員成功"
     }
   * #swagger.responses[404] = {
-      schema: { $ref: "#/definitions/Error" },
+      schema: { $ref: "#/definitions/ErrorMemberNotFound" },
       description: "找不到會員"
     }
-  * #swagger.responses[500] = {
-      schema: { $ref: "#/definitions/Error" },
-      description: "刪除會員失敗"
-    }
+  * #swagger.responses[401] = {
+    schema: {
+        $ref: "#/definitions/ErrorTokenExpired"
+    },
+    description: "Token 已經過期或無效"
+  }
+  * #swagger.responses[403] = {
+    schema: {
+      $ref: "#/definitions/ErrorJsonWebToken"
+    },
+    description: "驗證失敗"
+  }
   * #swagger.security = [{
       "Bearer": []
     }]
@@ -118,7 +148,7 @@ memberRouter.delete(
 memberRouter.get(
   /**
    * #swagger.tags = ['Member - 會員']
-   * #swagger.description = '獲取會員追蹤者'
+   * #swagger.description = '加入追蹤'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,
@@ -126,43 +156,23 @@ memberRouter.get(
     description: '會員ID'
   }
   * #swagger.responses[200] = {
-      schema: { $ref: "#/definitions/Member" },
-      description: "獲取會員追蹤者成功"
+      schema: {
+      status: true,
+        message: "您已成功追蹤",
+        result: { $ref: "#/definitions/Member" },
+      },
+      description: "成功加入會員追蹤中的人"
     }
-  * #swagger.responses[404] = {
-      schema: { $ref: "#/definitions/Error" },
-      description: "找不到會員"
-    }
-  * #swagger.responses[500] = {
-      schema: { $ref: "#/definitions/Error" },
-      description: "獲取會員追蹤者失敗"
-    }
-  * #swagger.security = [{
-      "Bearer": []
-    }]
-    */
-  '/follow',  handleErrorAsync(MemberController.getFollowers));
-memberRouter.get(
-  /**
-   * #swagger.tags = ['Member - 會員']
-   * #swagger.description = '獲取會員追蹤中的人'
-   * #swagger.parameters['id'] = {
-    in: 'path',
-    required: true,
-    type: 'string',
-    description: '會員ID'
+  * #swagger.responses[401] = {
+    schema: {
+        status: false,
+        message: "您無法追蹤自己",
+    },
+    description: "加入追蹤失敗"
   }
-  * #swagger.responses[200] = {
-      schema: { $ref: "#/definitions/Member" },
-      description: "獲取會員追蹤中的人成功"
-    }
   * #swagger.responses[404] = {
-      schema: { $ref: "#/definitions/Error" },
+      schema: { $ref: "#/definitions/ErrorMemberNotFound" },
       description: "找不到會員"
-    }
-  * #swagger.responses[500] = {
-      schema: { $ref: "#/definitions/Error" },
-      description: "獲取會員追蹤中的人失敗"
     }
   * #swagger.security = [{
       "Bearer": []
@@ -180,16 +190,23 @@ memberRouter.delete(
     description: '會員ID'
   }
   * #swagger.responses[200] = {
-      schema: { $ref: "#/definitions/Member" },
+      schema: {
+        status: true,
+        message: "取消追蹤成功",
+        result: { $ref: "#/definitions/Member" },
+      },
       description: "取消追蹤成功"
     }
+  * #swagger.responses[401] = {
+    schema: {
+        status: false,
+        message: "您無法取消追蹤自己",
+    },
+    description: "加入追蹤失敗"
+  }
   * #swagger.responses[404] = {
-      schema: { $ref: "#/definitions/Error" },
+      schema: { $ref: "#/definitions/ErrorMemberNotFound" },
       description: "找不到會員"
-    }
-  * #swagger.responses[500] = {
-      schema: { $ref: "#/definitions/Error" },
-      description: "取消追蹤失敗"
     }
   * #swagger.security = [{
       "Bearer": []

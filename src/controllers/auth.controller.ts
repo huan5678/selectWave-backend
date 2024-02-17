@@ -47,7 +47,8 @@ class AuthController {
   }
 };
 
-  public static registerHandler: RequestHandler = async (req, res, next) => {
+  public static registerHandler: RequestHandler = async (req, res, next) =>
+  {
     const inputSchema = object({
       email: string().email().required().lowercase(),
       password: string().required(),
@@ -81,7 +82,7 @@ class AuthController {
     });
     try {
       const isValidate = await inputSchema.validate(req.body);
-      if (!isValidate) throw appError({ code: 400, message: 'invalid input' });
+      if (!isValidate) throw appError({ code: 400, message: '請確認輸入的欄位格式是否正確', next });
 
       const { email, password } = inputSchema.cast(req.body);
       const { authToken, member } = await AuthService.login({ email, password }, next);
@@ -158,25 +159,30 @@ class AuthController {
     req,
     res: Response,
     next: NextFunction,
-  ) => {
-    const inputSchema = object({
-      email: string().required().email(),
-      password: string().required(),
-      confirmPassword: string().required(),
-    });
-    if (req.body.password !== req.body.confirmPassword)
-      throw appError({ code: 400, message: '密碼不一致', next });
+  ) =>
+  {
+    try {
+      const inputSchema = object({
+        email: string().required().email(),
+        password: string().required(),
+        confirmPassword: string().required(),
+      });
+      if (req.body.password !== req.body.confirmPassword)
+        throw appError({ code: 400, message: '密碼不一致', next });
 
-    const isValidate = await inputSchema.validate(req.body);
-    if (!isValidate) throw appError({ code: 400, message: 'invalid input', next });
+      const isValidate = await inputSchema.validate(req.body);
+      if (!isValidate) throw appError({ code: 400, message: 'invalid input', next });
 
-    const { email, password } = inputSchema.cast(req.body);
-    const member = await AuthService.getMemberByAccountOrEmail(email);
-    if (!member) {
-      throw appError({ code: 404, message: '已無此使用者請重新註冊' });
+      const { email, password } = inputSchema.cast(req.body);
+      const member = await AuthService.getMemberByAccountOrEmail(email);
+      if (!member) {
+        throw appError({ code: 404, message: '已無此使用者請重新註冊' });
+      }
+      await AuthService.updatePassword({ email, password, next });
+      successHandle(res, 'success', { result: true });
+    } catch (error) {
+      appError({ code: 500, message: 'Internal server error', next });
     }
-    await AuthService.updatePassword({ email, password, next });
-    successHandle(res, 'success', { result: true });
   };
 }
 

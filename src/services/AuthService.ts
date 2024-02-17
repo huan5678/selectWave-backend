@@ -32,12 +32,12 @@ export class AuthService {
     const { email, password } = options;
     const member = await AuthService.getMemberByAccountOrEmail(email);
     if (!member) {
-      throw appError({ code: 404, message: 'no such member', next });
+      throw appError({ code: 404, message: '請確認 Email 是否正確', next });
     }
 
     // check password
     if (member.password && !AuthService.verifyPassword(password, member.password)) {
-      throw appError({ code: 403, message: 'password does not match', next });
+      throw appError({ code: 403, message: '密碼錯誤', next });
     }
 
     const publicMember: Omit<Member, 'passhash'> = {
@@ -92,7 +92,7 @@ export class AuthService {
 
   static getMemberByAccountOrEmail = async (email: string): Promise<Member | null> =>
   {
-    const userDocument = await User.findOne({ email }).select('email name password avatar').exec();
+    const userDocument = await User.findOne({ email }).exec();
 
     if (!userDocument) return null;
 
@@ -142,7 +142,7 @@ export class AuthService {
 
   static updatePassword = async ({ email, password, next }: { email: string; password: string; next: NextFunction }) => {
     try {
-      const user = await User.findById(email);
+      const user = await User.findOne({ email });
       if (!user) {
         throw appError({ code: 404, message: '此 Email 未註冊', next });
       }
@@ -153,6 +153,16 @@ export class AuthService {
       throw appError({ message: (error as Error).message, next });
     }
   };
+
+  static deleteMemberById = async (id: string, next: NextFunction) => {
+    try {
+      const user = await User.findByIdAndDelete(id).exec();
+      if (!user) throw appError({ code: 404, message: '無此使用者請確認使用者 id 是否正確', next });
+      return user;
+    } catch (error) {
+      throw appError({ message: (error as Error).message, next });
+    }
+  }
 
   static updateValidationToken = () =>
   {
