@@ -1,7 +1,7 @@
 import type { NextFunction, Response } from "express";
 import session from "express-session";
 import { object, string, number } from "yup";
-import { ApiExcludeProps, TokenPayload } from "@/types";
+import { ApiExcludeProps, RequestWithAuth, RequestWithPath, TokenPayload } from "@/types";
 import { TokenBlacklist, User } from "@/models";
 import { appError, getToken, handleErrorAsync, verifyToken } from "@/utils";
 
@@ -26,18 +26,18 @@ export const sessionMiddleware = session({
 
 export const verifyMiddleware =
   (excludes: ApiExcludeProps[]) =>
-  async (req, _res: Response, next: NextFunction) => {
+  async (req: RequestWithPath, res: Response, next: NextFunction) => {
     try {
       const isExcluded = excludes.some(
-        ({ path, method }) => req.originalUrl.startsWith(path) &&
+        ({ path, method }) => req.path === path && // 修改這裡進行完全匹配檢查
             (!method || req.method.toLowerCase() === method.toLowerCase())
       );
       if (isExcluded) {
         return next();
       }
-      return isAuthor(req, _res, next);
+      return isAuthor(req, res, next);
     } catch (error: unknown) {
-      return appError({
+      throw appError({
         code: 403,
         message: `JWT error: ${(error as Error).message}`,
         next,
@@ -46,26 +46,26 @@ export const verifyMiddleware =
   };
 
 export const isAuthor = handleErrorAsync(
-  async (req, _res: Response, next: NextFunction) => {
+  async (req: RequestWithAuth, _res: Response, next: NextFunction) => {
     const token = getToken(req); // 提取 Token
     if (!token) {
-      return appError({ code: 401, message: "請先登入", next });
+      throw appError({ code: 401, message: "請先登入", next });
     }
     try {
       // 檢查 Token 是否在黑名單中
       const isBlacklisted = await TokenBlacklist.findOne({ token });
       if (isBlacklisted) {
-        return appError({ code: 401, message: "Token 已經過期或無效", next });
+        throw appError({ code: 401, message: "Token 已經過期或無效", next });
       }
 
       const decoded = verifyToken(token) as TokenPayload;
       const { userId, exp } = decoded;
       if (!userId) {
-        return appError({ code: 401, message: "驗證失敗，請重新登入！", next });
+        throw appError({ code: 401, message: "驗證失敗，請重新登入！", next });
       }
       if (!exp || exp < Date.now().valueOf() / 1000) {
         await TokenBlacklist.create({ token });
-        return appError({
+        throw appError({
           code: 401,
           message: "驗證碼已過期，請重新登入！",
           next,
@@ -73,12 +73,12 @@ export const isAuthor = handleErrorAsync(
       }
       const currentUser = await User.findById(userId).exec();
       if (!currentUser) {
-        return appError({ code: 404, message: "無此使用者", next });
+        throw appError({ code: 404, message: "無此使用者", next });
       }
       req.user = currentUser;
       next();
     } catch (err) {
-      return appError({ code: 401, message: "驗證失敗，請重新登入！", next });
+      throw appError({ code: 401, message: "驗證失敗，請重新登入！", next });
     }
   }
 );

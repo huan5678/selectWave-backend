@@ -1,10 +1,10 @@
-import { RequestHandler, Response } from 'express';
+import { RequestHandler } from 'express';
 import { Poll, Option } from '@/models';
-import { appError, successHandle } from '@/utils';
+import { appError, catchError, successHandle } from '@/utils';
 
 class OptionController {
   // 投票
-  public static vote: RequestHandler = async (req, res: Response ) => {
+  public static vote: RequestHandler = async (req, res, next ) => {
     try {
       const { optionId, userId } = req.body;
 
@@ -23,12 +23,12 @@ class OptionController {
 
       successHandle(res, '投票成功', { updatedOption });
     } catch (error) {
-      appError({ code: 500, message: '投票失敗' });
+      catchError((error as Error), next);
     }
   };
 
   // 更改投票
-  public static updateVote: RequestHandler = async (req, res: Response ) => {
+  public static updateVote: RequestHandler = async (req, res, next ) => {
     try {
       const { optionId, userId, newOptionId } = req.body;
 
@@ -56,12 +56,12 @@ class OptionController {
 
       successHandle(res, '更改投票成功', { updatedNewOption });
     } catch (error) {
-      appError({ code: 500, message: '更改投票失敗' });
+      throw catchError((error as Error), next);
     }
   };
 
   // 取消投票
-  public static cancelVote: RequestHandler = async (req, res: Response ) => {
+  public static cancelVote: RequestHandler = async (req, res, next ) => {
     try {
       const { optionId, userId } = req.body;
       const option = await Option.findById(optionId);
@@ -86,23 +86,23 @@ class OptionController {
 
       successHandle(res, '取消投票成功', {});
     } catch (error) {
-      appError({ code: 500, message: '取消投票失敗' });
+      throw catchError((error as Error), next);
     }
   };
 
   // 新增選項
-  public static createOption: RequestHandler = async (req, res: Response ) => {
+  public static createOption: RequestHandler = async (req, res, next ) => {
     try {
       const { pollId, optionData } = req.body;
       const newOption = await Option.create({ ...optionData, pollId });
       successHandle(res, '新增選項成功', { newOption });
     } catch (error) {
-      appError({ code: 500, message: '新增選項失敗' });
+      throw catchError((error as Error), next);
     }
   };
 
   // 更新選項
-  public static updateOption: RequestHandler = async (req, res: Response ) => {
+  public static updateOption: RequestHandler = async (req, res, next ) => {
     try {
       const { optionId, updateData } = req.body;
       const updatedOption = await Option.findByIdAndUpdate(optionId, updateData, { new: true });
@@ -111,12 +111,12 @@ class OptionController {
       }
       successHandle(res, '更新選項成功', { updatedOption });
     } catch (error) {
-      appError({ code: 500, message: '更新選項失敗' });
+      throw catchError((error as Error), next);
     }
   };
 
   // 刪除選項
-  public static deleteOption: RequestHandler = async (req, res: Response ) => {
+  public static deleteOption: RequestHandler = async (req, res, next ) => {
     try {
       const { id } = req.params;
       const deletedOption = await Option.findByIdAndDelete(id);
@@ -125,7 +125,7 @@ class OptionController {
       }
       successHandle(res, '刪除選項成功', { deletedOption });
     } catch (error) {
-      appError({ code: 500, message: '刪除選項失敗' });
+      catchError((error as Error), next);
     }
   };
 

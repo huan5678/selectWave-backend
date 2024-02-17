@@ -711,10 +711,7 @@
                   "type": "object",
                   "properties": {
                     "users": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/definitions/Member"
-                      }
+                      "$ref": "#/definitions/Members"
                     },
                     "totalPages": {
                       "type": "number",
@@ -751,7 +748,7 @@
             "required": true,
             "description": "更新會員資料",
             "schema": {
-              "$ref": "#/definitions/MemberProfile"
+              "$ref": "#/definitions/UserProfile"
             }
           }
         ],
@@ -819,7 +816,7 @@
                   "example": "成功取的使用者資訊"
                 },
                 "result": {
-                  "$ref": "#/definitions/Member"
+                  "$ref": "#/definitions/User"
                 }
               },
               "xml": {
@@ -926,7 +923,7 @@
                   "example": "您已成功追蹤"
                 },
                 "result": {
-                  "$ref": "#/definitions/Member"
+                  "$ref": "#/definitions/User"
                 }
               },
               "xml": {
@@ -934,6 +931,12 @@
               }
             },
             "description": "成功加入會員追蹤中的人"
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/ErrorNoneMemberId"
+            },
+            "description": "沒有提供會員 ID"
           },
           "401": {
             "schema": {
@@ -995,7 +998,7 @@
                   "example": "取消追蹤成功"
                 },
                 "result": {
-                  "$ref": "#/definitions/Member"
+                  "$ref": "#/definitions/User"
                 }
               },
               "xml": {
@@ -1003,6 +1006,12 @@
               }
             },
             "description": "取消追蹤成功"
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/ErrorNoneMemberId"
+            },
+            "description": "沒有提供會員 ID"
           },
           "401": {
             "schema": {
@@ -2415,6 +2424,125 @@
         }
       }
     },
+    "Member": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string",
+          "example": "62e348927278654321000001"
+        },
+        "name": {
+          "type": "string",
+          "example": "John Doe"
+        },
+        "avatar": {
+          "type": "string",
+          "example": "https://i.imgur.com/xcLTrkV.png"
+        },
+        "gender": {
+          "type": "string",
+          "example": "male"
+        },
+        "follwing": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "user": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "example": "62e348927278654321000003"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "Bob Smith"
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "example": "https://i.imgur.com/xcLTrkV.png"
+                  }
+                }
+              },
+              "createdAt": {
+                "type": "string",
+                "example": "2023-12-01T00:00:00.000Z"
+              }
+            }
+          }
+        },
+        "followers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "user": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "example": "62e348927278654321000002"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "Mary Johnson"
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "example": "https://i.imgur.com/xcLTrkV.png"
+                  }
+                }
+              },
+              "createdAt": {
+                "type": "string",
+                "example": "2023-12-01T00:00:00.000Z"
+              }
+            }
+          }
+        },
+        "socialMedia": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "example": "twitter"
+              },
+              "id": {
+                "type": "string",
+                "example": "johndoe"
+              }
+            }
+          }
+        },
+        "id": {
+          "type": "string",
+          "example": "62e348927278654321000001"
+        }
+      }
+    },
+    "Members": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "62e348927278654321000001"
+          },
+          "name": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "avatar": {
+            "type": "string",
+            "example": "https://i.imgur.com/"
+          }
+        }
+      }
+    },
     "Poll": {
       "type": "object",
       "properties": {
@@ -2796,6 +2924,19 @@
         "message": {
           "type": "string",
           "example": "無此使用者請確認使用者 id 是否正確"
+        }
+      }
+    },
+    "ErrorNoneMemberId": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "boolean",
+          "example": false
+        },
+        "message": {
+          "type": "string",
+          "example": "請提供使用者 id"
         }
       }
     }

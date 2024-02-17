@@ -145,7 +145,7 @@ userSchema.statics.findWithoutSensitiveData = function (query) {
 
 userSchema.pre(/^find/, function (next) {
   (this as IUser).populate({
-    path: 'following.user',
+    path: 'following.user followers.user',
     select: '-createdAt -following -isValidator -followers',
   });
   next();
