@@ -11,6 +11,15 @@ const tokenBlacklistSchema = new Schema<ITokenBlacklist>({
     type: Date,
     required: true,
   },
+}, {
+  versionKey: false,
+    timestamps: true,
+    toJSON: {
+      virtuals: true
+    },
+    toObject: {
+        virtuals: true
+    },
 });
 
 export default model<ITokenBlacklist>('TokenBlacklist', tokenBlacklistSchema);

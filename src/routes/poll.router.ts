@@ -7,7 +7,6 @@ import { Router } from 'express';
 const pollRouter = Router();
 
 pollRouter.get(
-
   /**
   * #swagger.tags = ['Poll - 投票']
   * #swagger.description = '獲取所有投票'
@@ -24,16 +23,14 @@ pollRouter.get(
     description: '每頁記錄數',
   }
   * #swagger.responses[200] = {
-    schema: { $ref: "#/definitions/Poll" },
+    schema: {
+      status: true,
+      message: "獲取投票列表成功",
+      result: {
+        $ref: "#/definitions/Poll"
+      }
+    },
     description: "獲取投票列表成功"
-  }
-  * #swagger.responses[500] = {
-    schema: { type: "object",
-    properties: {
-    message: { type: "string" }
-    }
-  },
-    description: "獲取投票列表失敗"
   }
   */
   '/',
@@ -55,19 +52,8 @@ pollRouter.get(
     description: "獲取投票詳細資訊成功"
     }
    * #swagger.responses[404] = {
-    schema: { type: "object",
-    properties: {
-    message: { type: "string" }
-    } },
+    schema: { $ref: "#/definitions/ErrorPollNotFound" },
     description: "找不到投票"
-    }
-   * #swagger.responses[500] = {
-    schema: { type: "object",
-    properties: {
-    message: { type: "string" }
-    }
-  },
-    description: "獲取投票詳細資訊失敗"
     }
    */
   '/:id',
@@ -82,45 +68,32 @@ pollRouter.post(
     in: 'body',
     required: true,
     type: 'object',
-    description: '新增投票',
+    description: '新投票',
     schema: {
-    properties: {
-    title: { type: 'string' },
-    description: { type: 'string' },
-    imageUrl: { type: 'string' },
-    tags: { type: 'array', items: { type: 'string' } },
-    userId: { type: 'string' },
-    optionsData: {
-    type: 'array',
-    items: {
-    properties: {
-    title: { type: 'string' },
-    description: { type: 'string' },
-    imageUrl: { type: 'string' },
-    },
+      $ref: "#/definitions/PollCreate"
       },
     }
-    },
-    },
-    }
    * #swagger.responses[200] = {
-    schema: { $ref: "#/definitions/Poll" },
+    schema: {
+    status: true,
+    message: "投票創建成功",
+    result: {
+      $ref: "#/definitions/Poll"
+      }
+    },
     description: "投票創建成功"
     }
-   * #swagger.responses[500] = {
-    schema: { type: "object",
-    properties: {
-    message: { type: "string" }
-    }
-  },
-    description: "投票創建失敗"
+    * #swagger.responses[400] = {
+    schema: {
+      $ref: "#/definitions/ErrorPollValidation"
+    },
+    description: "請確實填寫投票資訊"
     }
    * #swagger.security = [{
     "Bearer": []
     }]
    */
   '/',
-  
   handleErrorAsync(PollController.createPoll),
 );
 
@@ -134,57 +107,43 @@ pollRouter.put(
     type: 'string',
     description: '投票ID'
     }
-    #swagger.parameters['body'] = {
+    * #swagger.parameters['body'] = {
     in: 'body',
     required: true,
     type: 'object',
     description: '更新投票',
     schema: {
-    properties: {
-    title: { type: 'string' },
-    description: { type: 'string' },
-    imageUrl: { type: 'string' },
-    tags: { type: 'array', items: { type: 'string' } },
-    userId: { type: 'string' },
-    optionsData: {
-    type: 'array',
-    items: {
-    properties: {
-    title: { type: 'string' },
-    description: { type: 'string' },
-    imageUrl: { type: 'string' },
-    },
-      },
-    }
-    },
+      $ref: "#/definitions/PollUpdate"
     },
     }
    * #swagger.responses[200] = {
-    schema: { $ref: "#/definitions/Poll" },
+    schema: {
+      status: true,
+      message: "投票更新成功",
+      result: {
+      $ref: "#/definitions/Poll"
+      }
+    },
     description: "投票更新成功"
     }
+    * #swagger.responses[400] = {
+    schema: {
+      $ref: "#/definitions/ErrorPollValidation"
+    },
+    description: "請確實填寫投票資訊"
+    }
    * #swagger.responses[404] = {
-    schema: { type: "object",
-    properties: {
-    message: { type: "string" }
+    schema: {
+      $ref: "#/definitions/ErrorPollNotFound"
     }
   },
     description: "找不到投票"
-    }
-   * #swagger.responses[500] = {
-    schema: { type: "object",
-    properties: {
-    message: { type: "string" }
-    }
-  },
-    description: "投票更新失敗"
     }
    * #swagger.security = [{
     "Bearer": []
     }]
    */
   '/:id',
-  
     handleErrorAsync(PollController.updatePoll),
   );
 
@@ -200,36 +159,22 @@ pollRouter.delete(
     }
     * #swagger.responses[200] = {
     schema: {
-    type: "object",
-    properties: {
-    message: { type: "string" }
-    }
+      status: true,
+      message: "刪除投票成功"
     },
     description: "刪除投票成功"
     }
     * #swagger.responses[404] = {
     schema: {
-    type: "object",
-    properties: {
-    message: { type: "string" }
-    }
+      ref: "#/definitions/ErrorPollNotFound"
     },
     description: "找不到投票"
-    }
-    * #swagger.responses[500] = {
-    schema: { type: "object",
-    properties: {
-    message: { type: "string" }
-    }
-  },
-    description: "刪除投票失敗"
     }
     * #swagger.security = [{
     "Bearer": []
     }]
    */
   '/:id',
-  
   handleErrorAsync(PollController.deletePoll),
 );
 

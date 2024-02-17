@@ -20,11 +20,11 @@ apiRouter.use((req: Request, _, next: NextFunction) => {
   next();
 });
 
-apiRouter.use('/api/auth/', authRouter);
-apiRouter.use('/api/imgur/', imgurRouter);
-apiRouter.use('/api/member/', memberRouter);
-apiRouter.use('/api/poll/', pollRouter);
-apiRouter.use('/api/comment/', commentRouter);
-apiRouter.use('/api/option/', optionRouter);
+apiRouter.use('/api/auth', authRouter);
+apiRouter.use('/api/imgur', imgurRouter);
+apiRouter.use('/api/member', memberRouter);
+apiRouter.use('/api/poll', pollRouter);
+apiRouter.use('/api/comment', commentRouter);
+apiRouter.use('/api/option', optionRouter);
 
 export default apiRouter;

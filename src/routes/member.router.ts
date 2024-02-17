@@ -51,7 +51,7 @@ memberRouter.get(
           status: true,
           message: "成功取的使用者資訊",
           result: {
-          $ref: "#/definitions/User"
+          $ref: "#/definitions/Member"
           }
         },
         description: "獲取會員詳情成功"
@@ -157,7 +157,7 @@ memberRouter.get(
       schema: {
       status: true,
         message: "您已成功追蹤",
-        result: { $ref: "#/definitions/User" },
+        result: { $ref: "#/definitions/Member" },
       },
       description: "成功加入會員追蹤中的人"
     }
@@ -195,7 +195,7 @@ memberRouter.delete(
       schema: {
         status: true,
         message: "取消追蹤成功",
-        result: { $ref: "#/definitions/User" },
+        result: { $ref: "#/definitions/Member" },
       },
       description: "取消追蹤成功"
     }

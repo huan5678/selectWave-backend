@@ -15,7 +15,7 @@
       "type": "apiKey",
       "in": "header",
       "name": "authorization",
-      "description": "請加上 API Token"
+      "description": "請加上 API Token 以取得授權 格式: Bearer xxxxx"
     }
   },
   "paths": {
@@ -816,7 +816,7 @@
                   "example": "成功取的使用者資訊"
                 },
                 "result": {
-                  "$ref": "#/definitions/User"
+                  "$ref": "#/definitions/Member"
                 }
               },
               "xml": {
@@ -923,7 +923,7 @@
                   "example": "您已成功追蹤"
                 },
                 "result": {
-                  "$ref": "#/definitions/User"
+                  "$ref": "#/definitions/Member"
                 }
               },
               "xml": {
@@ -998,7 +998,7 @@
                   "example": "取消追蹤成功"
                 },
                 "result": {
-                  "$ref": "#/definitions/User"
+                  "$ref": "#/definitions/Member"
                 }
               },
               "xml": {
@@ -1071,38 +1071,25 @@
         "responses": {
           "200": {
             "schema": {
-              "$ref": "#/definitions/Poll"
-            },
-            "description": "獲取投票列表成功"
-          },
-          "500": {
-            "schema": {
               "type": "object",
               "properties": {
-                "type": {
-                  "type": "string",
-                  "example": "object"
+                "status": {
+                  "type": "boolean",
+                  "example": true
                 },
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    }
-                  }
+                "message": {
+                  "type": "string",
+                  "example": "獲取投票列表成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Poll"
                 }
               },
               "xml": {
                 "name": "main"
               }
             },
-            "description": "獲取投票列表失敗"
+            "description": "獲取投票列表成功"
           }
         }
       },
@@ -1116,154 +1103,40 @@
             "name": "body",
             "in": "body",
             "required": true,
-            "description": "新增投票",
+            "description": "新投票",
             "schema": {
-              "type": "object",
-              "properties": {
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "title": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    },
-                    "description": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    },
-                    "imageUrl": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    },
-                    "tags": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "array"
-                        },
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "string"
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "userId": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    },
-                    "optionsData": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "array"
-                        },
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "properties": {
-                              "type": "object",
-                              "properties": {
-                                "title": {
-                                  "type": "object",
-                                  "properties": {
-                                    "type": {
-                                      "type": "string",
-                                      "example": "string"
-                                    }
-                                  }
-                                },
-                                "description": {
-                                  "type": "object",
-                                  "properties": {
-                                    "type": {
-                                      "type": "string",
-                                      "example": "string"
-                                    }
-                                  }
-                                },
-                                "imageUrl": {
-                                  "type": "object",
-                                  "properties": {
-                                    "type": {
-                                      "type": "string",
-                                      "example": "string"
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
+              "$ref": "#/definitions/PollCreate"
             }
           }
         ],
         "responses": {
           "200": {
             "schema": {
-              "$ref": "#/definitions/Poll"
-            },
-            "description": "投票創建成功"
-          },
-          "500": {
-            "schema": {
               "type": "object",
               "properties": {
-                "type": {
-                  "type": "string",
-                  "example": "object"
+                "status": {
+                  "type": "boolean",
+                  "example": true
                 },
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    }
-                  }
+                "message": {
+                  "type": "string",
+                  "example": "投票創建成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Poll"
                 }
               },
               "xml": {
                 "name": "main"
               }
             },
-            "description": "投票創建失敗"
+            "description": "投票創建成功"
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/ErrorPollValidation"
+            },
+            "description": "請確實填寫投票資訊"
           }
         },
         "security": [
@@ -1297,61 +1170,9 @@
           },
           "404": {
             "schema": {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "type": "string",
-                  "example": "object"
-                },
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    }
-                  }
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
+              "$ref": "#/definitions/ErrorPollNotFound"
             },
             "description": "找不到投票"
-          },
-          "500": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "type": "string",
-                  "example": "object"
-                },
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    }
-                  }
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            },
-            "description": "獲取投票詳細資訊失敗"
           }
         }
       },
@@ -1374,181 +1195,44 @@
             "required": true,
             "description": "更新投票",
             "schema": {
-              "type": "object",
-              "properties": {
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "title": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    },
-                    "description": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    },
-                    "imageUrl": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    },
-                    "tags": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "array"
-                        },
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "string"
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "userId": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    },
-                    "optionsData": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "array"
-                        },
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "properties": {
-                              "type": "object",
-                              "properties": {
-                                "title": {
-                                  "type": "object",
-                                  "properties": {
-                                    "type": {
-                                      "type": "string",
-                                      "example": "string"
-                                    }
-                                  }
-                                },
-                                "description": {
-                                  "type": "object",
-                                  "properties": {
-                                    "type": {
-                                      "type": "string",
-                                      "example": "string"
-                                    }
-                                  }
-                                },
-                                "imageUrl": {
-                                  "type": "object",
-                                  "properties": {
-                                    "type": {
-                                      "type": "string",
-                                      "example": "string"
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
+              "$ref": "#/definitions/PollUpdate"
             }
           }
         ],
         "responses": {
           "200": {
             "schema": {
-              "$ref": "#/definitions/Poll"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "投票更新成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Poll"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
             "description": "投票更新成功"
           },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/ErrorPollValidation"
+            },
+            "description": "請確實填寫投票資訊"
+          },
           "404": {
             "schema": {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "type": "string",
-                  "example": "object"
-                },
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    }
-                  }
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
+              "$ref": "#/definitions/ErrorPollNotFound"
             },
-            "description": "找不到投票"
-          },
-          "500": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "type": "string",
-                  "example": "object"
-                },
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    }
-                  }
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            },
-            "description": "投票更新失敗"
+            "description": "Not Found"
           }
         },
         "security": [
@@ -1576,23 +1260,13 @@
             "schema": {
               "type": "object",
               "properties": {
-                "type": {
-                  "type": "string",
-                  "example": "object"
+                "status": {
+                  "type": "boolean",
+                  "example": true
                 },
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    }
-                  }
+                "message": {
+                  "type": "string",
+                  "example": "刪除投票成功"
                 }
               },
               "xml": {
@@ -1605,23 +1279,9 @@
             "schema": {
               "type": "object",
               "properties": {
-                "type": {
+                "ref": {
                   "type": "string",
-                  "example": "object"
-                },
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    }
-                  }
+                  "example": "#/definitions/ErrorPollNotFound"
                 }
               },
               "xml": {
@@ -1629,35 +1289,6 @@
               }
             },
             "description": "找不到投票"
-          },
-          "500": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "type": "string",
-                  "example": "object"
-                },
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    }
-                  }
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            },
-            "description": "刪除投票失敗"
           }
         },
         "security": [
@@ -2543,30 +2174,108 @@
         }
       }
     },
-    "Poll": {
+    "PollCreate": {
       "type": "object",
       "properties": {
-        "_id": {
-          "type": "string",
-          "example": "62e348927278654321000004"
-        },
         "title": {
           "type": "string",
-          "example": "最喜歡的水果？"
+          "example": "最喜歡的程式語言"
         },
         "description": {
           "type": "string",
-          "example": "請選擇您最喜歡的水果"
+          "example": "選擇您最喜歡的程式語言。"
         },
         "imageUrl": {
           "type": "string",
-          "example": "https://i.imgur.com/xcLTrkV.png"
+          "example": "https://i.imgur.com/D3hp8H6.png"
         },
         "tags": {
           "type": "array",
           "example": [
-            "水果",
-            "投票"
+            "程式語言",
+            "技術"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "startDate": {
+          "type": "string",
+          "example": "2023-01-01T00:00:00.000Z"
+        },
+        "endDate": {
+          "type": "string",
+          "example": "2023-01-07T00:00:00.000Z"
+        },
+        "isPrivate": {
+          "type": "boolean",
+          "example": false
+        },
+        "optionsData": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "example": "Python"
+              },
+              "imageUrl": {
+                "type": "string",
+                "example": "https://imgur.com/TECsq2J.png"
+              }
+            }
+          }
+        }
+      }
+    },
+    "PollUpdate": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "example": "最喜歡的前端框架"
+        },
+        "description": {
+          "type": "string",
+          "example": "選擇您最喜歡的前端開發框架。"
+        },
+        "tags": {
+          "type": "array",
+          "example": [
+            "前端",
+            "框架"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Poll": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "投票ID"
+        },
+        "title": {
+          "type": "string",
+          "example": "最喜歡的程式語言"
+        },
+        "description": {
+          "type": "string",
+          "example": "選擇您最喜歡的程式語言。"
+        },
+        "imageUrl": {
+          "type": "string",
+          "example": "https://i.imgur.com/D3hp8H6.png"
+        },
+        "tags": {
+          "type": "array",
+          "example": [
+            "程式語言",
+            "技術"
           ],
           "items": {
             "type": "string"
@@ -2575,9 +2284,9 @@
         "createdBy": {
           "type": "object",
           "properties": {
-            "_id": {
+            "id": {
               "type": "string",
-              "example": "62e348927278654321000001"
+              "example": "用戶ID"
             },
             "name": {
               "type": "string",
@@ -2589,17 +2298,13 @@
             }
           }
         },
-        "createdTime": {
-          "type": "string",
-          "example": "2023-12-01T00:00:00.000Z"
-        },
         "startDate": {
           "type": "string",
-          "example": "2023-12-01T00:00:00.000Z"
+          "example": "2023-01-01T00:00:00.000Z"
         },
         "endDate": {
           "type": "string",
-          "example": "2023-12-08T00:00:00.000Z"
+          "example": "2023-01-07T00:00:00.000Z"
         },
         "isPrivate": {
           "type": "boolean",
@@ -2609,6 +2314,11 @@
           "type": "number",
           "example": 10
         },
+        "options": {
+          "type": "array",
+          "example": [],
+          "items": {}
+        },
         "like": {
           "type": "array",
           "example": [],
@@ -2616,145 +2326,146 @@
         },
         "comments": {
           "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "_id": {
-                "type": "string",
-                "example": "62e348927278654321000005"
-              },
-              "pollId": {
-                "type": "string",
-                "example": "62e348927278654321000004"
-              },
-              "userId": {
-                "type": "string",
-                "example": "62e348927278654321000001"
-              },
-              "content": {
-                "type": "string",
-                "example": "我喜歡芒果！"
-              },
-              "createdTime": {
-                "type": "string",
-                "example": "2023-12-01T00:00:00.000Z"
-              },
-              "role": {
-                "type": "string",
-                "example": "user"
-              },
-              "edited": {
-                "type": "boolean",
-                "example": false
-              },
-              "updateTime": {
-                "type": "string",
-                "example": "2023-12-01T00:00:00.000Z"
-              }
-            }
-          }
+          "example": [],
+          "items": {}
+        }
+      }
+    },
+    "OptionCreate": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "example": "React"
         },
-        "options": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "_id": {
-                "type": "string",
-                "example": "62e348927278654321000008"
-              },
-              "optionTitle": {
-                "type": "string",
-                "example": "芒果"
-              },
-              "optionImageUrl": {
-                "type": "string",
-                "example": "https://i.imgur.com/xcLTrkV.png"
-              },
-              "pollId": {
-                "type": "string",
-                "example": "62e348927278654321000004"
-              }
-            }
-          }
+        "imageUrl": {
+          "type": "string",
+          "example": "https://imgur.com/TECsq2J.png"
+        },
+        "pollId": {
+          "type": "string",
+          "example": "投票ID"
+        }
+      }
+    },
+    "OptionUpdate": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "example": "Vue"
+        },
+        "imageUrl": {
+          "type": "string",
+          "example": "https://imgur.com/TECsq2J.png"
         }
       }
     },
     "Option": {
-      "type": "object",
-      "properties": {
-        "_id": {
-          "type": "string",
-          "example": "637b24267525423242675259"
-        },
-        "optionTitle": {
-          "type": "string",
-          "example": "Red"
-        },
-        "optionImageUrl": {
-          "type": "string",
-          "example": "https://i.imgur.com/xcLTrkV.png"
-        },
-        "pollId": {
-          "type": "string",
-          "example": "637b24267525423242675257"
-        },
-        "voters": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "userId": {
-                "type": "string",
-                "example": "637b24267525423242675255"
-              },
-              "createdTime": {
-                "type": "string",
-                "example": "2023-11-16T07:52:54.232Z"
-              },
-              "updatedTime": {
-                "type": "string",
-                "example": "2023-11-16T07:52:54.232Z"
-              }
-            }
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "選項ID"
+          },
+          "title": {
+            "type": "string",
+            "example": "Vue.js"
+          },
+          "imageUrl": {
+            "type": "string",
+            "example": "https://imgur.com/TECsq2J.png"
+          },
+          "pollId": {
+            "type": "string",
+            "example": "投票ID"
+          },
+          "voters": {
+            "type": "array",
+            "example": [],
+            "items": {}
           }
         }
       }
     },
-    "Comment": {
+    "CommentCreate": {
       "type": "object",
       "properties": {
-        "_id": {
-          "type": "string",
-          "example": "637b24267525423242675258"
-        },
         "pollId": {
           "type": "string",
-          "example": "637b24267525423242675257"
+          "example": "投票ID"
         },
         "userId": {
           "type": "string",
-          "example": "637b24267525423242675255"
+          "example": "留言者ID"
         },
         "content": {
           "type": "string",
-          "example": "This is a great poll!"
-        },
-        "createdTime": {
+          "example": "我非常喜歡這個投票！"
+        }
+      }
+    },
+    "CommentUpdate": {
+      "type": "object",
+      "properties": {
+        "content": {
           "type": "string",
-          "example": "2023-11-16T07:52:54.232Z"
-        },
-        "role": {
-          "type": "string",
-          "example": "user"
+          "example": "我改變了我的想法，這真是一個棒極了的投票！"
         },
         "edited": {
           "type": "boolean",
-          "example": false
-        },
-        "updateTime": {
-          "type": "string",
-          "example": "2023-11-16T07:52:54.232Z"
+          "example": true
+        }
+      }
+    },
+    "Comment": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "評論ID"
+          },
+          "pollId": {
+            "type": "string",
+            "example": "投票ID"
+          },
+          "userId": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "用戶ID"
+              },
+              "name": {
+                "type": "string",
+                "example": "Jane Doe"
+              },
+              "avatar": {
+                "type": "string",
+                "example": "https://i.imgur.com/newAvatar.png"
+              }
+            }
+          },
+          "content": {
+            "type": "string",
+            "example": "這是一個很好的投票！"
+          },
+          "createdTime": {
+            "type": "string",
+            "example": "2023-01-02T00:00:00.000Z"
+          },
+          "role": {
+            "type": "string",
+            "example": "user"
+          },
+          "edited": {
+            "type": "boolean",
+            "example": false
+          }
         }
       }
     },
@@ -2937,6 +2648,45 @@
         "message": {
           "type": "string",
           "example": "請提供使用者 id"
+        }
+      }
+    },
+    "ErrorPollNotFound": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "boolean",
+          "example": false
+        },
+        "message": {
+          "type": "string",
+          "example": "無此投票請確認投票 id 是否正確"
+        }
+      }
+    },
+    "ErrorNonePollId": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "boolean",
+          "example": false
+        },
+        "message": {
+          "type": "string",
+          "example": "請提供投票 id"
+        }
+      }
+    },
+    "ErrorPollValidation": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "boolean",
+          "example": false
+        },
+        "message": {
+          "type": "string",
+          "example": "請確實填寫投票資訊"
         }
       }
     }
