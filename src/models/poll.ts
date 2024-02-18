@@ -65,8 +65,10 @@ const pollSchema = new Schema<IPoll>({
   comments: [
     {
       _id: false,
-      type: Schema.Types.ObjectId,
-      ref: 'Comment',
+      comment: {
+        type: Schema.Types.ObjectId,
+        ref: 'Comment',
+      },
     },
   ],
   status: {

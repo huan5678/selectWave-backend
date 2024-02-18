@@ -65,7 +65,7 @@ export interface IPoll extends Document {
     user: IUser['_id'];
   }[];
   comments: {
-    commentId: IComment['_id'];
+    comment: IComment['_id'];
   }[];
   options: {
     optionId: IOption['_id'];
@@ -103,11 +103,10 @@ export interface CreateOptionRequest {
 
 export interface IComment extends Document {
   _id?: string;
-  userId: IUser['_id'];
+  author: IUser['_id'];
   pollId: IPoll['_id'];
   content: string;
   createdTime: Date;
-  role: 'author' | 'user';
   edited: boolean;
   updateTime: Date;
 }

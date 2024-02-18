@@ -83,7 +83,6 @@ commentRouter.put(
   type: 'object',
   description: '更新評論',
   schema: {
-    commentId: '60f3e3e3e3e3e3e3e3e3e3e3',
     content: '這是一則更新後的評論'
   }
 }

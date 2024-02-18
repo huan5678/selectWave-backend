@@ -7,7 +7,7 @@ const commentSchema = new Schema<IComment>({
     ref: 'Poll',
     required: [true, '請確實填寫投票'],
   },
-  userId: {
+  author: {
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: [true, '請確實填寫留言者'],
@@ -21,10 +21,6 @@ const commentSchema = new Schema<IComment>({
   createdTime: {
     type: Date,
     default: Date.now,
-  },
-  role: {
-    type: String,
-    default: 'user',
   },
   edited: {
     type: Boolean,
@@ -46,7 +42,7 @@ const commentSchema = new Schema<IComment>({
 
 commentSchema.pre(/^find/, function(next) {
   (this as IComment).populate([{
-    path: 'userId',
+    path: 'author',
     select: 'name avatar'
   },{
     path: 'pollId',
