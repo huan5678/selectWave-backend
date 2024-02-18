@@ -9,6 +9,7 @@ memberRouter.get(
   /**
    * #swagger.tags = ['Member - 會員']
    * #swagger.description = '獲取所有會員'
+   * #swagger.path = '/api/member/'
    * #swagger.parameters['page'] = {
       in: 'query',
       required: false,
@@ -40,6 +41,7 @@ memberRouter.get(
   /**
    * #swagger.tags = ['Member - 會員']
    * #swagger.description = '根據 ID 獲取會員詳情'
+   * #swagger.path = '/api/member/{id}'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,
@@ -66,6 +68,7 @@ memberRouter.put(
   /**
    * #swagger.tags = ['Member - 會員']
    * #swagger.description = '更新會員資料'
+   * #swagger.path = '/api/member/'
    * #swagger.parameters['body'] = {
       in: 'body',
       required: true,
@@ -108,6 +111,7 @@ memberRouter.delete(
   /**
    * #swagger.tags = ['Member - 會員']
    * #swagger.description = '刪除會員'
+   * #swagger.path = '/api/member/{id}'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,
@@ -147,6 +151,7 @@ memberRouter.get(
   /**
    * #swagger.tags = ['Member - 會員']
    * #swagger.description = '加入追蹤'
+   * #swagger.path = '/api/member/follow/{id}'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,
@@ -185,6 +190,7 @@ memberRouter.delete(
   /**
    * #swagger.tags = ['Member - 會員']
    * #swagger.description = '取消追蹤'
+   * #swagger.path = '/api/member/follow/{id}'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,

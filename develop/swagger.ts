@@ -7,7 +7,7 @@ const doc = {
     title: "Select Wave 選集 API 系統 - Swagger",
     description: `部分API需求 \n注意事項：登入成功後請點「Authorize」輸入 Token。\n\n範例程式碼 :
 
-    fetch('/api/auth/check', { method: 'GET', headers: {
+    fetch(\`\${baseUrl}/api/auth/check\`, { method: 'GET', headers: {
         'Authorization': 'Bearer ' + token
     }})
       .then(response => response.json())
@@ -162,6 +162,7 @@ const doc = {
       options: [],
       like: [],
       comments: [],
+      status: "active",
     },
     OptionCreate: {
       title: "React",

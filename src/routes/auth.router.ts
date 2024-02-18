@@ -8,6 +8,7 @@ authRouter.post(
   /**
    * #swagger.tags = ['Auth - 認證']
    * #swagger.description = '註冊'
+   * #swagger.path = '/api/auth/register'
    * #swagger.parameters['body'] = {
       in: 'body',
       required: true,
@@ -63,6 +64,7 @@ authRouter.post(
   /**
    * #swagger.tags = ['Auth - 認證']
    * #swagger.description = '登入'
+   * #swagger.path = '/api/auth/login'
    * #swagger.parameters['body'] = {
       in: 'body',
       required: true,
@@ -112,6 +114,7 @@ authRouter.get(
   /**
    * #swagger.tags = ['Auth - 認證']
    * #swagger.description = '登出'
+   * #swagger.path = '/api/auth/logout'
    * #swagger.responses[200] = {
     schema: {
       status: true,
@@ -139,6 +142,7 @@ authRouter.get(
   /**
    * #swagger.tags = ['Auth - 認證']
    * #swagger.description = '由 Token 取得使用者資訊'
+   * #swagger.path = '/api/auth/check'
    * #swagger.responses[200] = {
     schema: {
       status: true,
@@ -166,6 +170,7 @@ authRouter.post(
   /**
    * #swagger.tags = ['Auth - 認證']
    * #swagger.description = '重設密碼'
+   * #swagger.path = '/api/auth/reset-password'
    * #swagger.parameters['body'] = {
     in: 'body',
     required: true,
@@ -200,6 +205,7 @@ authRouter.post(
   /**
    * #swagger.tags = ['Auth - 認證']
    * #swagger.description = '更新帳號密碼'
+   * #swagger.path = '/api/auth/change-password'
    * #swagger.parameters['body'] = {
     in: 'body',
     required: true,
@@ -249,6 +255,7 @@ authRouter.put(
   /**
    * #swagger.tags = ['Auth - 認證']
    * #swagger.description = '重設密碼'
+   * #swagger.path = '/api/auth/reset-password'
    * #swagger.parameters['body'] = {
     in: 'body',
     required: true,
@@ -297,6 +304,7 @@ authRouter.get(
   /**
    * #swagger.tags = ['Auth - 認證']
    * #swagger.description = '驗證帳號'
+   * #swagger.path = '/api/auth/verify'
    * #swagger.parameters['parameterName'] = {
     in: 'query',
     type: 'string',
@@ -339,6 +347,7 @@ authRouter.post(
   /**
    * #swagger.tags = ['Auth - 認證']
    * #swagger.description = '重新發送驗證 Email'
+   * #swagger.path = '/api/auth/verify'
    * #swagger.parameters['body'] = {
       email: 'example@example.com',
     }

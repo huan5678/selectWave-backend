@@ -9,6 +9,7 @@ imgurRouter.post(
   /**
    * #swagger.tags = ['Imgur - 圖片']
    * #swagger.description = '上傳圖片'
+   * #swagger.path = '/api/imgur/upload'
    * #swagger.consumes = ['multipart/form-data']
    * #swagger.parameters['singleFile'] = {
             in: 'formData',
