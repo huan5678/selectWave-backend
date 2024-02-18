@@ -2,13 +2,13 @@ import { IOption } from '@/types';
 import { Schema, model } from 'mongoose';
 
 const optionSchema = new Schema<IOption>({
-  optionTitle: {
+  title: {
     type: String,
     required: [true, '請填寫選項名稱'],
     minLength: [1, '選項名稱請大於 1 個字'],
     maxLength: [50, '選項名稱長度過長，最多只能 50 個字'],
   },
-  optionImageUrl: {
+  imageUrl: {
     type: String,
     default: 'https://imgur.com/TECsq2J.png',
   },
@@ -31,6 +31,23 @@ const optionSchema = new Schema<IOption>({
       },
     },
   ],
+}, {
+  versionKey: false,
+    timestamps: true,
+    toJSON: {
+      virtuals: true
+    },
+    toObject: {
+        virtuals: true
+    },
+});
+
+optionSchema.pre(/^find/, function(next) {
+  (this as IOption).populate([{
+    path: 'voters',
+    select: 'name avatar'
+  }]);
+  next();
 });
 
 export default model<IOption>('Option', optionSchema);

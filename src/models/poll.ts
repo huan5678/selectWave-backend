@@ -64,6 +64,42 @@ const pollSchema = new Schema<IPoll>({
       ref: 'Comment',
     },
   ],
+}, {
+  versionKey: false,
+    timestamps: true,
+    toJSON: {
+      virtuals: true
+    },
+    toObject: {
+        virtuals: true
+    },
 });
+
+pollSchema.pre(/^find/, function(next) {
+  (this as IPoll).populate([
+    {
+      path: 'createdBy',
+      select: 'name avatar',
+    },
+    {
+      path: 'like',
+      select: 'name avatar',
+    },
+    {
+      path: 'comments',
+      select: 'content createdTime',
+    },
+    {
+      path: 'options',
+      select: 'title imageUrl',
+      populate: {
+        path: 'voters',
+        select: 'name avatar',
+      },
+    },
+  ]);
+  next();
+});
+
 
 export default model<IPoll>('Poll', pollSchema);

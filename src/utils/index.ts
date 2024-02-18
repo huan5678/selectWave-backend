@@ -160,5 +160,5 @@ export const randomPassword = () => {
 };
 
 export const handleErrorAsync = (func: Function) => {
-  return (req: Request, res: Response, next: NextFunction) => func(req, res, next).catch((error) => catchError((error as Error), next));
+  return (req: Request, res: Response, next: NextFunction) => func(req, res, next).catch((error: Error) => catchError(error, next));
 };

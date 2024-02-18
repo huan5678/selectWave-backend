@@ -33,6 +33,27 @@ const commentSchema = new Schema<IComment>({
   updateTime: {
     type: Date,
   },
+}, {
+  timestamps: { createdAt: 'createdTime', updatedAt: 'updateTime' },
+  versionKey: false,
+    toJSON: {
+      virtuals: true
+    },
+    toObject: {
+        virtuals: true
+    },
 });
+
+commentSchema.pre(/^find/, function(next) {
+  (this as IComment).populate([{
+    path: 'userId',
+    select: 'name avatar'
+  },{
+    path: 'pollId',
+    select: 'title'
+  }]);
+  next();
+});
+
 
 export default model<IComment>('Comment', commentSchema);

@@ -2,13 +2,12 @@ import type { Request, Response, RequestHandler } from 'express';
 import { Document } from 'mongoose';
 
 export interface IUser extends Document {
-  _id?: string;
-  id?: string;
+  id: string;
   name: string;
   email: string;
   password: string;
-  avatar?: string;
-  gender?: string;
+  avatar: string;
+  gender: 'male' | 'female' | 'x';
   socialMedia?: [
     {
       type: string;
@@ -23,19 +22,34 @@ export interface IUser extends Document {
     userId: IUser['_id'];
     createdAt: Date;
   }[];
-  createdAt?: Date;
+  isValidator: boolean;
+  verificationToken: string;
+  isSubscribed: boolean;
+  createdAt: Date;
+  coin: number;
+  resetToken?: string;
   googleId?: string;
   facebookId?: string;
   lineId?: string;
   discordId?: string;
-  verificationToken?: string;
-  isValidator?: boolean;
-  isSubscribed?: boolean;
-  coin?: number;
-  resetToken?: string;
+}
+
+export interface CreateUserRequest {
+  email: string;
+  password: string;
+  name?: string;
+  avatar?: string;
+  gender?: 'male' | 'female' | 'x';
+  socialMedia?: Array<{ type: string; id: string }>;
+}
+
+export interface UpdateUserRequest {
+  name?: string;
+  avatar?: string;
+  gender?: 'male' | 'female' | 'x';
 }
 export interface IPoll extends Document {
-  _id?: string;
+  id: string;
   title: string;
   description: string;
   imageUrl: string;
@@ -56,15 +70,32 @@ export interface IPoll extends Document {
     optionId: IOption['_id'];
   }[];
 }
+
+export interface CreatePollRequest {
+  title: string;
+  description: string;
+  imageUrl?: string;
+  tags?: string[];
+  startDate?: Date;
+  endDate?: Date;
+  isPrivate?: boolean;
+}
+
 export interface IOption extends Document {
-  _id?: string;
-  optionTitle: string;
-  optionImageUrl: string;
+  id?: string;
+  title: string;
+  imageUrl: string;
   pollId: IPoll['_id'];
   voters: {
     userId: IUser['_id'];
     createdTime: Date;
   }[];
+}
+
+export interface CreateOptionRequest {
+  optionTitle: string;
+  optionImageUrl?: string;
+  pollId: string;
 }
 
 export interface IComment extends Document {
@@ -76,6 +107,12 @@ export interface IComment extends Document {
   role: 'author' | 'user';
   edited: boolean;
   updateTime: Date;
+}
+
+export interface CreateCommentRequest {
+  pollId: string;
+  userId: string;
+  content: string;
 }
 
 export interface ITokenBlacklist extends Document {
@@ -151,4 +188,9 @@ export type RequestWithAuth = Request & {
     authorization: string;
   };
   user: IUser;
+};
+
+export type RequestCreatePoll = RequestWithAuth & {
+  poll: CreatePollRequest;
+  optionsData: CreateOptionRequest[];
 };
