@@ -112,6 +112,13 @@ const doc = {
         },
       ],
       id: "62e348927278654321000001",
+      likedPolls: [
+        {
+          _id: "62e348927278654321000001",
+          title: "最喜歡的程式語言",
+          imageUrl: "https://i.imgur.com/D3hp8H6.png",
+        },
+      ],
     },
     Members: [
       {
