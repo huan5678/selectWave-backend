@@ -8,6 +8,7 @@ commentRouter.get(
   /**
    * #swagger.tags = ['Comment - 評論']
    * #swagger.description = '獲取評論'
+   * #swagger.path = '/api/comment/{id}'
    * #swagger.parameters['id'] = {
   in: 'path',
   required: true,
@@ -35,6 +36,7 @@ commentRouter.post(
   /**
    * #swagger.tags = ['Comment - 評論']
    * #swagger.description = '新增評論'
+   * #swagger.path = '/api/comment/'
    *  #swagger.parameters['body'] = {
   in: 'body',
   required: true,
@@ -68,6 +70,7 @@ commentRouter.put(
   /**
    * #swagger.tags = ['Comment - 評論']
    * #swagger.description = '更新評論'
+   * #swagger.path = '/api/comment/{id}'
   * #swagger.parameters['id'] = {
   in: 'path',
   required: true,
@@ -116,6 +119,7 @@ commentRouter.delete(
   /**
    * #swagger.tags = ['Comment - 評論']
    * #swagger.description = '刪除評論'
+   * #swagger.path = '/api/comment/{id}'
    *  #swagger.parameters['id'] = {
   in: 'path',
   required: true,

@@ -10,6 +10,7 @@ optionRouter.post(
   /**
    * #swagger.tags = ['Option - 投票及投票選項']
    * #swagger.description = '投票'
+   * #swagger.path = '/api/option/vote'
     * #swagger.parameters['body'] = {
         in: 'body',
         required: true,
@@ -52,6 +53,7 @@ optionRouter.put(
   /**
    * #swagger.tags = ['Option - 投票及投票選項']
    * #swagger.description = '更改投票'
+   * #swagger.path = '/api/option/vote'
    * #swagger.parameters['body'] = {
       in: 'body',
       required: true,
@@ -100,6 +102,7 @@ optionRouter.delete(
   /**
    * #swagger.tags = ['Option - 投票及投票選項']
    * #swagger.description = '取消投票'
+   * #swagger.path = '/api/option/vote'
    * #swagger.parameters['body'] = {
       in: 'body',
       required: true,
@@ -140,6 +143,7 @@ optionRouter.post(
   /**
    * #swagger.tags = ['Option - 投票及投票選項']
    * #swagger.description = '新增選項'
+   * #swagger.path = '/api/option/'
    * #swagger.parameters['body'] = {
       in: 'body',
       required: true,
@@ -180,6 +184,7 @@ optionRouter.put(
   /**
    * #swagger.tags = ['Option - 投票及投票選項']
    * #swagger.description = '更新選項'
+   * #swagger.path = '/api/option/'
    * #swagger.parameters['body'] = {
       in: 'body',
       required: true,
@@ -223,6 +228,7 @@ optionRouter.delete(
   /**
    * #swagger.tags = ['Option - 投票及投票選項']
    * #swagger.description = '刪除選項'
+   * #swagger.path = '/api/option/{id}'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,

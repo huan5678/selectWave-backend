@@ -10,6 +10,7 @@ pollRouter.get(
   /**
   * #swagger.tags = ['Poll - 投票']
   * #swagger.description = '獲取所有投票'
+  * #swagger.path = '/api/poll/'
   * #swagger.parameters['page'] = {
     in: 'query',
     required: false,
@@ -26,9 +27,11 @@ pollRouter.get(
     schema: {
       status: true,
       message: "獲取投票列表成功",
-      result: {
-        $ref: "#/definitions/Poll"
-      },
+      result: [
+        {
+          $ref: "#/definitions/Poll"
+        },
+      ],
     },
     description: "獲取投票列表成功"
   }
@@ -41,6 +44,7 @@ pollRouter.get(
   /**
    * #swagger.tags = ['Poll - 投票']
    * #swagger.description = '根據 ID 獲取投票詳情'
+   * #swagger.path = '/api/poll/{id}'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,
@@ -70,6 +74,7 @@ pollRouter.post(
   /**
    * #swagger.tags = ['Poll - 投票']
    * #swagger.description = '創建新投票'
+   * #swagger.path = '/api/poll/'
    * #swagger.parameters['body'] = {
     in: 'body',
     required: true,
@@ -107,6 +112,7 @@ pollRouter.put(
   /**
    * #swagger.tags = ['Poll - 投票']
    * #swagger.description = '更新投票'
+   * #swagger.path = '/api/poll/{id}'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,
@@ -157,6 +163,7 @@ pollRouter.delete(
   /**
    * #swagger.tags = ['Poll - 投票']
    * #swagger.description = '刪除投票'
+   * #swagger.path = '/api/poll/{id}'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,
@@ -184,10 +191,11 @@ pollRouter.delete(
   handleErrorAsync(PollController.deletePoll),
 );
 
-pollRouter.post(
+pollRouter.get(
   /**
    * #swagger.tags = ['Poll - 投票']
    * #swagger.description = '投票按讚'
+   * #swagger.path = '/api/poll/{id}/like'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,
@@ -222,6 +230,7 @@ pollRouter.delete(
   /**
    * #swagger.tags = ['Poll - 投票']
    * #swagger.description = '取消投票按讚'
+   * #swagger.path = '/api/poll/{id}/like'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,
@@ -248,7 +257,7 @@ pollRouter.delete(
     "Bearer": []
     }]
    */
-  '/:id/unlike',
+  '/:id/like',
   handleErrorAsync(PollController.unlikePoll),
 );
 
@@ -257,6 +266,7 @@ pollRouter.get(
   /**
    * #swagger.tags = ['Poll - 投票']
    * #swagger.description = '投票開始'
+   * #swagger.path = '/api/poll/{id}/start'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,
@@ -292,6 +302,7 @@ pollRouter.get(
   /**
    * #swagger.tags = ['Poll - 投票']
    * #swagger.description = '投票結束'
+   * #swagger.path = '/api/poll/{id}/end'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,

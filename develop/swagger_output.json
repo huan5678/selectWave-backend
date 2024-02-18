@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Select Wave 選集 API 系統 - Swagger",
-    "description": "部分API需求 \n注意事項：登入成功後請點「Authorize」輸入 Token。\n\n範例程式碼 :\n\n    fetch('/api/auth/check', { method: 'GET', headers: {\n        'Authorization': 'Bearer ' + token\n    }})\n      .then(response => response.json())\n      .then(res => {\n          // { status: 'true', result: [{...}] }\n          console.log(res);\n      });\n    ",
+    "description": "部分API需求 \n注意事項：登入成功後請點「Authorize」輸入 Token。\n\n範例程式碼 :\n\n    fetch(`${baseUrl}/api/auth/check`, { method: 'GET', headers: {\n        'Authorization': 'Bearer ' + token\n    }})\n      .then(response => response.json())\n      .then(res => {\n          // { status: 'true', result: [{...}] }\n          console.log(res);\n      });\n    ",
     "version": "1.0.0"
   },
   "host": "localhost:3000",
@@ -604,7 +604,7 @@
         }
       }
     },
-    "/api/imgur/upload": {
+    "/imgur/upload": {
       "post": {
         "tags": [
           "Imgur - 圖片"
@@ -1046,7 +1046,7 @@
         ]
       }
     },
-    "/api/poll/": {
+    "/poll/": {
       "get": {
         "tags": [
           "Poll - 投票"
@@ -1082,7 +1082,10 @@
                   "example": "獲取投票列表成功"
                 },
                 "result": {
-                  "$ref": "#/definitions/Poll"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Poll"
+                  }
                 }
               },
               "xml": {
@@ -1146,7 +1149,7 @@
         ]
       }
     },
-    "/api/poll/{id}": {
+    "/poll/{id}": {
       "get": {
         "tags": [
           "Poll - 投票"
@@ -1314,8 +1317,8 @@
         ]
       }
     },
-    "/api/poll/{id}/like": {
-      "post": {
+    "/poll/{id}/like": {
+      "get": {
         "tags": [
           "Poll - 投票"
         ],
@@ -1364,9 +1367,7 @@
             "Bearer": []
           }
         ]
-      }
-    },
-    "/api/poll/{id}/unlike": {
+      },
       "delete": {
         "tags": [
           "Poll - 投票"
@@ -1418,7 +1419,7 @@
         ]
       }
     },
-    "/api/poll/{id}/start": {
+    "/poll/{id}/start": {
       "get": {
         "tags": [
           "Poll - 投票"
@@ -1470,7 +1471,7 @@
         ]
       }
     },
-    "/api/poll/{id}/end": {
+    "/poll/{id}/end": {
       "get": {
         "tags": [
           "Poll - 投票"
@@ -1522,7 +1523,7 @@
         ]
       }
     },
-    "/api/comment/{id}": {
+    "/comment/{id}": {
       "get": {
         "tags": [
           "Comment - 評論"
@@ -1697,7 +1698,7 @@
         ]
       }
     },
-    "/api/comment/": {
+    "/comment/": {
       "post": {
         "tags": [
           "Comment - 評論"
@@ -1761,7 +1762,7 @@
         ]
       }
     },
-    "/api/option/vote": {
+    "/option/vote": {
       "post": {
         "tags": [
           "Option - 投票及投票選項"
@@ -1988,7 +1989,7 @@
         ]
       }
     },
-    "/api/option/": {
+    "/option/": {
       "post": {
         "tags": [
           "Option - 投票及投票選項"
@@ -2141,7 +2142,7 @@
         ]
       }
     },
-    "/api/option/{id}": {
+    "/option/{id}": {
       "delete": {
         "tags": [
           "Option - 投票及投票選項"
@@ -2600,6 +2601,10 @@
           "type": "array",
           "example": [],
           "items": {}
+        },
+        "status": {
+          "type": "string",
+          "example": "active"
         }
       }
     },
