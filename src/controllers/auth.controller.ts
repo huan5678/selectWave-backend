@@ -24,7 +24,7 @@ class AuthController {
     if (!decoded) {
       throw appError({ code: 400, message: "無效的 token", next });
     }
-    const user = await User.findOne({ verificationToken: token });
+    const user = await User.findOne({ verificationToken: token }).exec();
 
     if (!user) {
       throw appError({ code: 404, message: "無效的驗證連結或已過期", next });
@@ -152,7 +152,7 @@ class AuthController {
     if (!user) {
       throw appError({ code: 404, message: "無效的重設連結或已過期", next });
     }
-    await User.findByIdAndUpdate(user._id, { resetToken: "", password });
+    await User.findByIdAndUpdate(user._id, { resetToken: "", password }).exec();
     return successHandle(_res, "成功重設密碼", { result: true });
   };
 

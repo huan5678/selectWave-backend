@@ -1,9 +1,9 @@
 import { RequestHandler, Response } from 'express'; // Import missing modules
 
-import { Poll, Option } from '@/models';
+import { Poll, Option, User } from '@/models';
 import { appError, successHandle } from '@/utils';
 import { array, object, string } from 'yup';
-import { IOption, IUser } from '@/types';
+import { IOption, IPoll, IUser } from '@/types';
 
 const pollSchema = object({
   title: string().required('請輸入投票標題').min(1, '投票標題至少需要1個字').max(50, '投票標題最多只能50個字'),
@@ -42,7 +42,7 @@ class PollController {
     const poll = await Poll.findById(newPoll.id)
       .populate('createdBy', 'name avatar')
       .populate('options', 'title imageUrl')
-      .lean();
+      .exec();
 
       successHandle(res, '投票創建成功', { poll });
   };
@@ -59,7 +59,7 @@ class PollController {
       const polls = await Poll.find()
         .skip(skip)
         .limit(limit)
-        .lean();
+        .exec();
 
       // 可以選擇性地添加總記錄數
       const total = await Poll.countDocuments();
@@ -74,7 +74,7 @@ class PollController {
         .populate('options')
         .populate('createdBy')
         .populate('comments')
-        .lean();
+        .exec();
       if (!poll) {
         throw appError({ code: 404, message: '找不到該投票資訊，請檢查ID是否正確', next });
       }
@@ -102,7 +102,7 @@ class PollController {
 
     if (req.body.optionsData) {
       for (const optionData of req.body.optionsData) {
-        let option = await Option.findOne({ pollId: id, title: optionData.title });
+        let option = await Option.findOne({ pollId: id, title: optionData.title }).exec();
         if (!option) {
           option = await Option.create({
             title: optionData.title,
@@ -121,7 +121,8 @@ class PollController {
       .populate({
         path: 'comments',
         populate: { path: 'userId', select: 'name avatar' }
-      });
+      })
+      .exec();
 
     successHandle(res, '更新投票資訊成功', { populatedPoll });
   };
@@ -129,7 +130,7 @@ class PollController {
   // 刪除投票
   public static deletePoll: RequestHandler = async (req, res: Response, next) => {
     const { id } = req.params;
-    const poll = await Poll.findById(id);
+    const poll = await Poll.findById(id).exec();
     if (!poll) {
       throw appError({ code: 404, message: '找不到投票', next });
     }
@@ -140,42 +141,68 @@ class PollController {
   };
 
   // 喜歡投票
-  public static likePoll: RequestHandler = async (req, res: Response, next) => {
+  public static likePoll: RequestHandler = async (req, res: Response, next) =>
+  {
+    const pollId = req.params.id;
     const { id } = req.user as IUser;
-    const { pollId } = req.body;
-    const poll = await Poll.findById(pollId);
+    const poll = await Poll.findById(pollId) as IPoll;
+    const user = await User.findById(id).exec() as IUser;
     if (!poll) {
       throw appError({ code: 404, message: '找不到投票', next });
     }
-    if (poll.like.includes({ userId: id })) {
+    const existingFollower = poll.like.find((like) =>
+    {
+      return like.user.toString() === user.id;
+    });
+
+    if (existingFollower) {
       throw appError({ code: 400, message: '您已經喜歡過此投票', next });
     }
-    poll.like.push({ userId: id });
-    await poll.save();
-    successHandle(res, '喜歡投票成功', {});
+    const resultPollData = await Poll.findOneAndUpdate(
+      { _id: pollId },
+      { $push: { like: { user } } },
+      { new: true },
+    ).populate('like.user', { name: 1, avatar: 1 }).exec();
+    await User.findOneAndUpdate(
+      { _id: id },
+      { $push: { likedPolls: { poll } } },
+      { new: true}
+    ).exec();
+    successHandle(res, '喜歡投票成功', {resultPollData});
   };
 
   // 取消喜歡投票
   public static unlikePoll: RequestHandler = async (req, res: Response, next) =>
   {
     const { id } = req.user as IUser;
-    const { pollId } = req.body;
-    const poll = await Poll.findById(pollId);
+    const pollId = req.params.id;
+
+    const poll = await Poll.findById(pollId).exec();
+    const user = await User.findById(id).exec() as IUser;
+
     if (!poll) {
       throw appError({ code: 404, message: '找不到投票', next });
     }
-    if (!poll.like.includes({ userId: id })) {
+    const existingFollower = poll.like.find((like) => like.user.toString() === user.id);
+    if (!existingFollower) {
       throw appError({ code: 400, message: '您尚未喜歡過此投票', next });
     }
-    poll.like = poll.like.filter((like) => like.userId !== id);
-    await poll.save();
-    successHandle(res, '取消喜歡投票成功', {});
+    const resultPollData = await Poll.findOneAndUpdate(
+      { _id: pollId },
+      { $pull: { like: { user } } },
+      { new: true },
+    ).populate('like.user', 'name avatar').exec();
+    await User.findOneAndUpdate(
+      { _id: id },
+      { $pull: { likedPolls: { poll } } },
+    ).exec();
+    successHandle(res, '取消喜歡投票成功', {resultPollData});
   };
 
   // 開始投票
   public static startPoll: RequestHandler = async (req, res: Response, next) => {
     const { id } = req.params;
-    const poll = await Poll.findById(id);
+    const poll = await Poll.findById(id).exec();
     if (!poll) {
       throw appError({ code: 404, message: '找不到投票', next });
     }
@@ -188,7 +215,7 @@ class PollController {
   };
 
   public static calculateResultsForPoll = async (id: string) => {
-    const poll = await Poll.findById(id);
+    const poll = await Poll.findById(id).exec();
     if (!poll) return;
     if (poll.status !== 'active') return;
 
@@ -218,7 +245,7 @@ class PollController {
   // 結束投票
   public static endPoll: RequestHandler = async (req, res: Response, next) => {
     const { id } = req.params;
-    const poll = await Poll.findById(id);
+    const poll = await Poll.findById(id).exec();
     if (!poll) {
       throw appError({ code: 404, message: '找不到投票', next });
     }
@@ -229,7 +256,7 @@ class PollController {
       throw appError({ code: 400, message: '投票已經結束', next });
     }
 
-    const options = await Option.find({ pollId: id });
+    const options = await Option.find({ pollId: id }).exec();
     let maxVotes = 0;
     let winners = [] as IOption[];
 

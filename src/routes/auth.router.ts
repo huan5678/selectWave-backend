@@ -349,8 +349,14 @@ authRouter.post(
    * #swagger.description = '重新發送驗證 Email'
    * #swagger.path = '/api/auth/verify'
    * #swagger.parameters['body'] = {
+    in: 'body',
+    required: true,
+    type: 'object',
+    description: '重新發送驗證 Email',
+    schema: {
       email: 'example@example.com',
     }
+  }
    * #swagger.responses[200] = {
     schema: {
       status: true,
