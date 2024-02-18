@@ -1599,10 +1599,6 @@
             "schema": {
               "type": "object",
               "properties": {
-                "commentId": {
-                  "type": "string",
-                  "example": "60f3e3e3e3e3e3e3e3e3e3e3"
-                },
                 "content": {
                   "type": "string",
                   "example": "這是一則更新後的評論"

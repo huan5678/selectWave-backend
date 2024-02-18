@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import { Comment } from '@/models';
+import { Comment, Poll } from '@/models';
 import { appError, successHandle } from '@/utils';
 import { object, string } from 'yup';
 import { IUser } from '@/types';
@@ -10,7 +10,6 @@ const createCommentSchema = object({
 });
 
 const updateCommentSchema = object({
-  commentId: string().required('請輸入評論ID'),
   content: string().required('請輸入評論內容').min(1, '評論內容請大於 1 個字').max(200, '評論內容長度過長，最多只能 200 個字'),
 });
 
@@ -23,13 +22,14 @@ class CommentController {
         throw appError({ code: 400, message: '請確實填寫評論資訊', next});
       }
       const { content, pollId } = req.body;
-      const newComment = await Comment.create({
-        userId: id,
+      const comment = await Comment.create({
+        author: id,
         content,
         pollId,
-        role: 'author',
       });
-      successHandle(res, '評論創建成功', { newComment });
+    const result = await Poll.findByIdAndUpdate({ _id: pollId }, { $push: { comments: { comment } } }, { new: true });
+    console.log(result);
+      successHandle(res, '評論創建成功', { comment });
   };
 
   // 更新評論
@@ -39,13 +39,15 @@ class CommentController {
       if (!validationResult) {
         throw appError({ code: 400, message: '請確實填寫評論資訊', next});
       }
-      const { commentId, content } = req.body;
-      const comment = await Comment.findById(commentId);
+    const commentId = req.params.id;
+      const { content } = req.body;
+    const comment = await Comment.findById(commentId);
       if (!comment) {
         throw appError({
           code: 404, message: '找不到評論', next});
       }
-      if (comment.userId && comment.userId !== id) {
+    console.log(comment.author, id);
+      if (comment.author.id !== id) {
         throw appError({ code: 403, message: '沒有權限更新評論', next});
       }
       const updatedComment = await Comment.findByIdAndUpdate(
@@ -58,18 +60,19 @@ class CommentController {
 
   // 刪除評論
   public static deleteComment: RequestHandler = async (req, res, next) => {
-      const { commentId } = req.params;
-      const deletedComment = await Comment.findByIdAndDelete(commentId);
+      const { id } = req.params;
+      const deletedComment = await Comment.findByIdAndDelete(id).exec();
       if (!deletedComment) {
         throw appError({ code: 404, message: '找不到評論', next});
       }
+      await Poll.findOne({ 'comments.comment': id }).updateOne({ $pull: { comments: { comment: id } } });
       successHandle(res, '評論刪除成功', { });
   };
 
   // 獲取特定評論
   public static getComment: RequestHandler = async (req, res, next) => {
-      const { commentId } = req.params;
-      const comment = await Comment.findById(commentId);
+      const { id } = req.params;
+      const comment = await Comment.findById(id).exec();
       if (!comment) {
         throw appError({ code: 404, message: '找不到評論', next });
       }

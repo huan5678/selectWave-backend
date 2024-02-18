@@ -69,8 +69,9 @@ class PollController {
 
   // 根據 ID 獲取投票詳情
   public static getPollById: RequestHandler = async (req, res: Response, next) => {
-      const { pollId } = req.params;
-      const poll = await Poll.findById(pollId)
+    const { id } = req.params;
+    console.log('pollId: ', id);
+      const poll = await Poll.findById(id)
         .populate('options')
         .populate('createdBy')
         .populate('comments')
@@ -120,7 +121,7 @@ class PollController {
       .populate('options')
       .populate({
         path: 'comments',
-        populate: { path: 'userId', select: 'name avatar' }
+        populate: { path: 'user', select: 'name avatar' }
       })
       .exec();
 
