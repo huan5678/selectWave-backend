@@ -151,7 +151,7 @@ memberRouter.get(
   /**
    * #swagger.tags = ['Member - 會員']
    * #swagger.description = '加入追蹤'
-   * #swagger.path = '/api/member/follow/{id}'
+   * #swagger.path = '/api/member/{id}/follow'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,
@@ -185,12 +185,12 @@ memberRouter.get(
       "Bearer": []
     }]
     */
-  '/follow/:id',  handleErrorAsync(MemberController.addFollower));
+  '/:id/follow',  handleErrorAsync(MemberController.addFollower));
 memberRouter.delete(
   /**
    * #swagger.tags = ['Member - 會員']
    * #swagger.description = '取消追蹤'
-   * #swagger.path = '/api/member/follow/{id}'
+   * #swagger.path = '/api/member/{id}/follow'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,
@@ -224,6 +224,6 @@ memberRouter.delete(
       "Bearer": []
     }]
     */
-  '/follow/:id',  handleErrorAsync(MemberController.deleteFollower));
+  '/:id/follow',  handleErrorAsync(MemberController.deleteFollower));
 
 export default memberRouter;

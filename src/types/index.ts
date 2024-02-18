@@ -15,11 +15,11 @@ export interface IUser extends Document {
     },
   ];
   followers?: {
-    userId: IUser['_id'];
+    user: IUser['_id'];
     createdAt: Date;
   }[];
   following?: {
-    userId: IUser['_id'];
+    user: IUser['_id'];
     createdAt: Date;
   }[];
   isValidator: boolean;
