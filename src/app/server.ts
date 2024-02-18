@@ -5,6 +5,7 @@ import 'dotenv/config';
 
 import app from './index';
 import { AuthService } from '@/services';
+import {PollService} from '@/services';
 
 const { DATABASE_PASSWORD, DATABASE_PATH } = process.env;
 const isProduction = process.env.NODE_ENV === 'production';
@@ -20,8 +21,6 @@ mongoose
 const port = parseInt(process.env.PORT || '8081');
 
 app.set('port', port);
-
-AuthService.updateValidationToken();
 
 let vite
 if (!isProduction) {
@@ -47,6 +46,15 @@ console.log(`設置的PORT是：${port}`);
 
 ViteExpress.listen(app, port, () => {
   console.log(`伺服器正在PORT ${port} 上運行...`);
+
+  if (vite) {
+    vite.watcher.on('change', (file) => {
+      console.log(`${file} 已更新，重新載入伺服器...`)
+      vite.ws.send({ type: 'full-reload' })
+    })
+  }
+  AuthService.updateValidationToken();
+  PollService.startPollCheckService();
 });
 
 server.on('listening', () => {

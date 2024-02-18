@@ -179,6 +179,7 @@ const doc = {
         imageUrl: "https://imgur.com/TECsq2J.png",
         pollId: "投票ID",
         voters: [],
+        isWinner: false,
       },
       {
         id: "選項ID",
@@ -186,6 +187,7 @@ const doc = {
         imageUrl: "https://imgur.com/TECsq2J.png",
         pollId: "投票ID",
         voters: [],
+        isWinner: false,
       },
     ],
     CommentCreate: {

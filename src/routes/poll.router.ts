@@ -184,4 +184,142 @@ pollRouter.delete(
   handleErrorAsync(PollController.deletePoll),
 );
 
+pollRouter.post(
+  /**
+   * #swagger.tags = ['Poll - 投票']
+   * #swagger.description = '投票按讚'
+   * #swagger.parameters['id'] = {
+    in: 'path',
+    required: true,
+    type: 'string',
+    description: '投票ID'
+    }
+   * #swagger.responses[200] = {
+    schema: {
+      status: true,
+      message: "投票按讚成功",
+      result: {
+      $ref: "#/definitions/Poll"
+      }
+    },
+    description: "投票按讚成功"
+    }
+   * #swagger.responses[404] = {
+    schema: {
+      $ref: "#/definitions/ErrorPollNotFound"
+    },
+    description: "找不到投票"
+    }
+   * #swagger.security = [{
+    "Bearer": []
+    }]
+   */
+  '/:id/like',
+  handleErrorAsync(PollController.likePoll),
+);
+
+pollRouter.delete(
+  /**
+   * #swagger.tags = ['Poll - 投票']
+   * #swagger.description = '取消投票按讚'
+   * #swagger.parameters['id'] = {
+    in: 'path',
+    required: true,
+    type: 'string',
+    description: '投票ID'
+    }
+   * #swagger.responses[200] = {
+    schema: {
+      status: true,
+      message: "取消投票按讚成功",
+      result: {
+      $ref: "#/definitions/Poll"
+      }
+    },
+    description: "取消投票按讚成功"
+    }
+   * #swagger.responses[404] = {
+    schema: {
+      $ref: "#/definitions/ErrorPollNotFound"
+    },
+    description: "找不到投票"
+    }
+   * #swagger.security = [{
+    "Bearer": []
+    }]
+   */
+  '/:id/unlike',
+  handleErrorAsync(PollController.unlikePoll),
+);
+
+//投票開始
+pollRouter.get(
+  /**
+   * #swagger.tags = ['Poll - 投票']
+   * #swagger.description = '投票開始'
+   * #swagger.parameters['id'] = {
+    in: 'path',
+    required: true,
+    type: 'string',
+    description: '投票ID'
+    }
+   * #swagger.responses[200] = {
+    schema: {
+      status: true,
+      message: "投票開始成功",
+      result: {
+      $ref: "#/definitions/Poll"
+      }
+    },
+    description: "投票開始成功"
+    }
+   * #swagger.responses[404] = {
+    schema: {
+      $ref: "#/definitions/ErrorPollNotFound"
+    },
+    description: "找不到投票"
+    }
+   * #swagger.security = [{
+    "Bearer": []
+    }]
+   */
+  '/:id/start',
+  handleErrorAsync(PollController.startPoll),
+);
+
+//投票結束
+pollRouter.get(
+  /**
+   * #swagger.tags = ['Poll - 投票']
+   * #swagger.description = '投票結束'
+   * #swagger.parameters['id'] = {
+    in: 'path',
+    required: true,
+    type: 'string',
+    description: '投票ID'
+    }
+   * #swagger.responses[200] = {
+    schema: {
+      status: true,
+      message: "投票結束成功",
+      result: {
+      $ref: "#/definitions/Poll"
+      }
+    },
+    description: "投票結束成功"
+    }
+   * #swagger.responses[404] = {
+    schema: {
+      $ref: "#/definitions/ErrorPollNotFound"
+    },
+    description: "找不到投票"
+    }
+   * #swagger.security = [{
+    "Bearer": []
+    }]
+   */
+  '/:id/end',
+  handleErrorAsync(PollController.endPoll),
+);
+
 export default pollRouter;

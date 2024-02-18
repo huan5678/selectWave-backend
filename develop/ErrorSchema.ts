@@ -69,4 +69,36 @@ export const ErrorSchema = {
     status: false,
     message: "請確實填寫投票資訊",
   },
+  ErrorOptionNotFound: {
+    status: false,
+    message: "無此選項請確認選項 id 是否正確",
+  },
+  ErrorOptionExist: {
+    status: false,
+    message: "此選項已存在",
+  },
+  ErrorOptionFormat: {
+    status: false,
+    message: "請確實填寫選項資訊",
+  },
+  ErrorVoteExist: {
+    status: false,
+    message: "您已經對此選項投過票",
+  },
+  ErrorNotVote: {
+    status: false,
+    message: "您尚未對此選項投票",
+  },
+  ErrorCommentNotFound: {
+    status: false,
+    message: "無此評論請確認評論 id 是否正確",
+  },
+  ErrorCommentFormat: {
+    status: false,
+    message: "請確實填寫評論資訊",
+  },
+  ErrorCommentUnauthorized: {
+    status: false,
+    message: "沒有權限更新評論",
+  },
 };

@@ -69,6 +69,7 @@ export interface IPoll extends Document {
   options: {
     optionId: IOption['_id'];
   }[];
+  status: 'pending' | 'active' | 'closed';
 }
 
 export interface CreatePollRequest {
@@ -90,6 +91,7 @@ export interface IOption extends Document {
     userId: IUser['_id'];
     createdTime: Date;
   }[];
+  isWinner: boolean;
 }
 
 export interface CreateOptionRequest {
@@ -179,18 +181,23 @@ export type TokenPayload = {
   exp: number;
 };
 
-export type RequestWithPath = Request & {
-  path: string;
-};
-
-export type RequestWithAuth = Request & {
-  headers: {
-    authorization: string;
-  };
-  user: IUser;
-};
-
-export type RequestCreatePoll = RequestWithAuth & {
-  poll: CreatePollRequest;
-  optionsData: CreateOptionRequest[];
-};
+declare global
+{
+  namespace Express
+  {
+    export interface Request
+    {
+      headers: {
+        authorization?: string;
+      };
+      user?: IUser;
+      path?: string;
+      body?: {
+        poll?: CreatePollRequest;
+        optionsData?: CreateOptionRequest[];
+        optionId?: string;
+        newOptionId?: string;
+      };
+    }
+  }
+}

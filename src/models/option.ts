@@ -31,6 +31,10 @@ const optionSchema = new Schema<IOption>({
       },
     },
   ],
+  isWinner: {
+    type: Boolean,
+    default: false,
+  }
 }, {
   versionKey: false,
     timestamps: true,

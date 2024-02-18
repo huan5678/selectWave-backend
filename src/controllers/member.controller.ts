@@ -3,6 +3,7 @@ import { User } from "@/models";
 import { appError, successHandle } from "@/utils";
 import validator from "validator";
 import { AuthService } from "@/services";
+import { IUser } from '../types/index';
 
 class MemberController {
   public static getAllMembers: RequestHandler = async (req, res) => {
@@ -66,20 +67,20 @@ class MemberController {
     return successHandle(res, "成功更新使用者資訊！", { result: userData });
   };
 
-  public static addFollower: RequestHandler = async (req: any, res, next) => {
+  public static addFollower: RequestHandler = async (req, res, next) => {
     const {
       params: { id: targetID },
-      user,
     } = req;
+    const { id } = req.user as IUser;
     if (!targetID)
       throw appError({ code: 400, message: "請提供使用者 id", next });
-    if (targetID === user.id) {
+    if (targetID === id) {
       throw appError({ code: 401, message: "您無法追蹤自己", next });
     }
 
     // 檢查是否已追蹤該使用者
     const existingFollower = await User.findOne({
-      _id: user?.id,
+      id,
       "following.user": targetID,
     }).exec();
     if (existingFollower) {
@@ -87,37 +88,37 @@ class MemberController {
     }
 
     const resultUserData = await User.findOneAndUpdate(
-      { _id: user?.id, "following.user": { $ne: targetID } },
+      { id, "following.user": { $ne: targetID } },
       { $addToSet: { following: { user: targetID } } },
       { new: true }
     ).select('-coin -updatedAt -isValidator -isSubscribed').exec();
 
     await User.findOneAndUpdate(
-      { _id: targetID, "followers.user": { $ne: user?.id } },
-      { $addToSet: { followers: { user: user?.id } } }
+      { _id: targetID, "followers.user": { $ne: id } },
+      { $addToSet: { followers: { user: id } } }
     );
 
     return successHandle(res, "您已成功追蹤！", { result: resultUserData });
   };
 
   public static deleteFollower: RequestHandler = async (
-    req: any,
+    req,
     res,
     next
   ) => {
     const {
       params: { id: targetID },
-      user,
     } = req;
+    const { id } = req.user as IUser;
     if (!targetID)
       throw appError({ code: 400, message: "請提供使用者 id", next });
-    if (targetID === user.id) {
+    if (targetID === id) {
       throw appError({ code: 401, message: "您無法取消追蹤自己", next });
     }
 
     // 檢查是否已追蹤該使用者
     const existingFollowing = await User.findOne({
-      _id: user?.id,
+      id,
       "following.user": targetID,
     }).exec();
     if (!existingFollowing) {
@@ -129,7 +130,7 @@ class MemberController {
     }
 
     const resultUserData = await User.findByIdAndUpdate(
-      user?.id,
+      id,
       {
         $pull: { following: { user: targetID } },
       },
@@ -137,7 +138,7 @@ class MemberController {
     ).select('-coin -updatedAt -isValidator -isSubscribed').exec();
 
     await User.findByIdAndUpdate(targetID, {
-      $pull: { followers: { user: user?.id } },
+      $pull: { followers: { user: id } },
     });
 
     return successHandle(res, "您已成功取消追蹤！", {

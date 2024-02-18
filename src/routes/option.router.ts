@@ -6,7 +6,6 @@ import { Router } from 'express';
 
 const optionRouter = Router();
 
-
 optionRouter.post(
   /**
    * #swagger.tags = ['Option - 投票及投票選項']
@@ -17,22 +16,28 @@ optionRouter.post(
         type: 'object',
         description: '投票',
         schema: {
-          properties: {
-            optionId: { type: 'string' },
-            userId: { type: 'string' },
-          },
+          optionId: '60f3e3e3e3e3e3e3e3e3e3e3',
         },
       }
       * #swagger.responses[200] = {
-          schema: { $ref: "#/definitions/Option" },
+          schema: {
+          status: true,
+          message: "投票成功",
+          result: {
+            $ref: "#/definitions/Option" },
+          },
           description: "投票成功"
         }
       * #swagger.responses[404] = {
-          schema: { $ref: "#/definitions/Error" },
+          schema: {
+            $ref: "#/definitions/ErrorOptionNotFound"
+          },
           description: "找不到選項"
         }
-      * #swagger.responses[500] = {
-          schema: { $ref: "#/definitions/Error" },
+      * #swagger.responses[400] = {
+          schema: {
+            $ref: "#/definitions/ErrorVoteExist"
+          },
           description: "投票失敗"
         }
       * #swagger.security = [{
@@ -40,7 +45,6 @@ optionRouter.post(
         }]
   */
   '/vote',
-  
   handleErrorAsync(OptionController.vote),
 );
 
@@ -54,31 +58,41 @@ optionRouter.put(
       type: 'object',
       description: '更改投票',
       schema: {
-        properties: {
-          optionId: { type: 'string' },
-          userId: { type: 'string' },
-          newOptionId: { type: 'string' },
-        },
+          optionId: '60f3e3e3e3e3e3e3e3e3e3e3',
+          newOptionId: '54f3e3e3e3e3e3e3e3e3e3e3',
       },
     }
     * #swagger.responses[200] = {
-        schema: { $ref: "#/definitions/Option" },
+        schema: {
+          status: true,
+          message: "更改投票成功",
+          result: {
+          $ref: "#/definitions/Option" },
+        },
         description: "更改投票成功"
       }
     * #swagger.responses[404] = {
-        schema: { $ref: "#/definitions/Error" },
+        schema: { $ref: "#/definitions/ErrorOptionNotFound" },
         description: "找不到選項"
       }
-    * #swagger.responses[500] = {
-        schema: { $ref: "#/definitions/Error" },
-        description: "更改投票失敗"
+    * #swagger.responses[400] = {
+          schema: {
+            $ref: "#/definitions/ErrorVoteExist"
+          },
+          description: "投票失敗"
+        }
+    * #swagger.responses[400] = {
+        schema: {
+          status: false,
+          message: "找不到投票者"
+        },
+        description: "找不到新投票選項"
       }
     * #swagger.security = [{
         "Bearer": []
       }]
    */
   '/vote',
-  
   handleErrorAsync(OptionController.updateVote),
 );
 
@@ -99,15 +113,20 @@ optionRouter.delete(
       },
     }
     * #swagger.responses[200] = {
-        schema: { $ref: "#/definitions/Option" },
+        schema: {
+          status: true,
+          message: "取消投票成功",
+        },
         description: "取消投票成功"
       }
     * #swagger.responses[404] = {
-        schema: { $ref: "#/definitions/Error" },
+        schema: {
+          $ref: "#/definitions/ErrorOptionNotFound"
+        },
         description: "找不到選項"
       }
-    * #swagger.responses[500] = {
-        schema: { $ref: "#/definitions/Error" },
+    * #swagger.responses[400] = {
+        schema: { $ref: "#/definitions/ErrorNotVote" },
         description: "取消投票失敗"
       }
     * #swagger.security = [{
@@ -115,7 +134,6 @@ optionRouter.delete(
       }]
    */
   '/vote',
-  
   handleErrorAsync(OptionController.cancelVote),
 );
 optionRouter.post(
@@ -128,28 +146,34 @@ optionRouter.post(
       type: 'object',
       description: '新增選項',
       schema: {
-        properties: {
-          title: { type: 'string' },
-          description: { type: 'string' },
-          imageUrl: { type: 'string' },
-          pollId: { type: 'string' },
-        },
+        pollId: '60f3e3e3e3e3e3e3e3e3e3e3',
+        optionData: [
+          {
+          title: 'React',
+          imageUrl: 'https://imgur.com/TECsq2J.png',
+          }
+        ],
       },
     }
     * #swagger.responses[200] = {
-        schema: { $ref: "#/definitions/Option" },
+        schema: {
+          status: true,
+          message: "新增選項成功",
+          result: {
+          $ref: "#/definitions/Option"
+          },
+        },
         description: "新增選項成功"
       }
-    * #swagger.responses[500] = {
-        schema: { $ref: "#/definitions/Error" },
-        description: "新增選項失敗"
+    * #swagger.responses[400] = {
+        schema: { $ref: "#/definitions/ErrorOptionFormat" },
+        description: "請確實填寫選項資訊"
       }
     * #swagger.security = [{
         "Bearer": []
       }]
    */
   '/',
-  
   handleErrorAsync(OptionController.createOption),
 );
 optionRouter.put(
@@ -162,30 +186,36 @@ optionRouter.put(
       type: 'object',
       description: '更新選項',
       schema: {
-        properties: {
-          optionId: { type: 'string' },
-          updateData: { type: 'object' },
+        optionId: '60f3e3e3e3e3e3e3e3e3e3e3',
+        updateData: {
+        title: 'Vue',
+        imageUrl: 'https://imgur.com/TECsq2J.png',
         },
       },
     }
     * #swagger.responses[200] = {
-        schema: { $ref: "#/definitions/Option" },
+        schema: {
+          status: true,
+          message: "更新選項成功",
+          result: {
+          $ref: "#/definitions/Option"
+          },
+        },
         description: "更新選項成功"
       }
     * #swagger.responses[404] = {
-        schema: { $ref: "#/definitions/Error" },
+        schema: { $ref: "#/definitions/ErrorOptionNotFound" },
         description: "找不到選項"
       }
-    * #swagger.responses[500] = {
-        schema: { $ref: "#/definitions/Error" },
-        description: "更新選項失敗"
+    * #swagger.responses[400] = {
+        schema: { $ref: "#/definitions/ErrorOptionFormat" },
+        description: "請確實填寫選項資訊"
       }
     * #swagger.security = [{
         "Bearer": []
       }]
    */
   '/',
-  
   handleErrorAsync(OptionController.updateOption),
 );
 
@@ -204,19 +234,14 @@ optionRouter.delete(
     description: "刪除選項成功"
   }
   * #swagger.responses[404] = {
-    schema: { $ref: "#/definitions/Error" },
+    schema: { $ref: "#/definitions/ErrorOptionNotFound" },
     description: "找不到選項"
-  }
-  * #swagger.responses[500] = {
-    schema: { $ref: "#/definitions/Error" },
-    description: "刪除選項失敗"
   }
   * #swagger.security = [{
     "Bearer": []
   }]
   */
   '/:id',
-  
   handleErrorAsync(OptionController.deleteOption),
 );
 

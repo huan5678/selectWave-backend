@@ -1314,12 +1314,220 @@
         ]
       }
     },
+    "/api/poll/{id}/like": {
+      "post": {
+        "tags": [
+          "Poll - 投票"
+        ],
+        "description": "投票按讚",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "投票ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "投票按讚成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Poll"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "投票按讚成功"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ErrorPollNotFound"
+            },
+            "description": "找不到投票"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/poll/{id}/unlike": {
+      "delete": {
+        "tags": [
+          "Poll - 投票"
+        ],
+        "description": "取消投票按讚",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "投票ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "取消投票按讚成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Poll"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "取消投票按讚成功"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ErrorPollNotFound"
+            },
+            "description": "找不到投票"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/poll/{id}/start": {
+      "get": {
+        "tags": [
+          "Poll - 投票"
+        ],
+        "description": "投票開始",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "投票ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "投票開始成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Poll"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "投票開始成功"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ErrorPollNotFound"
+            },
+            "description": "找不到投票"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/poll/{id}/end": {
+      "get": {
+        "tags": [
+          "Poll - 投票"
+        ],
+        "description": "投票結束",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "投票ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "投票結束成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Poll"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "投票結束成功"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ErrorPollNotFound"
+            },
+            "description": "找不到投票"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
     "/api/comment/{id}": {
       "get": {
         "tags": [
           "Comment - 評論"
         ],
-        "description": "獲取所有評論",
+        "description": "獲取評論",
         "parameters": [
           {
             "name": "id",
@@ -1332,21 +1540,31 @@
         "responses": {
           "200": {
             "schema": {
-              "$ref": "#/definitions/Comment"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "獲取評論成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Comment"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
             "description": "獲取評論成功"
           },
           "404": {
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/ErrorCommentNotFound"
             },
             "description": "找不到評論"
-          },
-          "500": {
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "description": "獲取評論失敗"
           }
         }
       },
@@ -1371,19 +1589,13 @@
             "schema": {
               "type": "object",
               "properties": {
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "content": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    }
-                  }
+                "commentId": {
+                  "type": "string",
+                  "example": "60f3e3e3e3e3e3e3e3e3e3e3"
+                },
+                "content": {
+                  "type": "string",
+                  "example": "這是一則更新後的評論"
                 }
               }
             }
@@ -1392,21 +1604,43 @@
         "responses": {
           "200": {
             "schema": {
-              "$ref": "#/definitions/Comment"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "評論更新成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Comment"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
             "description": "評論更新成功"
           },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/ErrorCommentFormat"
+            },
+            "description": "請確實填寫評論資訊"
+          },
+          "403": {
+            "schema": {
+              "$ref": "#/definitions/ErrorCommentUnauthorized"
+            },
+            "description": "沒有權限更新評論"
+          },
           "404": {
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/ErrorCommentNotFound"
             },
             "description": "找不到評論"
-          },
-          "500": {
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "description": "評論更新失敗"
           }
         },
         "security": [
@@ -1432,21 +1666,28 @@
         "responses": {
           "200": {
             "schema": {
-              "$ref": "#/definitions/Comment"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "評論刪除成功"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
             "description": "評論刪除成功"
           },
           "404": {
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/ErrorCommentNotFound"
             },
             "description": "找不到評論"
-          },
-          "500": {
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "description": "評論刪除失敗"
           }
         },
         "security": [
@@ -1471,28 +1712,13 @@
             "schema": {
               "type": "object",
               "properties": {
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "userId": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    },
-                    "content": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    }
-                  }
+                "pollId": {
+                  "type": "string",
+                  "example": "60f3e3e3e3e3e3e3e3e3e3e3"
+                },
+                "content": {
+                  "type": "string",
+                  "example": "這是一則評論"
                 }
               }
             }
@@ -1501,15 +1727,31 @@
         "responses": {
           "200": {
             "schema": {
-              "$ref": "#/definitions/Comment"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "評論創建成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Comment"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
             "description": "評論創建成功"
           },
-          "500": {
+          "400": {
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/ErrorCommentFormat"
             },
-            "description": "評論創建失敗"
+            "description": "請確實填寫評論資訊"
           }
         },
         "security": [
@@ -1534,28 +1776,9 @@
             "schema": {
               "type": "object",
               "properties": {
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "optionId": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    },
-                    "userId": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    }
-                  }
+                "optionId": {
+                  "type": "string",
+                  "example": "60f3e3e3e3e3e3e3e3e3e3e3"
                 }
               }
             }
@@ -1564,21 +1787,37 @@
         "responses": {
           "200": {
             "schema": {
-              "$ref": "#/definitions/Option"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "投票成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Option"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
             "description": "投票成功"
           },
-          "404": {
+          "400": {
             "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "description": "找不到選項"
-          },
-          "500": {
-            "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/ErrorVoteExist"
             },
             "description": "投票失敗"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ErrorOptionNotFound"
+            },
+            "description": "找不到選項"
           }
         },
         "security": [
@@ -1601,37 +1840,13 @@
             "schema": {
               "type": "object",
               "properties": {
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "optionId": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    },
-                    "userId": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    },
-                    "newOptionId": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    }
-                  }
+                "optionId": {
+                  "type": "string",
+                  "example": "60f3e3e3e3e3e3e3e3e3e3e3"
+                },
+                "newOptionId": {
+                  "type": "string",
+                  "example": "54f3e3e3e3e3e3e3e3e3e3e3"
                 }
               }
             }
@@ -1640,21 +1855,50 @@
         "responses": {
           "200": {
             "schema": {
-              "$ref": "#/definitions/Option"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "更改投票成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Option"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
             "description": "更改投票成功"
           },
+          "400": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "找不到投票者"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "找不到新投票選項"
+          },
           "404": {
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/ErrorOptionNotFound"
             },
             "description": "找不到選項"
-          },
-          "500": {
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "description": "更改投票失敗"
           }
         },
         "security": [
@@ -1707,21 +1951,34 @@
         "responses": {
           "200": {
             "schema": {
-              "$ref": "#/definitions/Option"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "取消投票成功"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
             "description": "取消投票成功"
           },
-          "404": {
+          "400": {
             "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "description": "找不到選項"
-          },
-          "500": {
-            "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/ErrorNotVote"
             },
             "description": "取消投票失敗"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ErrorOptionNotFound"
+            },
+            "description": "找不到選項"
           }
         },
         "security": [
@@ -1746,43 +2003,22 @@
             "schema": {
               "type": "object",
               "properties": {
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "title": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    },
-                    "description": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    },
-                    "imageUrl": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    },
-                    "pollId": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
+                "pollId": {
+                  "type": "string",
+                  "example": "60f3e3e3e3e3e3e3e3e3e3e3"
+                },
+                "optionData": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "example": "React"
+                      },
+                      "imageUrl": {
+                        "type": "string",
+                        "example": "https://imgur.com/TECsq2J.png"
                       }
                     }
                   }
@@ -1794,15 +2030,31 @@
         "responses": {
           "200": {
             "schema": {
-              "$ref": "#/definitions/Option"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "新增選項成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Option"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
             "description": "新增選項成功"
           },
-          "500": {
+          "400": {
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/ErrorOptionFormat"
             },
-            "description": "新增選項失敗"
+            "description": "請確實填寫選項資訊"
           }
         },
         "security": [
@@ -1825,26 +2077,20 @@
             "schema": {
               "type": "object",
               "properties": {
-                "properties": {
+                "optionId": {
+                  "type": "string",
+                  "example": "60f3e3e3e3e3e3e3e3e3e3e3"
+                },
+                "updateData": {
                   "type": "object",
                   "properties": {
-                    "optionId": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
+                    "title": {
+                      "type": "string",
+                      "example": "Vue"
                     },
-                    "updateData": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "object"
-                        }
-                      }
+                    "imageUrl": {
+                      "type": "string",
+                      "example": "https://imgur.com/TECsq2J.png"
                     }
                   }
                 }
@@ -1855,21 +2101,37 @@
         "responses": {
           "200": {
             "schema": {
-              "$ref": "#/definitions/Option"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "更新選項成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Option"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
             "description": "更新選項成功"
           },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/ErrorOptionFormat"
+            },
+            "description": "請確實填寫選項資訊"
+          },
           "404": {
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/ErrorOptionNotFound"
             },
             "description": "找不到選項"
-          },
-          "500": {
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "description": "更新選項失敗"
           }
         },
         "security": [
@@ -1903,15 +2165,9 @@
           },
           "404": {
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/ErrorOptionNotFound"
             },
             "description": "找不到選項"
-          },
-          "500": {
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "description": "刪除選項失敗"
           }
         },
         "security": [
@@ -2402,6 +2658,10 @@
             "type": "array",
             "example": [],
             "items": {}
+          },
+          "isWinner": {
+            "type": "boolean",
+            "example": false
           }
         }
       }
@@ -2703,6 +2963,110 @@
         "message": {
           "type": "string",
           "example": "請確實填寫投票資訊"
+        }
+      }
+    },
+    "ErrorOptionNotFound": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "boolean",
+          "example": false
+        },
+        "message": {
+          "type": "string",
+          "example": "無此選項請確認選項 id 是否正確"
+        }
+      }
+    },
+    "ErrorOptionExist": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "boolean",
+          "example": false
+        },
+        "message": {
+          "type": "string",
+          "example": "此選項已存在"
+        }
+      }
+    },
+    "ErrorOptionFormat": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "boolean",
+          "example": false
+        },
+        "message": {
+          "type": "string",
+          "example": "請確實填寫選項資訊"
+        }
+      }
+    },
+    "ErrorVoteExist": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "boolean",
+          "example": false
+        },
+        "message": {
+          "type": "string",
+          "example": "您已經對此選項投過票"
+        }
+      }
+    },
+    "ErrorNotVote": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "boolean",
+          "example": false
+        },
+        "message": {
+          "type": "string",
+          "example": "您尚未對此選項投票"
+        }
+      }
+    },
+    "ErrorCommentNotFound": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "boolean",
+          "example": false
+        },
+        "message": {
+          "type": "string",
+          "example": "無此評論請確認評論 id 是否正確"
+        }
+      }
+    },
+    "ErrorCommentFormat": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "boolean",
+          "example": false
+        },
+        "message": {
+          "type": "string",
+          "example": "請確實填寫評論資訊"
+        }
+      }
+    },
+    "ErrorCommentUnauthorized": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "boolean",
+          "example": false
+        },
+        "message": {
+          "type": "string",
+          "example": "沒有權限更新評論"
         }
       }
     }

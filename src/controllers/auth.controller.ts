@@ -1,4 +1,4 @@
-import { NextFunction, RequestHandler, Response } from "express";
+import { RequestHandler } from "express";
 import { TokenPayload } from "@/types";
 import { object, string } from "yup";
 import { AuthService } from "@/services";
@@ -10,10 +10,7 @@ const emailInputSchema = object({
   email: string().required().email(),
 });
 class AuthController {
-  public static decodeTokenHandler = async (
-    req,
-    res: Response,
-  ) => {
+  public static decodeTokenHandler: RequestHandler = async (req, res) => {
     const { user } = req;
     return successHandle(res, "驗證成功取得使用者資訊", { result: user });
   };
@@ -69,7 +66,7 @@ class AuthController {
       );
       req.body.token = authToken;
       req.body.email = email;
-      MailServiceController.sendVerificationEmail(req, res);
+      MailServiceController.sendVerificationEmail(req, res, next);
       return successHandle(res, "註冊成功", { result: { token: authToken } });
     }
   };
@@ -95,11 +92,7 @@ class AuthController {
     );
     return successHandle(res, "success", { authToken, member });
   };
-  public static logoutHandler: RequestHandler = async (
-    req,
-    res,
-    next: NextFunction
-  ) => {
+  public static logoutHandler: RequestHandler = async (req, res, next) => {
     const token = getToken(req);
     if (!token) {
       throw appError({ code: 400, message: "缺少 token", next });
@@ -113,8 +106,8 @@ class AuthController {
 
   public static resetPasswordHandler: RequestHandler = async (
     req,
-    res: Response,
-    next: NextFunction
+    res,
+    next
   ) => {
     const isValidate = await emailInputSchema.validate(req.body);
     if (!isValidate)
@@ -135,8 +128,8 @@ class AuthController {
 
   public static verifyResetPasswordHandler: RequestHandler = async (
     req,
-    _res: Response,
-    next: NextFunction
+    _res,
+    next
   ) => {
     const { token, password, confirmPassword } = req.body;
     if (password !== confirmPassword) {
@@ -165,8 +158,8 @@ class AuthController {
 
   public static changePasswordHandler: RequestHandler = async (
     req,
-    res: Response,
-    next: NextFunction
+    res,
+    next
   ) => {
     const inputSchema = object({
       email: string().required().email(),
