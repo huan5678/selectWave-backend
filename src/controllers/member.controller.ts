@@ -17,11 +17,11 @@ class MemberController {
     // 添加skip和limit進行分頁
     const users = await User.find()
       .select(
-        "-gender -coin -followers -following -socialMedia -updatedAt -isValidator -isSubscribed"
+        "-gender -coin -followers -following -socialMedia -updatedAt -isValidator -isSubscribed -likedPolls"
       )
       .skip((page - 1) * limit)
       .limit(limit)
-      .exec();
+      ;
 
     // 計算總頁數
     const totalPages = Math.ceil(totalCount / limit);
@@ -34,7 +34,11 @@ class MemberController {
 
   public static getMemberById: RequestHandler = async (req, res, next) => {
     const { id } = req.params;
-    const user = await User.findById(id).select('-coin -updatedAt -isValidator -isSubscribed').exec();
+    const user = await User.findById(id)
+    .select('-coin -updatedAt -isValidator')
+    .lean()
+    .populate('likedPolls', { title: 1, imageUrl: 1, description: 1, totalVoters: 1, createdBy: 0, options: 0, like: 0, comments: 0 })
+    ;
     if (!user)
       throw appError({
         code: 404,
@@ -63,7 +67,7 @@ class MemberController {
       throw appError({ code: 400, message: "請確認照片是否傳入網址", next });
     }
     const userData = await User.findByIdAndUpdate(user.id, updateData, { new: true, runValidators: true }).select('-coin -updatedAt -isValidator -isSubscribed')
-      .exec();
+    ;
     return successHandle(res, "成功更新使用者資訊！", { result: userData });
   };
 
@@ -91,7 +95,7 @@ class MemberController {
       { id, "following.user": { $ne: targetID } },
       { $addToSet: { following: { user: targetID } } },
       { new: true }
-    ).select('-coin -updatedAt -isValidator -isSubscribed').exec();
+    ).select('-coin -updatedAt -isValidator -isSubscribed');
 
     await User.findOneAndUpdate(
       { _id: targetID, "followers.user": { $ne: id } },
@@ -120,7 +124,7 @@ class MemberController {
     const existingFollowing = await User.findOne({
       id,
       "following.user": targetID,
-    }).exec();
+    });
     if (!existingFollowing) {
       throw appError({
         code: 400,
@@ -135,7 +139,7 @@ class MemberController {
         $pull: { following: { user: targetID } },
       },
       { new: true }
-    ).select('-coin -updatedAt -isValidator -isSubscribed').exec();
+    ).select('-coin -updatedAt -isValidator -isSubscribed');
 
     await User.findByIdAndUpdate(targetID, {
       $pull: { followers: { user: id } },

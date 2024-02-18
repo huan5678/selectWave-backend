@@ -43,7 +43,7 @@ class ThirdPartyAuthController {
     return field
       ? User.findOne({
           $or: [{ [field]: id }, { email }],
-        }).exec()
+        })
       : null;
   }
 

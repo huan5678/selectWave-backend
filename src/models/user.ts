@@ -119,6 +119,15 @@ const userSchema = new Schema<IUser>(
       type: String,
       select: false,
     },
+    likedPolls: [
+      {
+        _id: false,
+        poll: {
+          type: Schema.Types.ObjectId,
+          ref: 'Poll',
+        },
+      },
+    ],
   },
   {
     versionKey: false,
@@ -147,7 +156,7 @@ userSchema.pre(/^find/, function (next) {
   (this as IUser).populate({
     path: 'following.user followers.user',
     select: '-createdAt -following -isValidator -followers',
-  });
+    });
   next();
 });
 

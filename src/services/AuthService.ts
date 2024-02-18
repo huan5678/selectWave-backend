@@ -142,7 +142,7 @@ export class AuthService {
 
   static updatePassword = async ({ email, password, next }: { email: string; password: string; next: NextFunction }) => {
     try {
-      const user = await User.findOne({ email });
+      const user = await User.findOne({ email }).exec();
       if (!user) {
         throw appError({ code: 404, message: '此 Email 未註冊', next });
       }

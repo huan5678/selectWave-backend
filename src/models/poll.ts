@@ -48,18 +48,23 @@ const pollSchema = new Schema<IPoll>({
   },
   options: [
     {
+      _id: false,
       type: Schema.Types.ObjectId,
       ref: 'Option',
     },
   ],
   like: [
     {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
+      _id: false,
+      user: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
     },
   ],
   comments: [
     {
+      _id: false,
       type: Schema.Types.ObjectId,
       ref: 'Comment',
     },

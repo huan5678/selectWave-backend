@@ -566,9 +566,18 @@
         "parameters": [
           {
             "name": "body",
-            "email": "example@example.com",
-            "in": "query",
-            "type": "string"
+            "in": "body",
+            "required": true,
+            "description": "重新發送驗證 Email",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "example@example.com"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -604,7 +613,7 @@
         }
       }
     },
-    "/imgur/upload": {
+    "/api/imgur/upload": {
       "post": {
         "tags": [
           "Imgur - 圖片"
@@ -1046,7 +1055,7 @@
         ]
       }
     },
-    "/poll/": {
+    "/api/poll/": {
       "get": {
         "tags": [
           "Poll - 投票"
@@ -1149,7 +1158,7 @@
         ]
       }
     },
-    "/poll/{id}": {
+    "/api/poll/{id}": {
       "get": {
         "tags": [
           "Poll - 投票"
@@ -1317,7 +1326,7 @@
         ]
       }
     },
-    "/poll/{id}/like": {
+    "/api/poll/{id}/like": {
       "get": {
         "tags": [
           "Poll - 投票"
@@ -1419,7 +1428,7 @@
         ]
       }
     },
-    "/poll/{id}/start": {
+    "/api/poll/{id}/start": {
       "get": {
         "tags": [
           "Poll - 投票"
@@ -1471,7 +1480,7 @@
         ]
       }
     },
-    "/poll/{id}/end": {
+    "/api/poll/{id}/end": {
       "get": {
         "tags": [
           "Poll - 投票"
@@ -1523,7 +1532,7 @@
         ]
       }
     },
-    "/comment/{id}": {
+    "/api/comment/{id}": {
       "get": {
         "tags": [
           "Comment - 評論"
@@ -1698,7 +1707,7 @@
         ]
       }
     },
-    "/comment/": {
+    "/api/comment/": {
       "post": {
         "tags": [
           "Comment - 評論"
@@ -1762,7 +1771,7 @@
         ]
       }
     },
-    "/option/vote": {
+    "/api/option/vote": {
       "post": {
         "tags": [
           "Option - 投票及投票選項"
@@ -1989,7 +1998,7 @@
         ]
       }
     },
-    "/option/": {
+    "/api/option/": {
       "post": {
         "tags": [
           "Option - 投票及投票選項"
@@ -2142,7 +2151,7 @@
         ]
       }
     },
-    "/option/{id}": {
+    "/api/option/{id}": {
       "delete": {
         "tags": [
           "Option - 投票及投票選項"

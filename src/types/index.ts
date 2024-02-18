@@ -32,6 +32,7 @@ export interface IUser extends Document {
   facebookId?: string;
   lineId?: string;
   discordId?: string;
+  likedPolls: IPoll['_id'][];
 }
 
 export interface CreateUserRequest {
@@ -61,7 +62,7 @@ export interface IPoll extends Document {
   isPrivate: boolean;
   totalVoters: number;
   like: {
-    userId: IUser['_id'];
+    user: IUser['_id'];
   }[];
   comments: {
     commentId: IComment['_id'];
