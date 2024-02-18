@@ -1,79 +1,84 @@
 import { RequestHandler } from 'express';
 import { Poll, Option } from '@/models';
-import { appError, catchError, successHandle } from '@/utils';
+import { appError, successHandle } from '@/utils';
+import { IUser } from '@/types';
+import { array, object, string } from 'yup';
 
+const optionArraySchema = array(object({
+  title: string().required('請填寫選項名稱').min(1, '選項名稱請大於 1 個字').max(50, '選項名稱長度過長，最多只能 50 個字'),
+  imageUrl: string().default('https://imgur.com/TECsq2J.png'),
+}));
+
+const optionSchema = object({
+  title: string().required('請填寫選項名稱').min(1, '選項名稱請大於 1 個字').max(50, '選項名稱長度過長，最多只能 50 個字'),
+  imageUrl: string().default('https://imgur.com/TECsq2J.png'),
+});
 class OptionController {
   // 投票
   public static vote: RequestHandler = async (req, res, next ) => {
-    try {
-      const { optionId, userId } = req.body;
+      const { optionId } = req.body;
+      const { id } = req.user as IUser;
 
       // 檢查是否已經投過票
       const option = await Option.findById(optionId);
       if (!option) {
-        throw appError({ code: 404, message: '找不到選項' });
+        throw appError({ code: 404, message: '找不到選項', next });
       }
-      if (option?.voters.find((voter) => voter && voter.userId && voter.userId === userId)) {
-        throw appError({ code: 400, message: '您已經對此選項投過票' });
+      if (option?.voters.find((voter) => voter && voter.userId && voter.userId === id)) {
+        throw appError({ code: 400, message: '您已經對此選項投過票', next });
       }
       // 添加投票者
-      option.voters.push({ userId, createdTime: new Date() });
+      option.voters.push({ userId: id, createdTime: new Date() });
       Poll.updateOne({ options: optionId }, { $inc: { totalVoters: 1 } });
       const updatedOption = await option.save();
 
       successHandle(res, '投票成功', { updatedOption });
-    } catch (error) {
-      catchError((error as Error), next);
-    }
   };
 
   // 更改投票
   public static updateVote: RequestHandler = async (req, res, next ) => {
-    try {
-      const { optionId, userId, newOptionId } = req.body;
+      const { id } = req.user as IUser;
+      const { optionId, newOptionId } = req.body;
 
       // 檢查是否已經投過票
       const option = await Option.findById(optionId);
       if (!option) {
-        throw appError({ code: 404, message: '找不到選項' });
+        throw appError({ code: 404, message: '找不到選項', next });
       }
       const voter = option?.voters.find(
-        (voter) => voter && voter.userId && voter.userId === userId,
+        (voter) => voter && voter.userId && voter.userId === id,
       );
       if (!voter) {
-        throw appError({ code: 400, message: '找不到投票者' });
+        throw appError({ code: 400, message: '找不到投票者', next });
       }
 
-      option.voters = option.voters.filter((voter) => voter.userId !== userId);
+      option.voters = option.voters.filter((voter) => voter.userId !== id);
 
       const newOption = await Option.findById(newOptionId);
       if (!newOption) {
-        throw appError({ code: 404, message: '找不到新投票選項' });
+        throw appError({ code: 404, message: '找不到新投票選項', next });
       }
-      newOption.voters.push({ userId, createdTime: new Date() });
+      newOption.voters.push({ userId: id, createdTime: new Date() });
       await option.save();
       const updatedNewOption = await newOption.save();
 
       successHandle(res, '更改投票成功', { updatedNewOption });
-    } catch (error) {
-      throw catchError((error as Error), next);
-    }
   };
 
   // 取消投票
   public static cancelVote: RequestHandler = async (req, res, next ) => {
-    try {
-      const { optionId, userId } = req.body;
+      const {id} = req.user as IUser;
+      const { optionId } = req.body;
       const option = await Option.findById(optionId);
       if (!option) {
-        throw appError({ code: 404, message: '找不到選項' });
+        throw appError({ code: 404, message: '找不到選項', next});
       }
-      if (!option.voters.find((voter) => voter && voter.userId && voter.userId === userId)) {
-        throw appError({ code: 400, message: '您尚未對此選項投票' });
+      if (!option.voters.find((voter) => voter && voter.userId && voter.userId === id)) {
+        throw appError({ code: 400, message: '您尚未對此選項投票', next});
       }
       // 移除投票者
       option.voters = option.voters.filter(
-        (voter) => voter && voter.userId && voter.userId.toString() !== userId,
+        (voter) => voter && voter.userId && voter.userId.toString() !== id,
       );
       await option.save();
 
@@ -85,54 +90,43 @@ class OptionController {
       }
 
       successHandle(res, '取消投票成功', {});
-    } catch (error) {
-      throw catchError((error as Error), next);
-    }
   };
 
   // 新增選項
   public static createOption: RequestHandler = async (req, res, next ) => {
-    try {
       const { pollId, optionData } = req.body;
-      const newOption = await Option.create({ ...optionData, pollId });
+      const validatorInput = await optionArraySchema.validate(optionData);
+      if (!validatorInput) {
+        throw appError({ code: 400, message: '請確實填寫選項資訊', next });
+      }
+      const newOption = await Option.create({ ...validatorInput, pollId });
       successHandle(res, '新增選項成功', { newOption });
-    } catch (error) {
-      throw catchError((error as Error), next);
-    }
   };
 
   // 更新選項
   public static updateOption: RequestHandler = async (req, res, next ) => {
-    try {
       const { optionId, updateData } = req.body;
-      const updatedOption = await Option.findByIdAndUpdate(optionId, updateData, { new: true });
+      const validatorInput = await optionSchema.validate(updateData);
+      if (!validatorInput) {
+        throw appError({ code: 400, message: '請確實填寫選項資訊', next });
+      }
+      const updatedOption = await Option.findByIdAndUpdate(optionId, validatorInput, { new: true });
       if (!updatedOption) {
-        throw appError({ code: 404, message: '找不到選項' });
+        throw appError({ code: 404, message: '找不到選項', next });
       }
       successHandle(res, '更新選項成功', { updatedOption });
-    } catch (error) {
-      throw catchError((error as Error), next);
-    }
   };
 
   // 刪除選項
   public static deleteOption: RequestHandler = async (req, res, next ) => {
-    try {
       const { id } = req.params;
       const deletedOption = await Option.findByIdAndDelete(id);
       if (!deletedOption) {
-        throw appError({ code: 404, message: '找不到選項' });
+        throw appError({ code: 404, message: '找不到選項', next });
       }
       successHandle(res, '刪除選項成功', { deletedOption });
-    } catch (error) {
-      catchError((error as Error), next);
-    }
   };
 
-  // 管理投票者
-  // public static manageVoters: RequestHandler = async (req, res ) => {
-  //   // 這裡可以實現添加或刪除投票者的邏輯
-  // };
 }
 
 export default OptionController;

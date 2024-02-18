@@ -1,4 +1,4 @@
-import { RequestHandler, Request, NextFunction, Response } from "express";
+import { RequestHandler } from "express";
 import nodemailer from "nodemailer";
 import validator from "validator";
 import { object, string } from "yup";
@@ -20,10 +20,7 @@ export class MailServiceController {
   static FRONTEND_DOMAIN = process.env.FRONTEND_DOMAIN;
 
   //SEND MAIL
-  public static sendMail: RequestHandler = async (
-    req: Request,
-    res: Response
-  ) => {
+  public static sendMail: RequestHandler = async (req, res) => {
     mailSchema.validateSync(req.body);
     const { from, to, subject, text, html } = req.body;
     await MailServiceController.transporter.verify();
@@ -37,7 +34,7 @@ export class MailServiceController {
     successHandle(res, "信件已寄出", { result: info });
   };
 
-  public static sendVerificationEmail = async (req, _res) => {
+  public static sendVerificationEmail: RequestHandler = async (req, _res) => {
     const { email, token } = req.body;
     const verificationUrl = `${process.env.FRONTEND_DOMAIN}/verify-account?token=${token}`;
     const html = `
@@ -57,9 +54,9 @@ export class MailServiceController {
   };
 
   public static resendVerificationEmail: RequestHandler = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
+    req,
+    res,
+    next
   ) => {
     const { email } = req.body;
     const user = await User.findOne({ email: email.trim().toLowerCase() });
@@ -107,11 +104,7 @@ export class MailServiceController {
     });
   };
 
-  public static sendResetEmail: RequestHandler = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
+  public static sendResetEmail: RequestHandler = async (req, res, next) => {
     let { email } = req.body;
     email = email.trim().toLowerCase();
     if (!email) {

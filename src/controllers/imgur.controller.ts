@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import { RequestHandler } from 'express';
 import multer from 'multer';
 import path from 'path';
 const Imgur = await import('imgur');
@@ -26,7 +26,7 @@ export const upload = multer({
 }).any();
 // 將文件上傳的中間件和後續處理分開
 class ImgurController {
-  public static async createImgurHandler(req: Request, res: Response, next: NextFunction)
+  public static createImgurHandler:RequestHandler = async (req, res, next) =>
   {
     try {
       if (!req.files?.length) {

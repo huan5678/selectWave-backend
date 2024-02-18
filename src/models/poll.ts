@@ -64,6 +64,11 @@ const pollSchema = new Schema<IPoll>({
       ref: 'Comment',
     },
   ],
+  status: {
+    type: String,
+    enum: ['pending', 'active', 'closed'],
+    default: 'pending',
+  },
 }, {
   versionKey: false,
     timestamps: true,

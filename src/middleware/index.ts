@@ -1,7 +1,7 @@
 import type { NextFunction, Response } from "express";
 import session from "express-session";
 import { object, string, number } from "yup";
-import { ApiExcludeProps, RequestWithAuth, RequestWithPath, TokenPayload } from "@/types";
+import { ApiExcludeProps, TokenPayload } from "@/types";
 import { TokenBlacklist, User } from "@/models";
 import { appError, getToken, handleErrorAsync, verifyToken } from "@/utils";
 
@@ -26,7 +26,7 @@ export const sessionMiddleware = session({
 
 export const verifyMiddleware =
   (excludes: ApiExcludeProps[]) =>
-  async (req: RequestWithPath, res: Response, next: NextFunction) => {
+  async (req, res: Response, next: NextFunction) => {
     try {
       const isExcluded = excludes.some(
         ({ path, method }) => req.path === path && // 修改這裡進行完全匹配檢查
@@ -46,7 +46,7 @@ export const verifyMiddleware =
   };
 
 export const isAuthor = handleErrorAsync(
-  async (req: RequestWithAuth, _res: Response, next: NextFunction) => {
+  async (req, _res: Response, next: NextFunction) => {
     const token = getToken(req); // 提取 Token
     if (!token) {
       throw appError({ code: 401, message: "請先登入", next });
