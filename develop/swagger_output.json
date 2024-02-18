@@ -2068,13 +2068,22 @@
             "Bearer": []
           }
         ]
-      },
+      }
+    },
+    "/api/option/{id}": {
       "put": {
         "tags": [
           "Option - 投票及投票選項"
         ],
         "description": "更新選項",
         "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "選項ID"
+          },
           {
             "name": "body",
             "in": "body",
@@ -2083,10 +2092,6 @@
             "schema": {
               "type": "object",
               "properties": {
-                "optionId": {
-                  "type": "string",
-                  "example": "60f3e3e3e3e3e3e3e3e3e3e3"
-                },
                 "updateData": {
                   "type": "object",
                   "properties": {
@@ -2145,9 +2150,7 @@
             "Bearer": []
           }
         ]
-      }
-    },
-    "/api/option/{id}": {
+      },
       "delete": {
         "tags": [
           "Option - 投票及投票選項"

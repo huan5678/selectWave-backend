@@ -104,13 +104,15 @@ class OptionController {
   };
 
   // 更新選項
-  public static updateOption: RequestHandler = async (req, res, next ) => {
-      const { optionId, updateData } = req.body;
+  public static updateOption: RequestHandler = async (req, res, next) =>
+  {
+    const { id } = req.params;
+      const { updateData } = req.body;
       const validatorInput = await optionSchema.validate(updateData);
       if (!validatorInput) {
         throw appError({ code: 400, message: '請確實填寫選項資訊', next });
       }
-      const updatedOption = await Option.findByIdAndUpdate(optionId, validatorInput, { new: true });
+      const updatedOption = await Option.findByIdAndUpdate(id, validatorInput, { new: true });
       if (!updatedOption) {
         throw appError({ code: 404, message: '找不到選項', next });
       }
