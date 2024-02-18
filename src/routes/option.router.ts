@@ -184,14 +184,19 @@ optionRouter.put(
   /**
    * #swagger.tags = ['Option - 投票及投票選項']
    * #swagger.description = '更新選項'
-   * #swagger.path = '/api/option/'
+   * #swagger.path = '/api/option/{id}'
+   * #swagger.parameters['id'] = {
+    in: 'path',
+    required: true,
+    type: 'string',
+    description: '選項ID'
+    }
    * #swagger.parameters['body'] = {
       in: 'body',
       required: true,
       type: 'object',
       description: '更新選項',
       schema: {
-        optionId: '60f3e3e3e3e3e3e3e3e3e3e3',
         updateData: {
         title: 'Vue',
         imageUrl: 'https://imgur.com/TECsq2J.png',
@@ -220,7 +225,7 @@ optionRouter.put(
         "Bearer": []
       }]
    */
-  '/',
+  '/:id',
   handleErrorAsync(OptionController.updateOption),
 );
 
