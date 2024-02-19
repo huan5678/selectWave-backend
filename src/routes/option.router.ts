@@ -53,14 +53,19 @@ optionRouter.put(
   /**
    * #swagger.tags = ['Option - 投票及投票選項']
    * #swagger.description = '更改投票'
-   * #swagger.path = '/api/option/vote'
+   * #swagger.path = '/api/option/vote/{id}'
+   * #swagger.parameters['id'] = {
+    in: 'path',
+    required: true,
+    type: 'string',
+    description: '選項ID'
+    }
    * #swagger.parameters['body'] = {
       in: 'body',
       required: true,
       type: 'object',
       description: '更改投票',
       schema: {
-          optionId: '60f3e3e3e3e3e3e3e3e3e3e3',
           newOptionId: '54f3e3e3e3e3e3e3e3e3e3e3',
       },
     }
@@ -94,7 +99,7 @@ optionRouter.put(
         "Bearer": []
       }]
    */
-  '/vote',
+  '/vote/:id',
   handleErrorAsync(OptionController.updateVote),
 );
 
@@ -102,18 +107,12 @@ optionRouter.delete(
   /**
    * #swagger.tags = ['Option - 投票及投票選項']
    * #swagger.description = '取消投票'
-   * #swagger.path = '/api/option/vote'
-   * #swagger.parameters['body'] = {
-      in: 'body',
-      required: true,
-      type: 'object',
-      description: '取消投票',
-      schema: {
-        properties: {
-          optionId: { type: 'string' },
-          userId: { type: 'string' },
-        },
-      },
+   * #swagger.path = '/api/option/vote/{id}'
+   * #swagger.parameters['id'] = {
+    in: 'path',
+    required: true,
+    type: 'string',
+    description: '選項ID'
     }
     * #swagger.responses[200] = {
         schema: {
@@ -136,7 +135,7 @@ optionRouter.delete(
         "Bearer": []
       }]
    */
-  '/vote',
+  '/vote/:id',
   handleErrorAsync(OptionController.cancelVote),
 );
 optionRouter.post(

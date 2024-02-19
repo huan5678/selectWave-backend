@@ -87,6 +87,29 @@ const pollSchema = new Schema<IPoll>({
     },
 });
 
+pollSchema.pre('save', async function(next) {
+  // Only proceed if options are modified or it's a new document
+  if (this.isModified('options') || this.isNew) {
+    const poll = this;
+    const OptionModel = model('Option');
+
+    // Assuming `options` are the IDs of related Option documents
+    const options = await OptionModel.find({
+      '_id': { $in: poll.options }
+    });
+
+    let totalVoters = 0;
+    options.forEach(option => {
+      // Assuming each option document correctly populates the `voters` array
+      totalVoters += option.voters.length;
+    });
+
+    poll.totalVoters = totalVoters;
+  }
+  next();
+});
+
+
 pollSchema.pre(/^find/, function(next) {
   (this as IPoll).populate([
     {
@@ -104,10 +127,6 @@ pollSchema.pre(/^find/, function(next) {
     {
       path: 'options',
       select: 'title imageUrl',
-      populate: {
-        path: 'voters',
-        select: 'name avatar',
-      },
     },
   ]);
   next();

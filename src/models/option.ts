@@ -20,7 +20,7 @@ const optionSchema = new Schema<IOption>({
   voters: [
     {
       _id: false,
-      userId: { type: Schema.Types.ObjectId, ref: 'User' },
+      user: { type: Schema.Types.ObjectId, ref: 'User' },
       createdTime: {
         type: Date,
         default: Date.now,
@@ -46,9 +46,26 @@ const optionSchema = new Schema<IOption>({
     },
 });
 
+optionSchema.post('save', async function(doc, next) {
+  await recalculateTotalVoters(doc.pollId);
+  next();
+});
+
+async function recalculateTotalVoters(pollId: string) {
+  const OptionModel = model('Option');
+  const totalVoters = await OptionModel.aggregate([
+    { $match: { pollId: pollId } },
+    { $unwind: '$voters' },
+    { $group: { _id: '$pollId', totalVoters: { $sum: 1 } } }
+  ]);
+
+  const PollModel = model('Poll');
+  await PollModel.findByIdAndUpdate(pollId, { totalVoters: totalVoters[0]?.totalVoters || 0 });
+}
+
 optionSchema.pre(/^find/, function(next) {
   (this as IOption).populate([{
-    path: 'voters',
+    path: 'voters.user',
     select: 'name avatar'
   }]);
   next();
