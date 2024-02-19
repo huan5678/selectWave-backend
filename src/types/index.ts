@@ -70,7 +70,11 @@ export interface IPoll extends Document {
   options: {
     optionId: IOption['_id'];
   }[];
-  status: 'pending' | 'active' | 'closed';
+  status: 'pending' | 'active' | 'ended' | 'closed';
+  isWinner:
+    {
+      options: IOption['_id'];
+    }[];
 }
 
 export interface CreatePollRequest {

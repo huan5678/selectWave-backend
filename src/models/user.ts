@@ -152,20 +152,6 @@ userSchema.statics.findWithoutSensitiveData = function (query) {
   return this.find(query).select('-password -resetToken');
 };
 
-userSchema.pre(/^find/, function (next) {
-  (this as IUser).populate([
-    {
-    path: 'following.user',
-    select: {createdAt: 0, isValidator: 0, followers: 0, following: 0, likedPolls: 0, gender: 0, isSubscribed: 0, updatedAt: 0, coin: 0, verificationToken: 0, googleId: 0, facebookId: 0, lineId: 0, discordId: 0, }
-    },
-    {
-    path: 'followers.user',
-    select: {createdAt: 0, isValidator: 0, followers: 0, following: 0, likedPolls: 0, gender: 0, isSubscribed: 0, updatedAt: 0, coin: 0, verificationToken: 0, googleId: 0, facebookId: 0, lineId: 0, discordId: 0,}
-    },
-  ]);
-  next();
-});
-
 userSchema.methods.toJSON = function () {
   const user = this.toObject();
   delete user.password;

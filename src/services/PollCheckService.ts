@@ -13,17 +13,20 @@ export class PollService
       Logger.log('Checking polls...', 'INFO');
       const now = new Date();
 
-      const pollsToActivate = await Poll.find({ startDate: { $lte: now }, status: 'pending' });
-      pollsToActivate.forEach(async (poll) => {
-        poll.status = 'active';
-        await poll.save();
-      });
+      await Poll.find({ startDate: { $lte: now }, status: 'pending' }).where('status', 'active').updateMany({ status: 'active' });
 
-      Logger.log(`目前有 ${ pollsToActivate.length } 筆投票正在進行中`, 'INFO');
+      const totalPollsActivated = await Poll.countDocuments({ status: 'active' });
 
-      const pollsToEnd = await Poll.find({ endDate: { $lte: now }, status: 'active' });
+      Logger.log(`目前有 ${totalPollsActivated} 筆投票正在進行中`, 'INFO');
 
-      Logger.log(`目前有 ${ pollsToEnd.length } 筆投票已經結束`, 'INFO');
+
+      await Poll.find({ endDate: { $lte: now }, status: 'active' }).where('status', 'ended').updateMany({ status: 'ended' });
+
+      const pollsToEnd = await Poll.find({ endDate: { $lte: now }, status: 'ended' });
+
+      const totalPollsToEnd = await Poll.countDocuments({ status: 'closed' });
+
+      Logger.log(`目前有 ${ totalPollsToEnd } 筆投票已經結束`, 'INFO');
 
       for (let poll of pollsToEnd) {
         await PollController.calculateResultsForPoll(poll._id);
