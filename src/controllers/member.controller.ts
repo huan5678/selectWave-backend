@@ -34,8 +34,11 @@ class MemberController {
     const { id } = req.params;
     const user = await User.findById(id)
       .select("-coin -updatedAt -isValidator")
-      .populate("likedPolls", { title: 1, _id: 1 })
-      .lean();
+      .populate({
+        path: 'likedPolls.poll',
+        select: {createdBy: 0, like: 0, comments: 0, options: 0, isPrivate: 0, createdTime: 0, createdAt: 0, updatedAt: 0}
+      })
+      .exec();
     if (!user)
       throw appError({
         code: 404,

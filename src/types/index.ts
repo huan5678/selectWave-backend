@@ -89,7 +89,7 @@ export interface IOption extends Document {
   imageUrl: string;
   pollId: IPoll['_id'];
   voters: {
-    userId: IUser['_id'];
+    user: IUser['_id'];
     createdTime: Date;
   }[];
   isWinner: boolean;
