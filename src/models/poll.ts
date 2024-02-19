@@ -73,9 +73,18 @@ const pollSchema = new Schema<IPoll>({
   ],
   status: {
     type: String,
-    enum: ['pending', 'active', 'closed'],
+    enum: ['pending', 'active', 'ended', 'closed'],
     default: 'pending',
   },
+  isWinner: [
+    {
+      _id: false,
+      option: {
+        type: Schema.Types.ObjectId,
+        ref: 'Option',
+      },
+    },
+  ],
 }, {
   versionKey: false,
     timestamps: true,
@@ -109,26 +118,24 @@ pollSchema.pre('save', async function(next) {
   next();
 });
 
-
-pollSchema.pre(/^find/, function(next) {
-  (this as IPoll).populate([
-    {
+pollSchema.pre(/^find/, function (next)
+{
+  (this as IPoll)
+    .populate({
       path: 'createdBy',
-      select: 'name avatar',
-    },
+      select: 'name avatar'
+    });
+  (this as IPoll).populate(
     {
       path: 'like',
       select: 'name avatar',
-    },
+    });
+  (this as IPoll).populate(
     {
-      path: 'comments',
-      select: 'content createdTime',
-    },
-    {
-      path: 'options',
-      select: 'title imageUrl',
-    },
-  ]);
+      path: 'isWinner.option',
+      select: 'title imageUrl'
+    }
+  )
   next();
 });
 

@@ -44,9 +44,6 @@ commentSchema.pre(/^find/, function(next) {
   (this as IComment).populate([{
     path: 'author',
     select: 'name avatar'
-  },{
-    path: 'pollId',
-    select: 'title'
   }]);
   next();
 });
