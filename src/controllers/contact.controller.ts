@@ -1,7 +1,10 @@
 import { RequestHandler } from "express";
-import { Contact } from "@/models";
+import jsonWebToken from 'jsonwebtoken';
+import { Contact, EmailSubscriber } from "@/models";
 import { appError, successHandle } from "@/utils";
 import { object, string } from "yup";
+
+const { JWT_SECRET } = process.env;
 
 const contactSchema = object({
   name: string().required("請輸入姓名"),
@@ -32,12 +35,32 @@ class ContactController {
     if (!email) {
       throw appError({ code: 400, message: "請輸入正確的Email格式", next });
     }
-    const contact = await Contact.findOne({ "emailSubscriber.email": email });
-    if (contact) {
+    const unScribedToken = jsonWebToken.sign(email, JWT_SECRET as unknown as string);
+    const subscriber = await EmailSubscriber.findOne({ email });
+    if (subscriber) {
       throw appError({ code: 400, message: "您已經訂閱過了", next });
-    } else {
-      await Contact.updateOne({}, { $push: { emailSubscriber: { email } } });
-      return successHandle(res, "感謝您的訂閱", {});
+    }
+    const newSubscriber = new EmailSubscriber({ email, unScribedToken });
+    await newSubscriber.save();
+    return successHandle(res, "感謝您的訂閱", {});
+  };
+
+  public static unsubscribe: RequestHandler = async (req, res, next) =>
+  {
+    try {
+    const { token } = req.body;
+    const email = jsonWebToken.verify(token, JWT_SECRET as unknown as string);
+
+    const subscriber = await EmailSubscriber.findOne({ email });
+    if (!subscriber) {
+      throw appError({ code: 400, message: "您尚未訂閱過", next });
+    }
+    await EmailSubscriber.deleteOne({ email });
+      return successHandle(res, "退訂成功，期待您再次訂閱電子報", {});
+    } catch (error) {
+      if ((error as Error).name === "JsonWebTokenError") {
+        throw appError({ code: 400, message: "驗證失敗請確認是否有權限取消訂閱", next });
+      }
     }
   };
 }

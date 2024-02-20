@@ -1,23 +1,7 @@
-import { IContact } from '@/types';
+import { IContact, IEmailSubscriber } from '@/types';
 import { Schema, model } from 'mongoose';
 
 const contactSchema = new Schema<IContact>({
-  emailSubscriber: [
-    {
-      _id: false,
-      email: {
-        type: String,
-        required: true,
-      },
-      createdAt: {
-        type: Date,
-        default: Date.now,
-      },
-    },
-  ],
-  contact: [
-    {
-      _id: false,
       name: {
         type: String,
         required: true,
@@ -37,8 +21,6 @@ const contactSchema = new Schema<IContact>({
         type: Date,
         default: Date.now,
       },
-    },
-  ],
 }, {
   timestamps: { createdAt: 'createdTime', updatedAt: 'updateTime' },
   versionKey: false,
@@ -50,4 +32,30 @@ const contactSchema = new Schema<IContact>({
     },
 });
 
-export default model<IContact>('Contact', contactSchema);
+const subscriberSchema = new Schema<IEmailSubscriber>({
+  email: {
+    type: String,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  unScribedToken: {
+    type: String,
+    default: '',
+    select: false,
+  },
+}, {
+  timestamps: { createdAt: 'createdTime', updatedAt: 'updateTime' },
+  versionKey: false,
+    toJSON: {
+      virtuals: true
+    },
+    toObject: {
+        virtuals: true
+    },
+});
+
+export const Contact = model<IContact>('Contact', contactSchema);
+export const EmailSubscriber = model<IEmailSubscriber>('EmailSubscriber', subscriberSchema);

@@ -2164,7 +2164,7 @@
         ]
       }
     },
-    "/contact/": {
+    "/api/contact/": {
       "post": {
         "tags": [
           "Contact - 聯絡我們與訂閱電子報"
@@ -2210,7 +2210,7 @@
         }
       }
     },
-    "/contact/subscribe": {
+    "/api/contact/subscribe": {
       "post": {
         "tags": [
           "Contact - 聯絡我們與訂閱電子報"
@@ -2271,6 +2271,90 @@
               }
             },
             "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/contact/subscribe/": {
+      "put": {
+        "tags": [
+          "Contact - 聯絡我們與訂閱電子報"
+        ],
+        "description": "退訂電子報",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "body",
+            "description": "Email",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string",
+                  "example": "eyJhbGciOiJIUzI1NiJ9.dGxxxxxx"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "退訂成功，期待您再次訂閱電子報"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "您尚未訂閱過"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "Bad Request"
+          },
+          "403": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "驗證失敗請確認是否有權限取消訂閱"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "Forbidden"
           }
         }
       }

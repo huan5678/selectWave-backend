@@ -40,6 +40,7 @@ app.use(
       { path: '/mail/contact', method: 'POST' },
       { path: '/contact/', method: 'POST' },
       { path: '/contact/subscribe', method: 'POST' },
+      { path: '/contact/subscribe', method: 'PUT' },
   ]),
   Routes,
 );
