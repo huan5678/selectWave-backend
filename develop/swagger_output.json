@@ -2163,6 +2163,117 @@
           }
         ]
       }
+    },
+    "/contact/": {
+      "post": {
+        "tags": [
+          "Contact - 聯絡我們與訂閱電子報"
+        ],
+        "description": "接收聯絡我們表單",
+        "parameters": [
+          {
+            "name": "contact",
+            "in": "body",
+            "description": "Contact us",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Contact"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "感謝您的留言"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/ErrorContactFormat"
+            },
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/contact/subscribe": {
+      "post": {
+        "tags": [
+          "Contact - 聯絡我們與訂閱電子報"
+        ],
+        "description": "訂閱電子報",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "body",
+            "description": "Email",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "example@example.com"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "感謝您的訂閱"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "請輸入正確的Email格式"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "Bad Request"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -2756,6 +2867,27 @@
         }
       }
     },
+    "Contact": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "John Doe"
+        },
+        "email": {
+          "type": "string",
+          "example": "example@example.com"
+        },
+        "message": {
+          "type": "string",
+          "example": "我想要聯絡你們。"
+        },
+        "quests": {
+          "type": "string",
+          "example": "意見提供"
+        }
+      }
+    },
     "ErrorTokenExpired": {
       "type": "object",
       "properties": {
@@ -3078,6 +3210,19 @@
         "message": {
           "type": "string",
           "example": "沒有權限更新評論"
+        }
+      }
+    },
+    "ErrorContactFormat": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "boolean",
+          "example": false
+        },
+        "message": {
+          "type": "string",
+          "example": "請確實填寫聯絡資訊"
         }
       }
     }

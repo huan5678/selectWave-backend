@@ -101,4 +101,8 @@ export const ErrorSchema = {
     status: false,
     message: "沒有權限更新評論",
   },
+  ErrorContactFormat: {
+    status: false,
+    message: "請確實填寫聯絡資訊",
+  },
 };

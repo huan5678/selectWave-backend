@@ -38,6 +38,8 @@ app.use(
       { path: '/option/', method: 'GET' },
       { path: '/poll/', method: 'GET' },
       { path: '/mail/contact', method: 'POST' },
+      { path: '/contact/', method: 'POST' },
+      { path: '/contact/subscribe', method: 'POST' },
   ]),
   Routes,
 );
