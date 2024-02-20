@@ -37,6 +37,7 @@ app.use(
       { path: '/comment/', method: 'GET' },
       { path: '/option/', method: 'GET' },
       { path: '/poll/', method: 'GET' },
+      { path: '/mail/contact', method: 'POST' },
   ]),
   Routes,
 );

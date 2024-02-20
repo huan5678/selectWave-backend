@@ -1831,13 +1831,22 @@
             "Bearer": []
           }
         ]
-      },
+      }
+    },
+    "/api/option/vote/{id}": {
       "put": {
         "tags": [
           "Option - 投票及投票選項"
         ],
         "description": "更改投票",
         "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "選項ID"
+          },
           {
             "name": "body",
             "in": "body",
@@ -1846,10 +1855,6 @@
             "schema": {
               "type": "object",
               "properties": {
-                "optionId": {
-                  "type": "string",
-                  "example": "60f3e3e3e3e3e3e3e3e3e3e3"
-                },
                 "newOptionId": {
                   "type": "string",
                   "example": "54f3e3e3e3e3e3e3e3e3e3e3"
@@ -1920,38 +1925,11 @@
         "description": "取消投票",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
+            "name": "id",
+            "in": "path",
             "required": true,
-            "description": "取消投票",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "optionId": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    },
-                    "userId": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
+            "type": "string",
+            "description": "選項ID"
           }
         ],
         "responses": {

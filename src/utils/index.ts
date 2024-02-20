@@ -73,7 +73,7 @@ export class Logger {
   }
   static log(message: string | Error, level: (typeof LogLevel)[number] = 'INFO') {
     const now: Date = new Date();
-    const formatTime = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+    const formatTime = `${now.toLocaleDateString('zh-TW', {timeZone: 'Asia/Taipei'})} ${now.toLocaleTimeString('zh-TW', {timeZone: 'Asia/Taipei'})}`;
     message =
       message instanceof Error ? `${message.name} ${message.message} ${message.stack}` : message;
     console.log(`[${level}] ${message} [${formatTime}]`);
