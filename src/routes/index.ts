@@ -6,7 +6,7 @@ import memberRouter from './member.router';
 import pollRouter from './poll.router';
 import commentRouter from './comment.router';
 import optionRouter from './option.router';
-
+import mailRouter from './mail.router';
 
 const apiRouter = Router();
 
@@ -20,11 +20,13 @@ apiRouter.use((req: Request, _, next: NextFunction) => {
   next();
 });
 
+
 apiRouter.use('/auth', authRouter);
 apiRouter.use('/imgur', imgurRouter);
 apiRouter.use('/member', memberRouter);
 apiRouter.use('/poll', pollRouter);
 apiRouter.use('/comment', commentRouter);
 apiRouter.use('/option', optionRouter);
+apiRouter.use('/mail', mailRouter);
 
 export default apiRouter;

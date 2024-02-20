@@ -11,7 +11,7 @@ const tokenBlacklistSchema = new Schema<ITokenBlacklist>({
     type: Date,
     required: true,
   },
-}, {
+},{
   versionKey: false,
     timestamps: true,
     toJSON: {
