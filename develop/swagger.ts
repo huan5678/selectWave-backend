@@ -81,6 +81,7 @@ const doc = {
       name: "John Doe",
       avatar: "https://i.imgur.com/xcLTrkV.png",
       gender: "male",
+      birthday: "1990-01-01T00:00:00.000Z",
       follwing: [
         {
           user: {
