@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { NextFunction } from 'express';
 
+import { google } from 'googleapis';
+
 import {
   googleClientId,
   googleClientSecret,
@@ -17,7 +19,6 @@ import {
   discordClientId,
   discordClientSecret,
   discordRedirectUrl,
-  discordState,
 } from '@/app/config';
 import { IUser } from '@/types';
 import { AuthService } from '@/services';
@@ -35,11 +36,11 @@ class ThirdPartyAuthController {
   };
 
   private static async findUser(
-    type: keyof typeof this.userFieldMap,
+    type: keyof typeof ThirdPartyAuthController.userFieldMap,
     id: string,
     email: string,
   ): Promise<IUser | null> {
-    const field = this.userFieldMap[type];
+    const field = ThirdPartyAuthController.userFieldMap[type];
     return field
       ? User.findOne({
           $or: [{ [field]: id }, { email }],
@@ -86,17 +87,35 @@ class ThirdPartyAuthController {
   }
 
   public static async loginWithGoogle(_req, res, _next: NextFunction) {
-    const queryString = this.createOAuthQueryParams(googleClientId as string, googleRedirectUrl, [
+    // const queryString = ThirdPartyAuthController.createOAuthQueryParams(googleClientId as string, googleRedirectUrl, [
+    //   'https://www.googleapis.com/auth/userinfo.profile',
+    //   'https://www.googleapis.com/auth/userinfo.email',
+    // ]);
+
+    const oauth2Client = new google.auth.OAuth2(
+      googleClientId as string,
+      googleClientSecret as string,
+      googleRedirectUrl,
+    );
+
+    const scopes = [
       'https://www.googleapis.com/auth/userinfo.profile',
       'https://www.googleapis.com/auth/userinfo.email',
-    ]);
+    ];
 
-    const authUrl = 'https://accounts.google.com/o/oauth2/auth';
-    res.redirect(`${authUrl}?${queryString}`);
+    const url = oauth2Client.generateAuthUrl({
+      access_type: 'offline',
+      scope: scopes,
+    });
+
+    console.log(url);
+    // const authUrl = 'https://accounts.google.com/o/oauth2/auth';
+    // res.redirect(`${authUrl}?${queryString}`);
+    res.redirect(url);
   }
   public static async googleCallback(req, res, _next: NextFunction) {
     const code = req.query.code as string;
-    const queryString = this.createOAuthTokenExchangeOptions(
+    const queryString = ThirdPartyAuthController.createOAuthTokenExchangeOptions(
       code,
       googleClientId as string,
       googleClientSecret as string,
@@ -116,7 +135,7 @@ class ThirdPartyAuthController {
       },
     );
     const { id, email } = data;
-    const user = (await this.findUser('google', id, email)) as IUser;
+    const user = (await ThirdPartyAuthController.findUser('google', id, email)) as IUser;
     AuthService.thirdPartyAuthCreateMember(res, user, data, 'googleId');
   }
   public static async loginWithFacebook(_req, res, _next: NextFunction) {
@@ -206,16 +225,15 @@ class ThirdPartyAuthController {
     const email = getVerifyData.email;
     data.id = id;
     data.email = email;
-    const user = (await this.findUser('line', id, email)) as IUser;
+    const user = (await ThirdPartyAuthController.findUser('line', id, email)) as IUser;
     AuthService.thirdPartyAuthCreateMember(res, user, data, 'lineId');
   }
   public static async loginWithDiscord(_req, res, _next: NextFunction) {
     const query = {
       client_id: discordClientId as string,
-      redirect_uri: discordRedirectUrl as string,
       response_type: 'code',
-      state: discordState as string,
-      scope: ['email', 'identify'].join(' '),
+      redirect_uri: discordRedirectUrl as string,
+      scope: ['identify', 'email'].join(' '),
     };
     const auth_url = 'https://discord.com/api/oauth2/authorize';
     const queryString = new URLSearchParams(query).toString();
@@ -235,21 +253,25 @@ class ThirdPartyAuthController {
 
     const queryString = new URLSearchParams(options).toString();
 
+    console.log('queryString', queryString);
+
     const response = await axios.post(url, queryString);
 
     const { access_token } = response.data;
 
-    const { data } = await axios.get('https://discord.com/api/users/@me', {
+    const { data } = await axios.get('https://discord.com/api/oauth2/@me', {
       headers: {
         Authorization: `Bearer ${access_token}`,
       },
     });
 
-    const { id, email } = data;
+    console.log('data', data);
+
+    const { id, email } = data.user;
     data.photo = `https://cdn.discordapp.com/avatars/${id}/${data.avatar}`;
     data.name = data.username;
 
-    const user = (await this.findUser('discord', id, email)) as IUser;
+    const user = (await ThirdPartyAuthController.findUser('discord', id, email)) as IUser;
     AuthService.thirdPartyAuthCreateMember(res, user, data, 'discordId');
   }
 }
