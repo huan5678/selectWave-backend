@@ -1,5 +1,5 @@
 import axios from 'axios';
-import passport, { use } from 'passport';
+import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 import { Strategy as LineStrategy } from 'passport-line-auth';
@@ -7,7 +7,7 @@ import { Strategy as DiscordStrategy } from 'passport-discord';
 import { Strategy as GitHubStrategy } from 'passport-github2';
 import { User } from '@/models';
 import { IUser } from '@/types';
-import { generateToken, randomPassword, successHandle } from '@/utils';
+import { generateToken, randomPassword } from '@/utils';
 
 const googleRedirectUrl = `${process.env.BACKEND_DOMAIN}/api/auth/google/callback`;
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
@@ -142,7 +142,7 @@ const useFacebookStrategy = new
     }
 );
 
-export const useFacebookCallback = async (req, res) =>
+export const useFacebookCallback = async (req, res, next) =>
 {
   const code = req.query.code as string;
   const queryString = createOAuthTokenExchangeOptions(
