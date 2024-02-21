@@ -55,7 +55,7 @@ class MemberController {
 
   public static updateProfile: RequestHandler = async (req: any, res, next) => {
     const { user } = req;
-    const validFields = ["name", "avatar", "gender", "socialMedia"];
+    const validFields = ["name", "avatar", "gender", "socialMedia" , "birthday"];
     let updateData = {};
     for (let field of validFields) {
       if (req.body[field] !== undefined) {

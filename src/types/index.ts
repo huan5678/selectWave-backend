@@ -22,6 +22,7 @@ export interface IUser extends Document {
   password: string;
   avatar: string;
   gender: 'male' | 'female' | 'x';
+  birthday?: Date;
   socialMedia?: [
     {
       type: string;

@@ -45,6 +45,9 @@ const userSchema = new Schema<IUser>(
       enum: ['male', 'female', 'x'],
       default: 'x',
     },
+    birthday: {
+      type: Date,
+    },
     followers: [
       {
         _id: false,
