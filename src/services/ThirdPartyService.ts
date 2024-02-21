@@ -21,7 +21,7 @@ const facebookClientSecret = process.env.FACEBOOK_CLIENT_SECRET;
 const facebookRedirectUrl = `${process.env.BACKEND_DOMAIN}/api/auth/facebook/callback`;
 const discordClientId = process.env.DISCORD_CLIENT_ID;
 const discordClientSecret = process.env.DISCORD_CLIENT_SECRET;
-const discordState = 'mongodb-express-discord';
+
 const discordRedirectUrl = `${process.env.BACKEND_DOMAIN}/api/auth/discord/callback`;
 const githubClientId = process.env.GITHUB_CLIENT_ID;
 const githubClientSecret = process.env.GITHUB_CLIENT_SECRET;
@@ -30,26 +30,6 @@ const githubRedirectUrl = `${process.env.BACKEND_DOMAIN}/api/auth/github/callbac
 const tokenHeader = {
   'Content-Type': 'application/x-www-form-urlencoded',
 };
-
-function createOAuthQueryParams(
-    clientId: string,
-    redirectUri: string,
-    scope: string[],
-    state?: string,
-    responseType: string = 'code',
-    accessType: string = 'offline',
-  ): string {
-    const query = {
-      response_type: responseType,
-      client_id: clientId,
-      redirect_uri: redirectUri,
-      scope: scope.join(' '),
-      access_type: accessType,
-      ...(state && { state }), // 只有當 state 存在時才添加
-    };
-
-    return new URLSearchParams(query).toString();
-  }
 
 function createOAuthTokenExchangeOptions(
     code: string,
@@ -75,14 +55,14 @@ const useGoogleStrategy = new
     clientSecret: googleClientSecret as string,
     callbackURL: googleRedirectUrl,
   },
-    function (accessToken, refreshToken, profile, done)
+    function (_accessToken, _refreshToken, profile, done)
     {
       console.log('profile', profile);
       return done(null, profile);
     }
 );
 
-export const useGoogleCallback = async (req, res, next) =>
+export const useGoogleCallback = async (req, res, _next) =>
 {
     const code = req.query.code as string;
     const queryString = createOAuthTokenExchangeOptions(
@@ -133,7 +113,7 @@ const useFacebookStrategy = new
     clientSecret: facebookClientSecret as string,
     callbackURL: facebookRedirectUrl,
   },
-    async (accessToken, refreshToken, profile, done) =>
+    async (_accessToken, _refreshToken, profile, done) =>
     {
       console.log('profile', profile);
       if (profile) {
@@ -142,7 +122,7 @@ const useFacebookStrategy = new
     }
 );
 
-export const useFacebookCallback = async (req, res, next) =>
+export const useFacebookCallback = async (req, res, _next) =>
 {
   const code = req.query.code as string;
   const queryString = createOAuthTokenExchangeOptions(
@@ -190,7 +170,7 @@ const useLineStrategy = new
     scope: ['profile', 'openid', 'email'],
     botPrompt: 'normal',
   },
-    async (accessToken, refreshToken, params, profile, done) =>
+    async (_accessToken, _refreshToken, _params, profile, done) =>
     {
       console.log('profile', profile);
       if (profile) {
@@ -199,7 +179,7 @@ const useLineStrategy = new
     }
 );
 
-export const useLineCallback = async (req, res, next) =>
+export const useLineCallback = async (req, res, _next) =>
 {
   const code = req.query.code as string;
     const options = {
@@ -238,7 +218,6 @@ export const useLineCallback = async (req, res, next) =>
       },
     });
 
-  
   const { userId, displayName, pictureUrl } = data;
   const email = getVerifyData.email;
 
@@ -270,7 +249,7 @@ const useDiscordStrategy = new
     callbackURL: discordRedirectUrl,
     scope: ['identify', 'email'],
   },
-    async (accessToken, refreshToken, profile, done) =>
+    async (_accessToken, _refreshToken, profile, done) =>
     {
       console.log('profile', profile);
       if (profile) {
@@ -279,7 +258,7 @@ const useDiscordStrategy = new
     }
 );
 
-export const useDiscordCallback = async (req, res, next) =>
+export const useDiscordCallback = async (req, res, _next) =>
 {
   const code = req.query.code as string;
   const options = {
@@ -335,7 +314,7 @@ const useGitHubStrategy = new
     clientSecret: githubClientSecret as string,
     callbackURL: githubRedirectUrl,
   },
-    async (accessToken, refreshToken, profile, done) =>
+    async (_accessToken, _refreshToken, profile, done) =>
     {
       console.log('profile', profile);
       if (profile) {
@@ -344,7 +323,7 @@ const useGitHubStrategy = new
     }
 );
 
-export const useGithubCallback = async (req, res, next) =>
+export const useGithubCallback = async (req, res, _next) =>
 {
   const code = req.query.code as string;
   const options = {
