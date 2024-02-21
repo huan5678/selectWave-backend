@@ -420,5 +420,15 @@ authRouter.get(
    * #swagger.ignore = true
    */
   '/discord/callback', handleErrorAsync(ThirdPartyAuthController.discordCallback));
+authRouter.get(
+    /**
+   * #swagger.ignore = true
+   */
+  '/github', handleErrorAsync(ThirdPartyAuthController.loginWithGithub));
+authRouter.get(
+    /**
+   * #swagger.ignore = true
+   */
+  '/github/callback', handleErrorAsync(ThirdPartyAuthController.githubCallback));
 
 export default authRouter;
