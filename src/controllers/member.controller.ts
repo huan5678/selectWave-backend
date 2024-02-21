@@ -17,7 +17,7 @@ class MemberController {
     // 添加skip和limit進行分頁
     const users = await User.find()
       .select(
-        "-gender -coin -followers -following -socialMedia -updatedAt -isValidator -isSubscribed -likedPolls"
+        "-gender -birthday -coin -followers -following -socialMedia -updatedAt -isValidator -isSubscribed -likedPolls"
       )
       .skip((page - 1) * limit)
       .limit(limit);
