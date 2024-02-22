@@ -5,10 +5,10 @@ import mongoose from "mongoose";
 import "dotenv/config";
 
 import app from "./index";
-import { AuthService } from "@/services";
-import { PollService } from "@/services";
+import { AuthService, PollService, webSocketService } from "@/services";
 import { Logger } from "@/utils";
-import webSocketService from "@/services/webSocketService";
+import { attachWsToRequest, initWebSocketServer } from "@/middleware";
+import { WebSocketServer } from "ws";
 
 const { DATABASE_PASSWORD, DATABASE_PATH } = process.env;
 const isProduction = process.env.NODE_ENV === "production";
@@ -41,6 +41,14 @@ if (!isProduction) {
 
 const server = http.createServer(app);
 
+const wss = new WebSocketServer({ noServer: true });
+
+initWebSocketServer(server);
+attachWsToRequest(wss);
+webSocketService(wss);
+
+
+
 server.on("error", (error) => {
   Logger.error(`伺服器錯誤： ${error}`);
 });
@@ -50,15 +58,13 @@ Logger.info(`設置的PORT是：${port}`);
 
 ViteExpress.listen(app, port, () => {
   Logger.info(`伺服器正在PORT ${port} 上運行...`);
-  
+
   if (vite) {
     vite.watcher.on("change", (file) => {
       Logger.info(`${file} 已更新，重新載入伺服器...`);
       vite.ws.send({ type: "full-reload" });
     });
   }
-  
-  webSocketService(8080);
   AuthService.updateValidationToken();
   PollService.startPollCheckService();
 });

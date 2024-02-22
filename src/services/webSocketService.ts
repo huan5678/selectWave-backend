@@ -1,27 +1,29 @@
 import { Logger } from "@/utils";
 import { WebSocket } from "vite";
-import { WebSocketServer } from 'ws';
+import { randomUUID } from "crypto";
 
-const webSocketService = (port) =>
+export const webSocketService = (wss) =>
 {
 
-  const wss = new WebSocketServer({ port });
-
-  Logger.log(`WebSocket server is running on port ${port}`);
-
-  wss.on('connection', (ws: WebSocket) =>
+  wss.on('connection', (ws: WebSocket & {id: string}) =>
   {
-    Logger.log('New client connected');
+    ws.id = randomUUID();
+
+    wss.clients.forEach((client) =>
+    {
+      client.send(`Client ${ws.id} connected`);
+    });
 
     ws.on('message', (message: string) => {
-      console.log(`Received message: ${message}`);
+      Logger.info(`Received message: ${message}`);
       wss.clients.forEach((client) => {
         client.send(`Server received your message: ${message}`);
+        Logger.log(`client id: ${client.id}`);
       });
     });
 
     ws.on('close', () => {
-      console.log('Client disconnected');
+      Logger.info('Client disconnected');
     });
   });
 };
