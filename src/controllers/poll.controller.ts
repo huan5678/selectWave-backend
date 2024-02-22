@@ -51,6 +51,18 @@ class PollController {
 
     const now = new Date();
 
+    if (status !== 'active' && startDate && new Date(startDate) < now) {
+      throw appError({ code: 400, message: "開始時間不能早於當前時間", next });
+    }
+
+    if (endDate && startDate && (new Date(endDate) < new Date(startDate)) || (endDate && new Date(endDate) < now)){
+      throw appError({ code: 400, message: "結束時間不能早於開始時間或當前時間", next });
+    }
+
+    if (status === 'active' && endDate && new Date(endDate) < now) {
+      throw appError({ code: 400, message: "結束時間不能早於當前時間", next });
+    }
+
     let isStartNow = false;
 
     if (startDate && new Date(startDate) < now || status === 'active') isStartNow = true;
@@ -142,15 +154,6 @@ class PollController {
     next
   ) => {
     const { id } = req.params;
-    const validationResult = await pollSchema
-      .validate(req.body)
-      .catch((err) => {
-        throw appError({ code: 400, message: err.errors.join(", "), next });
-      });
-    if (!validationResult) {
-      throw appError({ code: 400, message: "請確實填寫投票資訊", next });
-    }
-
     const updatedPoll = await Poll.findById(id);
     if (!updatedPoll) {
       throw appError({
@@ -158,6 +161,26 @@ class PollController {
         message: "找不到該投票資訊，請檢查ID是否正確",
         next,
       });
+    }
+    if (updatedPoll.createdBy.toString() !== (req.user as IUser).id) {
+      throw appError({ code: 403, message: "您無法更新該投票", next });
+    }
+
+    if (updatedPoll.status === "closed" || updatedPoll.status === "ended") {
+      throw appError({ code: 400, message: "投票已經結束，無法更新", next });
+    }
+
+    if (updatedPoll.status === "active") {
+      throw appError({ code: 400, message: "投票已經開始，無法更新", next });
+    }
+
+    const validationResult = await pollSchema
+      .validate(req.body)
+      .catch((err) => {
+        throw appError({ code: 400, message: err.errors.join(", "), next });
+      });
+    if (!validationResult) {
+      throw appError({ code: 400, message: "請確實填寫投票資訊", next });
     }
 
     Object.assign(updatedPoll, req.body);
