@@ -100,6 +100,10 @@ const userSchema = new Schema<IUser>(
       type: String,
       select: false,
     },
+    githubId: {
+      type: String,
+      select: false,
+    },
     isValidator: {
       type: Boolean,
       default: false,

@@ -47,6 +47,7 @@ export interface IUser extends Document {
   facebookId?: string;
   lineId?: string;
   discordId?: string;
+  githubId?: string;
   likedPolls: IPoll['_id'][];
 }
 
