@@ -1,14 +1,27 @@
 import { Logger } from "@/utils";
+import { WebSocket } from "vite";
+import { WebSocketServer } from 'ws';
 
-const webSocketService = async (io) =>
+const webSocketService = (port) =>
 {
-  io.on('connection', async (socket) =>
-  {
-    console.log(socket);
-    Logger.info(`user ${socket.id} connection`);
 
-    socket.on('disconnect', () => {
-      Logger.info('disconnected from user');
+  const wss = new WebSocketServer({ port });
+
+  Logger.log(`WebSocket server is running on port ${port}`);
+
+  wss.on('connection', (ws: WebSocket) =>
+  {
+    Logger.log('New client connected');
+
+    ws.on('message', (message: string) => {
+      console.log(`Received message: ${message}`);
+      wss.clients.forEach((client) => {
+        client.send(`Server received your message: ${message}`);
+      });
+    });
+
+    ws.on('close', () => {
+      console.log('Client disconnected');
     });
   });
 };
