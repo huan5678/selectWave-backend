@@ -39,7 +39,13 @@ class PollController {
     if (!validationResult) {
       throw appError({ code: 400, message: "請確實填寫投票資訊", next });
     }
-    const { title, description, imageUrl, tags, optionsData } = req.body;
+    const { title, description, imageUrl, tags, optionsData, startDate, endDate, isPrivate, status  } = req.body;
+
+    const now = new Date();
+
+    let isStartNow = false;
+
+    if (startDate && new Date(startDate) < now || status === 'active') isStartNow = true;
 
     const newPoll = await Poll.create({
       title,
@@ -47,6 +53,10 @@ class PollController {
       imageUrl,
       tags,
       createdBy: req.user._id,
+      isPrivate,
+      startDate: startDate ? new Date(startDate) : null,
+      endDate: endDate ? new Date(endDate) : null,
+      status: status ? status : isStartNow ? "active" : "pending",
     });
 
     // 建立 Option 資料
