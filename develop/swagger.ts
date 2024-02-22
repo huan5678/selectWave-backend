@@ -146,6 +146,7 @@ const doc = {
           imageUrl: "https://imgur.com/TECsq2J.png",
         },
       ],
+      status: "active",
     },
     PollUpdate: {
       title: "最喜歡的前端框架",

@@ -2528,6 +2528,10 @@
           "type": "string",
           "example": "male"
         },
+        "birthday": {
+          "type": "string",
+          "example": "1990-01-01T00:00:00.000Z"
+        },
         "follwing": {
           "type": "array",
           "items": {
@@ -2700,6 +2704,10 @@
               }
             }
           }
+        },
+        "status": {
+          "type": "string",
+          "example": "active"
         }
       }
     },
