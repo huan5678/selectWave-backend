@@ -95,6 +95,7 @@ export const useGoogleCallback = async (req, res, _next) =>
       avatar: picture,
       password: randomPassword(),
       googleId: id,
+      isValidator: true,
     });
     const authToken = generateToken({ userId: userData._id });
 
@@ -149,6 +150,7 @@ export const useFacebookCallback = async (req, res, _next) =>
       avatar: picture.data.url,
       password: randomPassword(),
       facebookId: id,
+      isValidator: true,
     });
     const authToken = generateToken({ userId: userData._id });
 
@@ -230,6 +232,7 @@ export const useLineCallback = async (req, res, _next) =>
       avatar: pictureUrl,
       password: randomPassword(),
       lineId: userId,
+      isValidator: true,
     });
     const authToken = generateToken({ userId: userData._id });
 
@@ -296,6 +299,7 @@ export const useDiscordCallback = async (req, res, _next) =>
       avatar,
       password: randomPassword(),
       discordId: id,
+      isValidator: true,
     });
     const authToken = generateToken({ userId: userData._id });
 
@@ -357,6 +361,7 @@ export const useGithubCallback = async (req, res, _next) =>
       avatar: avatar_url,
       password: randomPassword(),
       githubId: id,
+      isValidator: true,
     });
     const authToken = generateToken({ userId: userData._id });
 
