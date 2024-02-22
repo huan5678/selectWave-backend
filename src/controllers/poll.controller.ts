@@ -2,7 +2,7 @@ import { RequestHandler, Response } from "express"; // Import missing modules
 
 import { Poll, Option, User } from "@/models";
 import { appError, successHandle } from "@/utils";
-import { array, object, string } from "yup";
+import { array, date, object, string } from "yup";
 import { IOption, IPoll, IUser } from "@/types";
 
 const pollSchema = object({
@@ -23,6 +23,9 @@ const pollSchema = object({
     })
   ),
 });
+
+const dateSchema = date().required("請輸入日期");
+
 class PollController {
   // 創建新投票
   public static createPoll: RequestHandler = async (
@@ -41,6 +44,11 @@ class PollController {
     }
     const { title, description, imageUrl, tags, optionsData, startDate, endDate, isPrivate, status  } = req.body;
 
+    [ [ startDate, endDate ].map(async (date) => date && await dateSchema.validate(date).catch((err) =>
+    {
+      throw appError({ code: 400, message: err.errors.join(", "), next });
+    })) ];
+
     const now = new Date();
 
     let isStartNow = false;
@@ -54,7 +62,7 @@ class PollController {
       tags,
       createdBy: req.user._id,
       isPrivate,
-      startDate: startDate ? new Date(startDate) : null,
+      startDate: startDate ? new Date(startDate) : isStartNow ? now : null,
       endDate: endDate ? new Date(endDate) : null,
       status: status ? status : isStartNow ? "active" : "pending",
     });
