@@ -164,27 +164,21 @@ export class AuthService {
     }
   }
 
-  static updateValidationToken = () =>
+  static updateValidationToken = async () =>
   {
-    cron.schedule('0 1 * * *', async () =>
-    {
-      console.log('Running a job at 01:00 to update verification tokens');
-      const users = await User.find({ isValidator: false, verificationToken: { $ne: '' } });
+    console.log('Running a job at 01:00 to update verification tokens');
+    const users = await User.find({ isValidator: false, verificationToken: { $ne: '' } });
 
-      users.forEach(async (user) =>
-      {
-        const newVerificationToken = jwt.sign(
-          { userId: user._id },
-          process.env.JWT_SECRET as string,
-          { expiresIn: '24h' } // 根據需要調整過期時間
-        );
-        user.verificationToken = newVerificationToken;
-        await user.save();
-      });
-    }, {
-      scheduled: true,
-      timezone: "Asia/Taipei"
+    users.forEach(async (user) =>
+    {
+      const newVerificationToken = jwt.sign(
+        { userId: user._id },
+        process.env.JWT_SECRET as string,
+        { expiresIn: '24h' } // 根據需要調整過期時間
+      );
+      user.verificationToken = newVerificationToken;
+      await user.save();
     });
-  };
+  }
 }
 

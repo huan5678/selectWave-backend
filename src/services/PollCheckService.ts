@@ -2,14 +2,11 @@ import { PollController } from "@/controllers";
 import { Poll } from "@/models";
 import { Logger } from "@/utils";
 
-import cron from 'node-cron';
-
 export class PollService
 {
-  static startPollCheckService = () =>
+  static startPollCheckService = async () =>
   {
-    cron.schedule('* * * * *', async () =>
-    {
+
       Logger.log('Checking polls...', 'INFO');
       const now = new Date();
 
@@ -32,6 +29,5 @@ export class PollService
         await PollController.calculateResultsForPoll(poll._id);
       }
 
-    });
   }
 }
