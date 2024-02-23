@@ -1,7 +1,7 @@
 import type { NextFunction, Response, Request } from "express";
 import session from "express-session";
 import { object, string, number } from "yup";
-import { Server, WebSocketServer } from 'ws';
+import { WebSocketServer } from 'ws';
 
 import { ApiExcludeProps, TokenPayload } from "@/types";
 import { TokenBlacklist, User } from "@/models";
@@ -92,8 +92,7 @@ export const attachWsToRequest = (wss: WebSocketServer) => {
   };
 };
 
-export const initWebSocketServer = (server: any): WebSocketServer => {
-  const wss = new WebSocketServer({ noServer: true });
+export const initWebSocketServer = (wss: WebSocketServer, server: any): WebSocketServer => {
   server.on('upgrade', (request: any, socket: any, head: any) => {
     wss.handleUpgrade(request, socket, head, (ws) => {
       wss.emit('connection', ws, request);

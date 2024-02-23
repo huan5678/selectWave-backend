@@ -49,4 +49,58 @@ commentSchema.pre(/^find/, function(next) {
 });
 
 
+commentSchema.post('save', async function(doc, next) {
+  const Poll = model('Poll');
+
+  const poll = await Poll.findById(doc.pollId)
+    .populate('createdBy')
+    .populate('like.user')
+    .populate({
+      path: 'options',
+      populate: {
+        path: 'voters.user',
+      }
+    })
+    .populate({
+      path: 'comments',
+      populate: {
+        path: 'author',
+      }
+    });
+
+  const userIdsToNotify = new Set();
+
+  userIdsToNotify.add(poll.createdBy._id.toString());
+
+  poll.like.forEach(like => {
+    userIdsToNotify.add(like.user._id.toString());
+  });
+
+  poll.options.forEach(option => {
+    option.voters.forEach(voter => {
+      userIdsToNotify.add(voter.user._id.toString());
+    });
+  });
+
+  poll.comments.forEach(comment => {
+    userIdsToNotify.add(comment.author._id.toString());
+  });
+
+  const wss = require('@/app').wss;
+  wss.clients.forEach(client => {
+    if (userIdsToNotify.has(client.userId) && client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify({
+        type: 'newComment',
+        message: 'A new comment has been added to a poll you are interested in.',
+        pollId: doc.pollId,
+        commentId: doc._id,
+      }));
+    }
+  });
+
+  next();
+});
+
+
+
 export default model<IComment>('Comment', commentSchema);

@@ -41,13 +41,11 @@ if (!isProduction) {
 
 const server = http.createServer(app);
 
-const wss = new WebSocketServer({ noServer: true });
+const wss = new WebSocketServer({ port: 8082 });
 
-initWebSocketServer(server);
-attachWsToRequest(wss);
+initWebSocketServer(wss, server);
 webSocketService(wss);
-
-
+app.use(attachWsToRequest(wss));
 
 server.on("error", (error) => {
   Logger.error(`伺服器錯誤： ${error}`);
@@ -65,6 +63,7 @@ ViteExpress.listen(app, port, () => {
       vite.ws.send({ type: "full-reload" });
     });
   }
+
   AuthService.updateValidationToken();
   PollService.startPollCheckService();
 });
