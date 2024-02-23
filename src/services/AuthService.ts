@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import cron from 'node-cron';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
@@ -55,7 +55,7 @@ export class AuthService {
     email: string;
     password?: string | null;
   }, next: NextFunction): Promise<{ authToken: string; member: Omit<Member, 'passhash'> }> => {
-    const memberId = uuidv4();
+    const memberId = randomUUID();
     const { email, password } = profile;
     if (!passwordCheck(password as string))
       throw appError({

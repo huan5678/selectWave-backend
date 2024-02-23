@@ -19,6 +19,7 @@ app.use(morgan('dev'));
 usePassport();
 app.use(passport.initialize());
 app.use(swaggerRouter);
+
 app.use(
   '/api',
   verifyMiddleware(

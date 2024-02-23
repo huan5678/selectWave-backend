@@ -118,6 +118,17 @@ pollSchema.pre('save', async function(next) {
   next();
 });
 
+pollSchema.post('save', async function() {
+  const wss = require('@/app').wss;
+  wss.clients.forEach(client => {
+    client.send(JSON.stringify({
+      type: 'pollUpdate',
+      pollId: this._id,
+      totalVoters: this.totalVoters,
+    }));
+  });
+});
+
 pollSchema.pre(/^find/, function (next)
 {
   (this as IPoll)
