@@ -34,7 +34,8 @@ export interface IUser extends Document {
   lineId?: string;
   discordId?: string;
   githubId?: string;
-  likedPolls: IPoll['_id'][];
+  likedPolls: IPoll[ '_id' ][];
+  comments: IComment[ '_id' ][];
 }
 
 export interface CreateUserRequest {
@@ -70,12 +71,12 @@ export interface IPoll extends Document {
     comment: IComment['_id'];
   }[];
   options: {
-    optionId: IOption['_id'];
+    optionId: IVote['_id'];
   }[];
   status: 'pending' | 'active' | 'ended' | 'closed';
   isWinner:
     {
-      options: IOption['_id'];
+      options: IVote['_id'];
     }[];
 }
 
@@ -89,7 +90,7 @@ export interface CreatePollRequest {
   isPrivate?: boolean;
 }
 
-export interface IOption extends Document {
+export interface IVote extends Document {
   id?: string;
   title: string;
   imageUrl: string;

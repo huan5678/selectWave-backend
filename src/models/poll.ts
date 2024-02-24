@@ -50,7 +50,7 @@ const pollSchema = new Schema<IPoll>({
     {
       _id: false,
       type: Schema.Types.ObjectId,
-      ref: 'Option',
+      ref: 'Vote',
     },
   ],
   like: [
@@ -81,7 +81,7 @@ const pollSchema = new Schema<IPoll>({
       _id: false,
       option: {
         type: Schema.Types.ObjectId,
-        ref: 'Option',
+        ref: 'Vote',
       },
     },
   ],
@@ -100,7 +100,7 @@ pollSchema.pre('save', async function(next) {
   // Only proceed if options are modified or it's a new document
   if (this.isModified('options') || this.isNew) {
     const poll = this;
-    const OptionModel = model('Option');
+    const OptionModel = model('Vote');
 
     // Assuming `options` are the IDs of related Option documents
     const options = await OptionModel.find({

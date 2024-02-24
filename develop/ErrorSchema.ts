@@ -59,11 +59,11 @@ export const ErrorSchema = {
   },
   ErrorPollNotFound: {
     status: false,
-    message: "無此投票請確認投票 id 是否正確",
+    message: "無此投票請確認提案 id 是否正確",
   },
   ErrorNonePollId: {
     status: false,
-    message: "請提供投票 id",
+    message: "請提供提案 id",
   },
   ErrorPollValidation: {
     status: false,

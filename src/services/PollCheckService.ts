@@ -1,4 +1,4 @@
-import { PollController } from "@/controllers";
+import PollController from "@/controllers/poll.controller";
 import { Poll } from "@/models";
 import { Logger } from "@/utils";
 

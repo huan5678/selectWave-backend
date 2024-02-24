@@ -154,7 +154,7 @@ const doc = {
       tags: ["前端", "框架"],
     },
     Poll: {
-      id: "投票ID",
+      id: "提案ID",
       title: "最喜歡的程式語言",
       description: "選擇您最喜歡的程式語言。",
       imageUrl: "https://i.imgur.com/D3hp8H6.png",
@@ -176,7 +176,7 @@ const doc = {
     OptionCreate: {
       title: "React",
       imageUrl: "https://imgur.com/TECsq2J.png",
-      pollId: "投票ID",
+      pollId: "提案ID",
     },
     OptionUpdate: {
       title: "Vue",
@@ -187,7 +187,7 @@ const doc = {
         id: "選項ID",
         title: "React",
         imageUrl: "https://imgur.com/TECsq2J.png",
-        pollId: "投票ID",
+        pollId: "提案ID",
         voters: [],
         isWinner: false,
       },
@@ -195,13 +195,13 @@ const doc = {
         id: "選項ID",
         title: "Vue.js",
         imageUrl: "https://imgur.com/TECsq2J.png",
-        pollId: "投票ID",
+        pollId: "提案ID",
         voters: [],
         isWinner: false,
       },
     ],
     CommentCreate: {
-      pollId: "投票ID",
+      pollId: "提案ID",
       userId: "留言者ID",
       content: "我非常喜歡這個投票！",
     },
@@ -212,7 +212,7 @@ const doc = {
     Comment: [
       {
         id: "評論ID",
-        pollId: "投票ID",
+        pollId: "提案ID",
         userId: {
           id: "用戶ID",
           name: "Jane Doe",

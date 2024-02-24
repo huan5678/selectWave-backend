@@ -50,6 +50,4 @@ app.use(
 app.use(Exception.sendNotFoundError);
 app.use(Exception.catchCustomError);
 
-Exception.catchGlobalError();
-
 export default app;

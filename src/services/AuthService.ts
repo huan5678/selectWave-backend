@@ -1,5 +1,4 @@
 import { randomUUID } from 'crypto';
-import cron from 'node-cron';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { appError, generateToken, passwordCheck } from '@/utils';
@@ -30,7 +29,7 @@ export class AuthService {
   }, next: NextFunction): Promise<{ authToken: string; member: Omit<Member, 'passhash'> }> => {
     // get possible members
     const { email, password } = options;
-    const member = await AuthService.getMemberByAccountOrEmail(email);
+    const member = await User.findOne({ email }).select('+password');
     if (!member) {
       throw appError({ code: 404, message: '請確認 Email 是否正確', next });
     }
@@ -166,7 +165,6 @@ export class AuthService {
 
   static updateValidationToken = async () =>
   {
-    console.log('Running a job at 01:00 to update verification tokens');
     const users = await User.find({ isValidator: false, verificationToken: { $ne: '' } });
 
     users.forEach(async (user) =>
