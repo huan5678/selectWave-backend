@@ -1,9 +1,9 @@
 import { RequestHandler, Response } from "express"; // Import missing modules
 
-import { Poll, Option, User } from "@/models";
+import { Poll, Vote, User } from "@/models";
 import { appError, successHandle } from "@/utils";
 import { array, date, object, string } from "yup";
-import { IOption, IPoll, IUser } from "@/types";
+import { IVote, IPoll, IUser } from "@/types";
 
 const pollSchema = object({
   title: string()
@@ -19,7 +19,6 @@ const pollSchema = object({
         .required("請輸入選項標題")
         .min(1, "選項標題至少需要1個字")
         .max(50, "選項標題最多只能50個字"),
-      imageUrl: string(),
     })
   ),
 });
@@ -79,10 +78,10 @@ class PollController {
       status: status ? status : isStartNow ? "active" : "pending",
     });
 
-    // 建立 Option 資料
+    // 建立 Vote 資料
     const optionInstances = await Promise.all(
       optionsData.map((optionData) =>
-        Option.create({ ...optionData, pollId: newPoll.id })
+        Vote.create({ ...optionData, pollId: newPoll.id })
       )
     );
     newPoll.options = optionInstances.map((option) => option._id);
@@ -123,7 +122,6 @@ class PollController {
     next
   ) => {
     const { id } = req.params;
-    console.log("pollId: ", id);
     const poll = await Poll.findById(id)
       .populate("options")
       .populate("createdBy")
@@ -188,12 +186,12 @@ class PollController {
 
     if (req.body.optionsData) {
       for (const optionData of req.body.optionsData) {
-        let option = await Option.findOne({
+        let option = await Vote.findOne({
           pollId: id,
           title: optionData.title,
         }).exec();
         if (!option) {
-          option = await Option.create({
+          option = await Vote.create({
             title: optionData.title,
             imageUrl: optionData.imageUrl,
             pollId: id,
@@ -227,7 +225,7 @@ class PollController {
     if (!poll) {
       throw appError({ code: 404, message: "找不到投票", next });
     }
-    const options = await Option.find({ pollId: id });
+    const options = await Vote.find({ pollId: id });
     await Promise.all(options.map((option) => option.deleteOne()));
     await poll.deleteOne();
     successHandle(res, "刪除投票成功", {});
@@ -331,21 +329,21 @@ class PollController {
     poll.status = "closed";
     await poll.save();
 
-    const options = await Option.find({ pollId: id }).exec();
+    const options = await Vote.find({ pollId: id }).exec();
     let maxVotes = 0;
-    let winnerOptions = [] as IOption[];
+    let winnerVotes = [] as IVote[];
 
     options.forEach((option) => {
       const votesCount = option.voters.length;
       if (votesCount > maxVotes) {
-        winnerOptions = [option];
+        winnerVotes = [option];
         maxVotes = votesCount;
       } else if (votesCount === maxVotes) {
-        winnerOptions.push(option);
+        winnerVotes.push(option);
       }
     });
 
-    const winnerUpdates = winnerOptions.map((winner) => ({
+    const winnerUpdates = winnerVotes.map((winner) => ({
       option: winner._id,
     }));
 

@@ -3,7 +3,7 @@ import * as esbuild from 'esbuild';
 esbuild
   .build({
     bundle: true,
-    minify: true,
+    minify: process.env.NODE_ENV==='production' ? true : false,
     entryPoints: ['src/app/server.ts'],
     outfile: 'dist/index.js',
     format: 'esm',

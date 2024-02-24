@@ -38,6 +38,10 @@ class MemberController {
         path: 'likedPolls.poll',
         select: {createdBy: 0, like: 0, comments: 0, options: 0, isPrivate: 0, createdTime: 0, createdAt: 0, updatedAt: 0}
       })
+      .populate({
+        path: 'comments',
+        select: {createdBy: 0, like: 0, comments: 0, options: 0, isPrivate: 0, createdTime: 0, createdAt: 0, updatedAt: 0}
+      })
       .exec();
     if (!user)
       throw appError({
@@ -121,7 +125,7 @@ class MemberController {
 
     const user = await User.findById(id);
     if (!user) throw appError({ code: 404, message: "找不到使用者", next });
-    console.log(user.following);
+
     const isFollowing =
       user.following &&
       user.following.some(

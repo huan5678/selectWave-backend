@@ -1058,9 +1058,9 @@
     "/api/poll/": {
       "get": {
         "tags": [
-          "Poll - 投票"
+          "Poll - 提案"
         ],
-        "description": "獲取所有投票",
+        "description": "獲取所有提案",
         "parameters": [
           {
             "name": "page",
@@ -1088,7 +1088,7 @@
                 },
                 "message": {
                   "type": "string",
-                  "example": "獲取投票列表成功"
+                  "example": "獲取提案列表成功"
                 },
                 "result": {
                   "type": "array",
@@ -1101,21 +1101,21 @@
                 "name": "main"
               }
             },
-            "description": "獲取投票列表成功"
+            "description": "獲取提案列表成功"
           }
         }
       },
       "post": {
         "tags": [
-          "Poll - 投票"
+          "Poll - 提案"
         ],
-        "description": "創建新投票",
+        "description": "創建新提案",
         "parameters": [
           {
             "name": "body",
             "in": "body",
             "required": true,
-            "description": "新投票",
+            "description": "新提案",
             "schema": {
               "$ref": "#/definitions/PollCreate"
             }
@@ -1132,7 +1132,7 @@
                 },
                 "message": {
                   "type": "string",
-                  "example": "投票創建成功"
+                  "example": "提案創建成功"
                 },
                 "result": {
                   "$ref": "#/definitions/Poll"
@@ -1142,13 +1142,13 @@
                 "name": "main"
               }
             },
-            "description": "投票創建成功"
+            "description": "提案創建成功"
           },
           "400": {
             "schema": {
               "$ref": "#/definitions/ErrorPollValidation"
             },
-            "description": "請確實填寫投票資訊"
+            "description": "請確實填寫提案資訊"
           }
         },
         "security": [
@@ -1161,16 +1161,16 @@
     "/api/poll/{id}": {
       "get": {
         "tags": [
-          "Poll - 投票"
+          "Poll - 提案"
         ],
-        "description": "根據 ID 獲取投票詳情",
+        "description": "根據 ID 獲取提案詳情",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "投票ID"
+            "description": "提案ID"
           }
         ],
         "responses": {
@@ -1184,7 +1184,7 @@
                 },
                 "message": {
                   "type": "string",
-                  "example": "獲取投票詳細資訊成功"
+                  "example": "獲取提案詳細資訊成功"
                 },
                 "result": {
                   "$ref": "#/definitions/Poll"
@@ -1194,36 +1194,36 @@
                 "name": "main"
               }
             },
-            "description": "獲取投票詳細資訊成功"
+            "description": "獲取提案詳細資訊成功"
           },
           "404": {
             "schema": {
               "$ref": "#/definitions/ErrorPollNotFound"
             },
-            "description": "找不到投票"
+            "description": "找不到提案"
           }
         }
       },
       "put": {
         "tags": [
-          "Poll - 投票"
+          "Poll - 提案"
         ],
-        "description": "更新投票",
+        "description": "更新提案",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "投票ID"
+            "description": "提案ID"
           },
           {
             "name": "body",
             "in": "body",
             "required": true,
-            "description": "更新投票",
+            "description": "更新提案",
             "schema": {
-              "$ref": "#/definitions/PollUpdate"
+              "$ref": "#/definitions/PollCreate"
             }
           }
         ],
@@ -1238,7 +1238,7 @@
                 },
                 "message": {
                   "type": "string",
-                  "example": "投票更新成功"
+                  "example": "提案更新成功"
                 },
                 "result": {
                   "$ref": "#/definitions/Poll"
@@ -1248,13 +1248,13 @@
                 "name": "main"
               }
             },
-            "description": "投票更新成功"
+            "description": "提案更新成功"
           },
           "400": {
             "schema": {
               "$ref": "#/definitions/ErrorPollValidation"
             },
-            "description": "請確實填寫投票資訊"
+            "description": "請確實填寫提案資訊"
           },
           "404": {
             "schema": {
@@ -1271,16 +1271,16 @@
       },
       "delete": {
         "tags": [
-          "Poll - 投票"
+          "Poll - 提案"
         ],
-        "description": "刪除投票",
+        "description": "刪除提案",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "投票ID"
+            "description": "提案ID"
           }
         ],
         "responses": {
@@ -1294,14 +1294,14 @@
                 },
                 "message": {
                   "type": "string",
-                  "example": "刪除投票成功"
+                  "example": "刪除提案成功"
                 }
               },
               "xml": {
                 "name": "main"
               }
             },
-            "description": "刪除投票成功"
+            "description": "刪除提案成功"
           },
           "404": {
             "schema": {
@@ -1316,7 +1316,7 @@
                 "name": "main"
               }
             },
-            "description": "找不到投票"
+            "description": "找不到提案"
           }
         },
         "security": [
@@ -1329,16 +1329,16 @@
     "/api/poll/{id}/like": {
       "get": {
         "tags": [
-          "Poll - 投票"
+          "Poll - 提案"
         ],
-        "description": "投票按讚",
+        "description": "提案按讚",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "投票ID"
+            "description": "提案ID"
           }
         ],
         "responses": {
@@ -1352,7 +1352,7 @@
                 },
                 "message": {
                   "type": "string",
-                  "example": "投票按讚成功"
+                  "example": "提案按讚成功"
                 },
                 "result": {
                   "$ref": "#/definitions/Poll"
@@ -1362,13 +1362,13 @@
                 "name": "main"
               }
             },
-            "description": "投票按讚成功"
+            "description": "提案按讚成功"
           },
           "404": {
             "schema": {
               "$ref": "#/definitions/ErrorPollNotFound"
             },
-            "description": "找不到投票"
+            "description": "找不到提案"
           }
         },
         "security": [
@@ -1379,16 +1379,16 @@
       },
       "delete": {
         "tags": [
-          "Poll - 投票"
+          "Poll - 提案"
         ],
-        "description": "取消投票按讚",
+        "description": "取消提案按讚",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "投票ID"
+            "description": "提案ID"
           }
         ],
         "responses": {
@@ -1402,7 +1402,7 @@
                 },
                 "message": {
                   "type": "string",
-                  "example": "取消投票按讚成功"
+                  "example": "取消提案按讚成功"
                 },
                 "result": {
                   "$ref": "#/definitions/Poll"
@@ -1412,13 +1412,13 @@
                 "name": "main"
               }
             },
-            "description": "取消投票按讚成功"
+            "description": "取消提案按讚成功"
           },
           "404": {
             "schema": {
               "$ref": "#/definitions/ErrorPollNotFound"
             },
-            "description": "找不到投票"
+            "description": "找不到提案"
           }
         },
         "security": [
@@ -1431,16 +1431,16 @@
     "/api/poll/{id}/start": {
       "get": {
         "tags": [
-          "Poll - 投票"
+          "Poll - 提案"
         ],
-        "description": "投票開始",
+        "description": "提案開始",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "投票ID"
+            "description": "提案ID"
           }
         ],
         "responses": {
@@ -1454,7 +1454,7 @@
                 },
                 "message": {
                   "type": "string",
-                  "example": "投票開始成功"
+                  "example": "提案開始成功"
                 },
                 "result": {
                   "$ref": "#/definitions/Poll"
@@ -1464,13 +1464,13 @@
                 "name": "main"
               }
             },
-            "description": "投票開始成功"
+            "description": "提案開始成功"
           },
           "404": {
             "schema": {
               "$ref": "#/definitions/ErrorPollNotFound"
             },
-            "description": "找不到投票"
+            "description": "找不到提案"
           }
         },
         "security": [
@@ -1483,16 +1483,16 @@
     "/api/poll/{id}/end": {
       "get": {
         "tags": [
-          "Poll - 投票"
+          "Poll - 提案"
         ],
-        "description": "投票結束",
+        "description": "提案結束",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "投票ID"
+            "description": "提案ID"
           }
         ],
         "responses": {
@@ -1506,7 +1506,7 @@
                 },
                 "message": {
                   "type": "string",
-                  "example": "投票結束成功"
+                  "example": "提案結束成功"
                 },
                 "result": {
                   "$ref": "#/definitions/Poll"
@@ -1516,13 +1516,218 @@
                 "name": "main"
               }
             },
-            "description": "投票結束成功"
+            "description": "提案結束成功"
           },
           "404": {
             "schema": {
               "$ref": "#/definitions/ErrorPollNotFound"
             },
-            "description": "找不到投票"
+            "description": "找不到提案"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/vote": {
+      "post": {
+        "tags": [
+          "Vote - 投票"
+        ],
+        "description": "投票",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "投票",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "optionId": {
+                  "type": "string",
+                  "example": "60f3e3e3e3e3e3e3e3e3e3e3"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "投票成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Option"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "投票成功"
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/ErrorVoteExist"
+            },
+            "description": "投票失敗"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ErrorOptionNotFound"
+            },
+            "description": "找不到選項"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/vote/{id}": {
+      "put": {
+        "tags": [
+          "Vote - 投票"
+        ],
+        "description": "更改投票",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "選項ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "更改投票",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "newOptionId": {
+                  "type": "string",
+                  "example": "54f3e3e3e3e3e3e3e3e3e3e3"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "更改投票成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Option"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "更改投票成功"
+          },
+          "400": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "找不到投票者"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "找不到新投票選項"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ErrorOptionNotFound"
+            },
+            "description": "找不到選項"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Vote - 投票"
+        ],
+        "description": "取消投票",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "選項ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "取消投票成功"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "取消投票成功"
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/ErrorNotVote"
+            },
+            "description": "取消投票失敗"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ErrorOptionNotFound"
+            },
+            "description": "找不到選項"
           }
         },
         "security": [
@@ -1758,403 +1963,6 @@
               "$ref": "#/definitions/ErrorCommentFormat"
             },
             "description": "請確實填寫評論資訊"
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
-    "/api/option/vote": {
-      "post": {
-        "tags": [
-          "Option - 投票及投票選項"
-        ],
-        "description": "投票",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "description": "投票",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "optionId": {
-                  "type": "string",
-                  "example": "60f3e3e3e3e3e3e3e3e3e3e3"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "boolean",
-                  "example": true
-                },
-                "message": {
-                  "type": "string",
-                  "example": "投票成功"
-                },
-                "result": {
-                  "$ref": "#/definitions/Option"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            },
-            "description": "投票成功"
-          },
-          "400": {
-            "schema": {
-              "$ref": "#/definitions/ErrorVoteExist"
-            },
-            "description": "投票失敗"
-          },
-          "404": {
-            "schema": {
-              "$ref": "#/definitions/ErrorOptionNotFound"
-            },
-            "description": "找不到選項"
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
-    "/api/option/vote/{id}": {
-      "put": {
-        "tags": [
-          "Option - 投票及投票選項"
-        ],
-        "description": "更改投票",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "選項ID"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "description": "更改投票",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "newOptionId": {
-                  "type": "string",
-                  "example": "54f3e3e3e3e3e3e3e3e3e3e3"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "boolean",
-                  "example": true
-                },
-                "message": {
-                  "type": "string",
-                  "example": "更改投票成功"
-                },
-                "result": {
-                  "$ref": "#/definitions/Option"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            },
-            "description": "更改投票成功"
-          },
-          "400": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "boolean",
-                  "example": false
-                },
-                "message": {
-                  "type": "string",
-                  "example": "找不到投票者"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            },
-            "description": "找不到新投票選項"
-          },
-          "404": {
-            "schema": {
-              "$ref": "#/definitions/ErrorOptionNotFound"
-            },
-            "description": "找不到選項"
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "Option - 投票及投票選項"
-        ],
-        "description": "取消投票",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "選項ID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "boolean",
-                  "example": true
-                },
-                "message": {
-                  "type": "string",
-                  "example": "取消投票成功"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            },
-            "description": "取消投票成功"
-          },
-          "400": {
-            "schema": {
-              "$ref": "#/definitions/ErrorNotVote"
-            },
-            "description": "取消投票失敗"
-          },
-          "404": {
-            "schema": {
-              "$ref": "#/definitions/ErrorOptionNotFound"
-            },
-            "description": "找不到選項"
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
-    "/api/option/": {
-      "post": {
-        "tags": [
-          "Option - 投票及投票選項"
-        ],
-        "description": "新增選項",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "description": "新增選項",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "pollId": {
-                  "type": "string",
-                  "example": "60f3e3e3e3e3e3e3e3e3e3e3"
-                },
-                "optionData": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "title": {
-                        "type": "string",
-                        "example": "React"
-                      },
-                      "imageUrl": {
-                        "type": "string",
-                        "example": "https://imgur.com/TECsq2J.png"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "boolean",
-                  "example": true
-                },
-                "message": {
-                  "type": "string",
-                  "example": "新增選項成功"
-                },
-                "result": {
-                  "$ref": "#/definitions/Option"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            },
-            "description": "新增選項成功"
-          },
-          "400": {
-            "schema": {
-              "$ref": "#/definitions/ErrorOptionFormat"
-            },
-            "description": "請確實填寫選項資訊"
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
-    "/api/option/{id}": {
-      "put": {
-        "tags": [
-          "Option - 投票及投票選項"
-        ],
-        "description": "更新選項",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "選項ID"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "description": "更新選項",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "updateData": {
-                  "type": "object",
-                  "properties": {
-                    "title": {
-                      "type": "string",
-                      "example": "Vue"
-                    },
-                    "imageUrl": {
-                      "type": "string",
-                      "example": "https://imgur.com/TECsq2J.png"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "boolean",
-                  "example": true
-                },
-                "message": {
-                  "type": "string",
-                  "example": "更新選項成功"
-                },
-                "result": {
-                  "$ref": "#/definitions/Option"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            },
-            "description": "更新選項成功"
-          },
-          "400": {
-            "schema": {
-              "$ref": "#/definitions/ErrorOptionFormat"
-            },
-            "description": "請確實填寫選項資訊"
-          },
-          "404": {
-            "schema": {
-              "$ref": "#/definitions/ErrorOptionNotFound"
-            },
-            "description": "找不到選項"
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "Option - 投票及投票選項"
-        ],
-        "description": "刪除選項",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "選項ID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "schema": {
-              "$ref": "#/definitions/Option"
-            },
-            "description": "刪除選項成功"
-          },
-          "404": {
-            "schema": {
-              "$ref": "#/definitions/ErrorOptionNotFound"
-            },
-            "description": "找不到選項"
           }
         },
         "security": [
@@ -2739,7 +2547,7 @@
       "properties": {
         "id": {
           "type": "string",
-          "example": "投票ID"
+          "example": "提案ID"
         },
         "title": {
           "type": "string",
@@ -2830,7 +2638,7 @@
         },
         "pollId": {
           "type": "string",
-          "example": "投票ID"
+          "example": "提案ID"
         }
       }
     },
@@ -2866,7 +2674,7 @@
           },
           "pollId": {
             "type": "string",
-            "example": "投票ID"
+            "example": "提案ID"
           },
           "voters": {
             "type": "array",
@@ -2885,7 +2693,7 @@
       "properties": {
         "pollId": {
           "type": "string",
-          "example": "投票ID"
+          "example": "提案ID"
         },
         "userId": {
           "type": "string",
@@ -2921,7 +2729,7 @@
           },
           "pollId": {
             "type": "string",
-            "example": "投票ID"
+            "example": "提案ID"
           },
           "userId": {
             "type": "object",
@@ -3171,7 +2979,7 @@
         },
         "message": {
           "type": "string",
-          "example": "無此投票請確認投票 id 是否正確"
+          "example": "無此投票請確認提案 id 是否正確"
         }
       }
     },
@@ -3184,7 +2992,7 @@
         },
         "message": {
           "type": "string",
-          "example": "請提供投票 id"
+          "example": "請提供提案 id"
         }
       }
     },
