@@ -224,6 +224,12 @@ const doc = {
         edited: false,
       },
     ],
+    Contact: {
+      name: "John Doe",
+      email: "example@example.com",
+      message: "我想要聯絡你們。",
+      quests: "意見提供",
+    },
     // Error Response
     ...ErrorSchema,
   },

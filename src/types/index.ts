@@ -1,6 +1,20 @@
 import type { Request, Response, RequestHandler } from 'express';
 import { Document } from 'mongoose';
 
+export interface IContact extends Document {
+    name: string;
+    email: string;
+    message: string;
+    quests: string;
+    createdAt: Date;
+}
+
+export interface IEmailSubscriber extends Document {
+  email: string;
+  createdAt: Date;
+  unScribedToken: string;
+}
+
 export interface IUser extends Document {
   id: string;
   name: string;

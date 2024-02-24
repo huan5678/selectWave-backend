@@ -1532,6 +1532,211 @@
         ]
       }
     },
+    "/api/vote": {
+      "post": {
+        "tags": [
+          "Vote - 投票"
+        ],
+        "description": "投票",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "投票",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "optionId": {
+                  "type": "string",
+                  "example": "60f3e3e3e3e3e3e3e3e3e3e3"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "投票成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Option"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "投票成功"
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/ErrorVoteExist"
+            },
+            "description": "投票失敗"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ErrorOptionNotFound"
+            },
+            "description": "找不到選項"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/vote/{id}": {
+      "put": {
+        "tags": [
+          "Vote - 投票"
+        ],
+        "description": "更改投票",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "選項ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "更改投票",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "newOptionId": {
+                  "type": "string",
+                  "example": "54f3e3e3e3e3e3e3e3e3e3e3"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "更改投票成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Option"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "更改投票成功"
+          },
+          "400": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "找不到投票者"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "找不到新投票選項"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ErrorOptionNotFound"
+            },
+            "description": "找不到選項"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Vote - 投票"
+        ],
+        "description": "取消投票",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "選項ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "取消投票成功"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "取消投票成功"
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/ErrorNotVote"
+            },
+            "description": "取消投票失敗"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ErrorOptionNotFound"
+            },
+            "description": "找不到選項"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
     "/api/comment/{id}": {
       "get": {
         "tags": [
@@ -1767,26 +1972,20 @@
         ]
       }
     },
-    "/api/vote": {
+    "/api/contact/": {
       "post": {
         "tags": [
-          "Vote - 投票"
+          "Contact - 聯絡我們與訂閱電子報"
         ],
-        "description": "投票",
+        "description": "接收聯絡我們表單",
         "parameters": [
           {
-            "name": "body",
+            "name": "contact",
             "in": "body",
+            "description": "Contact us",
             "required": true,
-            "description": "投票",
             "schema": {
-              "type": "object",
-              "properties": {
-                "optionId": {
-                  "type": "string",
-                  "example": "60f3e3e3e3e3e3e3e3e3e3e3"
-                }
-              }
+              "$ref": "#/definitions/Contact"
             }
           }
         ],
@@ -1801,63 +2000,42 @@
                 },
                 "message": {
                   "type": "string",
-                  "example": "投票成功"
-                },
-                "result": {
-                  "$ref": "#/definitions/Option"
+                  "example": "感謝您的留言"
                 }
               },
               "xml": {
                 "name": "main"
               }
             },
-            "description": "投票成功"
+            "description": "OK"
           },
           "400": {
             "schema": {
-              "$ref": "#/definitions/ErrorVoteExist"
+              "$ref": "#/definitions/ErrorContactFormat"
             },
-            "description": "投票失敗"
-          },
-          "404": {
-            "schema": {
-              "$ref": "#/definitions/ErrorOptionNotFound"
-            },
-            "description": "找不到選項"
+            "description": "Bad Request"
           }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
+        }
       }
     },
-    "/api/vote/{id}": {
-      "put": {
+    "/api/contact/subscribe": {
+      "post": {
         "tags": [
-          "Vote - 投票"
+          "Contact - 聯絡我們與訂閱電子報"
         ],
-        "description": "更改投票",
+        "description": "訂閱電子報",
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "選項ID"
-          },
-          {
-            "name": "body",
+            "name": "email",
             "in": "body",
+            "description": "Email",
             "required": true,
-            "description": "更改投票",
             "schema": {
               "type": "object",
               "properties": {
-                "newOptionId": {
+                "email": {
                   "type": "string",
-                  "example": "54f3e3e3e3e3e3e3e3e3e3e3"
+                  "example": "example@example.com"
                 }
               }
             }
@@ -1874,17 +2052,14 @@
                 },
                 "message": {
                   "type": "string",
-                  "example": "更改投票成功"
-                },
-                "result": {
-                  "$ref": "#/definitions/Option"
+                  "example": "感謝您的訂閱"
                 }
               },
               "xml": {
                 "name": "main"
               }
             },
-            "description": "更改投票成功"
+            "description": "OK"
           },
           "400": {
             "schema": {
@@ -1896,40 +2071,39 @@
                 },
                 "message": {
                   "type": "string",
-                  "example": "找不到投票者"
+                  "example": "請輸入正確的Email格式"
                 }
               },
               "xml": {
                 "name": "main"
               }
             },
-            "description": "找不到新投票選項"
-          },
-          "404": {
-            "schema": {
-              "$ref": "#/definitions/ErrorOptionNotFound"
-            },
-            "description": "找不到選項"
+            "description": "Bad Request"
           }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      },
-      "delete": {
+        }
+      }
+    },
+    "/api/contact/subscribe/": {
+      "put": {
         "tags": [
-          "Vote - 投票"
+          "Contact - 聯絡我們與訂閱電子報"
         ],
-        "description": "取消投票",
+        "description": "退訂電子報",
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
+            "name": "email",
+            "in": "body",
+            "description": "Email",
             "required": true,
-            "type": "string",
-            "description": "選項ID"
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string",
+                  "example": "eyJhbGciOiJIUzI1NiJ9.dGxxxxxx"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -1943,33 +2117,54 @@
                 },
                 "message": {
                   "type": "string",
-                  "example": "取消投票成功"
+                  "example": "退訂成功，期待您再次訂閱電子報"
                 }
               },
               "xml": {
                 "name": "main"
               }
             },
-            "description": "取消投票成功"
+            "description": "OK"
           },
           "400": {
             "schema": {
-              "$ref": "#/definitions/ErrorNotVote"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "您尚未訂閱過"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
-            "description": "取消投票失敗"
+            "description": "Bad Request"
           },
-          "404": {
+          "403": {
             "schema": {
-              "$ref": "#/definitions/ErrorOptionNotFound"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "驗證失敗請確認是否有權限取消訂閱"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             },
-            "description": "找不到選項"
+            "description": "Forbidden"
           }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
+        }
       }
     }
   },
@@ -2572,6 +2767,27 @@
         }
       }
     },
+    "Contact": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "John Doe"
+        },
+        "email": {
+          "type": "string",
+          "example": "example@example.com"
+        },
+        "message": {
+          "type": "string",
+          "example": "我想要聯絡你們。"
+        },
+        "quests": {
+          "type": "string",
+          "example": "意見提供"
+        }
+      }
+    },
     "ErrorTokenExpired": {
       "type": "object",
       "properties": {
@@ -2894,6 +3110,19 @@
         "message": {
           "type": "string",
           "example": "沒有權限更新評論"
+        }
+      }
+    },
+    "ErrorContactFormat": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "boolean",
+          "example": false
+        },
+        "message": {
+          "type": "string",
+          "example": "請確實填寫聯絡資訊"
         }
       }
     }
