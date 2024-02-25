@@ -1463,7 +1463,7 @@
         "tags": [
           "Poll - 提案"
         ],
-        "description": "提案開始",
+        "description": "投票活動開始投票",
         "parameters": [
           {
             "name": "id",
@@ -1515,7 +1515,7 @@
         "tags": [
           "Poll - 提案"
         ],
-        "description": "提案結束",
+        "description": "投票活動關閉結算投票結果",
         "parameters": [
           {
             "name": "id",
@@ -1631,7 +1631,7 @@
     "/api/vote/{id}": {
       "put": {
         "tags": [
-          "Vote - 投票"
+          "Vote"
         ],
         "description": "更改投票",
         "parameters": [
@@ -1715,7 +1715,7 @@
       },
       "delete": {
         "tags": [
-          "Vote - 投票"
+          "Vote"
         ],
         "description": "取消投票",
         "parameters": [
