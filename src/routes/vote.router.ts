@@ -1,12 +1,11 @@
-import OptionController from '@/controllers/vote.controller';
-
-import { handleErrorAsync } from '@/utils';
-
 import { Router } from 'express';
 
-const optionRouter = Router();
+import VoteController from '@/controllers/vote.controller';
+import { handleErrorAsync } from '@/utils';
 
-optionRouter.post(
+const voteRouter = Router();
+
+voteRouter.post(
   /**
    * #swagger.tags = ['Vote - 投票']
    * #swagger.description = '投票'
@@ -45,13 +44,13 @@ optionRouter.post(
           "Bearer": []
         }]
   */
-  '/',
-  handleErrorAsync(OptionController.vote),
+  '/vote',
+  handleErrorAsync(VoteController.vote),
 );
 
-optionRouter.put(
+voteRouter.put(
   /**
-   * #swagger.tags = ['Vote - 投票']
+   * #swagger.tags = ['Vote']
    * #swagger.description = '更改投票'
    * #swagger.path = '/api/vote/{id}'
    * #swagger.parameters['id'] = {
@@ -99,13 +98,13 @@ optionRouter.put(
         "Bearer": []
       }]
    */
-  '/:id',
-  handleErrorAsync(OptionController.updateVote),
+  '/vote/:id',
+  handleErrorAsync(VoteController.updateVote),
 );
 
-optionRouter.delete(
+voteRouter.delete(
   /**
-   * #swagger.tags = ['Vote - 投票']
+   * #swagger.tags = ['Vote']
    * #swagger.description = '取消投票'
    * #swagger.path = '/api/vote/{id}'
    * #swagger.parameters['id'] = {
@@ -135,8 +134,8 @@ optionRouter.delete(
         "Bearer": []
       }]
    */
-  '/:id',
-  handleErrorAsync(OptionController.cancelVote),
+  '/vote/:id',
+  handleErrorAsync(VoteController.cancelVote),
 );
 
-export default optionRouter;
+export default voteRouter;

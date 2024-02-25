@@ -23,6 +23,21 @@ pollRouter.get(
     type: 'number',
     description: '每頁記錄數',
   }
+  * #swagger.parameters['q'] = {
+    in: 'query',
+    required: false,
+    type: 'string',
+    description: '搜尋關鍵字',
+  }
+  * #swagger.parameters['status'] = {
+    in: 'query',
+    required: false,
+    type: 'string',
+    schema: {
+      enum: ["active", "pending", "closed"],
+    },
+    description: '提案狀態',
+  }
   * #swagger.responses[200] = {
     schema: {
       status: true,
@@ -261,11 +276,11 @@ pollRouter.delete(
   handleErrorAsync(PollController.unlikePoll),
 );
 
-//提案開始
+//提案啟動投票開始
 pollRouter.get(
   /**
    * #swagger.tags = ['Poll - 提案']
-   * #swagger.description = '提案開始'
+   * #swagger.description = '投票活動開始投票'
    * #swagger.path = '/api/poll/{id}/start'
    * #swagger.parameters['id'] = {
     in: 'path',
@@ -301,7 +316,7 @@ pollRouter.get(
 pollRouter.get(
   /**
    * #swagger.tags = ['Poll - 提案']
-   * #swagger.description = '提案結束'
+   * #swagger.description = '投票活動關閉結算投票結果'
    * #swagger.path = '/api/poll/{id}/end'
    * #swagger.parameters['id'] = {
     in: 'path',

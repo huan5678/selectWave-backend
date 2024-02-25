@@ -9,7 +9,7 @@ class VoteController {
     const { id } = req.user as IUser;
     const poll = await Poll.findOne({ options: optionId });
     const vote = await Vote.findById(optionId);
-    const user = await User.findOne({ _id: id });
+    const user = await User.findOne({ id: id });
 
     if (!poll) {
       throw appError({ code: 404, message: "找不到投票", next });
@@ -27,7 +27,7 @@ class VoteController {
 
     // 添加投票者
     const updatedVote = await Vote.findByIdAndUpdate(
-      { _id: optionId },
+      { id: optionId },
       { $push: { voters: { user, createdTime: new Date() } } },
       { new: true }
     )
@@ -44,7 +44,7 @@ class VoteController {
     const { newVoteId } = req.body;
 
     const vote = await Vote.findById(voteId);
-    const user = await User.findOne({ _id: id });
+    const user = await User.findOne({ id: id });
     const poll = await Poll.findOne({ votes: voteId });
 
     if (!poll) {
