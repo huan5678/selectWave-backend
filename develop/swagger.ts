@@ -27,7 +27,7 @@ const doc = {
   },
   definitions: {
     User: {
-      _id: "62e348927278654321000001",
+      id: "62e348927278654321000001",
       email: "johndoe@example.com",
       password: "hashed-password",
       name: "John Doe",
@@ -36,7 +36,7 @@ const doc = {
       followers: [
         {
           user: {
-            _id: "62e348927278654321000002",
+            id: "62e348927278654321000002",
             name: "Jane Doe",
             avatar: "https://i.imgur.com/xcLTrkV.png",
           },
@@ -46,7 +46,7 @@ const doc = {
       following: [
         {
           user: {
-            _id: "62e348927278654321000003",
+            id: "62e348927278654321000003",
             name: "Bob Smith",
             avatar: "https://i.imgur.com/xcLTrkV.png",
           },
@@ -77,7 +77,7 @@ const doc = {
       ],
     },
     Member: {
-      _id: "62e348927278654321000001",
+      id: "62e348927278654321000001",
       name: "John Doe",
       avatar: "https://i.imgur.com/xcLTrkV.png",
       gender: "male",
@@ -85,7 +85,7 @@ const doc = {
       follwing: [
         {
           user: {
-            _id: "62e348927278654321000003",
+            id: "62e348927278654321000003",
             name: "Bob Smith",
             avatar: "https://i.imgur.com/xcLTrkV.png",
           },
@@ -95,7 +95,7 @@ const doc = {
       followers: [
         {
           user: {
-            _id: "62e348927278654321000002",
+            id: "62e348927278654321000002",
             name: "Mary Johnson",
             avatar: "https://i.imgur.com/xcLTrkV.png",
           },
@@ -112,10 +112,9 @@ const doc = {
           id: "johndoe",
         },
       ],
-      id: "62e348927278654321000001",
       likedPolls: [
         {
-          _id: "62e348927278654321000001",
+          id: "62e348927278654321000001",
           title: "最喜歡的程式語言",
           imageUrl: "https://i.imgur.com/D3hp8H6.png",
         },

@@ -2364,7 +2364,7 @@
     "User": {
       "type": "object",
       "properties": {
-        "_id": {
+        "id": {
           "type": "string",
           "example": "62e348927278654321000001"
         },
@@ -2396,7 +2396,7 @@
               "user": {
                 "type": "object",
                 "properties": {
-                  "_id": {
+                  "id": {
                     "type": "string",
                     "example": "62e348927278654321000002"
                   },
@@ -2425,7 +2425,7 @@
               "user": {
                 "type": "object",
                 "properties": {
-                  "_id": {
+                  "id": {
                     "type": "string",
                     "example": "62e348927278654321000003"
                   },
@@ -2512,7 +2512,7 @@
     "Member": {
       "type": "object",
       "properties": {
-        "_id": {
+        "id": {
           "type": "string",
           "example": "62e348927278654321000001"
         },
@@ -2540,7 +2540,7 @@
               "user": {
                 "type": "object",
                 "properties": {
-                  "_id": {
+                  "id": {
                     "type": "string",
                     "example": "62e348927278654321000003"
                   },
@@ -2569,7 +2569,7 @@
               "user": {
                 "type": "object",
                 "properties": {
-                  "_id": {
+                  "id": {
                     "type": "string",
                     "example": "62e348927278654321000002"
                   },
@@ -2606,16 +2606,12 @@
             }
           }
         },
-        "id": {
-          "type": "string",
-          "example": "62e348927278654321000001"
-        },
         "likedPolls": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "_id": {
+              "id": {
                 "type": "string",
                 "example": "62e348927278654321000001"
               },
