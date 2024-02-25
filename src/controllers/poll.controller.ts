@@ -2,8 +2,8 @@ import { RequestHandler, Response } from "express"; // Import missing modules
 
 import { Poll, Vote, User } from "@/models";
 import { appError, successHandle } from "@/utils";
-import { array, date, object, string } from "yup";
-import { IVote, IPoll, IUser } from "@/types";
+import { array, boolean, date, object, string } from "yup";
+import { IVote, IPoll, IUser, IOption } from "@/types";
 
 const pollSchema = object({
   title: string()
@@ -23,7 +23,33 @@ const pollSchema = object({
   ),
 });
 
-const dateSchema = date().required("請輸入日期");
+const updatePollSchema = object({
+  title: string()
+    .min(1, "投票標題至少需要1個字")
+    .max(50, "投票標題最多只能50個字"),
+  description: string(),
+  imageUrl: string(),
+  tags: array().of(string()),
+  optionsData: array().of(
+    object({
+      id: string(),
+      title: string()
+        .min(1, "選項標題至少需要1個字")
+        .max(50, "選項標題最多只能50個字"),
+      imageUrl: string(),
+    })
+  ),
+  startDate: date(),
+  endDate: date(),
+  isPrivate: boolean(),
+  status: string(),
+});
+
+const dateSchema = date()
+  .required("請輸入日期")
+  .test("date-validation", "日期應該晚於當前時間", function (value) {
+    return new Date(value) > new Date();
+  });
 
 class PollController {
   // 創建新投票
@@ -41,37 +67,60 @@ class PollController {
     if (!validationResult) {
       throw appError({ code: 400, message: "請確實填寫投票資訊", next });
     }
-    const { title, description, imageUrl, tags, optionsData, startDate, endDate, isPrivate, status  } = req.body;
+    const {
+      title,
+      description,
+      imageUrl,
+      tags,
+      optionsData,
+      startDate,
+      endDate,
+      isPrivate,
+      status,
+    } = req.body;
 
-    [ [ startDate, endDate ].map(async (date) => date && await dateSchema.validate(date).catch((err) =>
-    {
-      throw appError({ code: 400, message: err.errors.join(", "), next });
-    })) ];
+    [
+      [startDate, endDate].map(
+        async (date) =>
+          date &&
+          (await dateSchema.validate(date).catch((err) => {
+            throw appError({ code: 400, message: err.errors.join(", "), next });
+          }))
+      ),
+    ];
 
     const now = new Date();
 
-    if (status !== 'active' && startDate && new Date(startDate) < now) {
+    if (status !== "active" && startDate && new Date(startDate) < now) {
       throw appError({ code: 400, message: "開始時間不能早於當前時間", next });
     }
 
-    if (endDate && startDate && (new Date(endDate) < new Date(startDate)) || (endDate && new Date(endDate) < now)){
-      throw appError({ code: 400, message: "結束時間不能早於開始時間或當前時間", next });
+    if (
+      (endDate && startDate && new Date(endDate) < new Date(startDate)) ||
+      (endDate && new Date(endDate) < now)
+    ) {
+      throw appError({
+        code: 400,
+        message: "結束時間不能早於開始時間或當前時間",
+        next,
+      });
     }
 
-    if (status === 'active' && endDate && new Date(endDate) < now) {
+    if (status === "active" && endDate && new Date(endDate) < now) {
       throw appError({ code: 400, message: "結束時間不能早於當前時間", next });
     }
 
     let isStartNow = false;
 
-    if (startDate && new Date(startDate) < now || status === 'active') isStartNow = true;
+    if ((startDate && new Date(startDate) < now) || status === "active")
+      isStartNow = true;
 
     const newPoll = await Poll.create({
       title,
       description,
       imageUrl,
       tags,
-      createdBy: req.user._id,
+      createdBy: req.user.id,
       isPrivate,
       startDate: startDate ? new Date(startDate) : isStartNow ? now : null,
       endDate: endDate ? new Date(endDate) : null,
@@ -84,7 +133,7 @@ class PollController {
         Vote.create({ ...optionData, pollId: newPoll.id })
       )
     );
-    newPoll.options = optionInstances.map((option) => option._id);
+    newPoll.options = optionInstances.map((option) => option.id);
     await newPoll.save();
     const poll = await Poll.findById(newPoll.id)
       .populate("createdBy", "name avatar")
@@ -96,14 +145,25 @@ class PollController {
 
   // 獲取所有投票
   public static getAllPolls: RequestHandler = async (req, res: Response) => {
-    let { page = 1, limit = 10 } = req.query;
+    let { page = 1, limit = 10, status, q } = req.query;
 
     // 轉換為數字並進行合理性檢查
     page = Math.max(Number(page), 1); // 確保頁碼至少為1
     limit = Math.max(Number(limit), 1); // 確保每頁至少有1條記錄
 
     const skip = (page - 1) * limit;
-    const polls = await Poll.find()
+    const polls = await Poll.find(
+      q
+        ? {
+            $or: [
+              { title: { $regex: q, $options: "i" } },
+            { description: { $regex: q, $options: "i" } },
+            { tags: { $in: [q] } },
+            ],
+          }
+        : {},
+      status ? { status: status } : {}
+    )
       .select("-comments -options")
       .skip(skip)
       .limit(limit)
@@ -146,72 +206,99 @@ class PollController {
   };
 
   // 更新投票資訊
-  public static updatePoll: RequestHandler = async (
-    req,
-    res: Response,
-    next
-  ) => {
+  public static updatePoll: RequestHandler = async (req, res, next) => {
     const { id } = req.params;
-    const updatedPoll = await Poll.findById(id);
-    if (!updatedPoll) {
+    const { id: userId } = req.user as IUser;
+    const poll = await Poll.findById(id).exec();
+
+    
+    if (!poll) {
       throw appError({
         code: 404,
         message: "找不到該投票資訊，請檢查ID是否正確",
         next,
       });
     }
-    if (updatedPoll.createdBy.toString() !== (req.user as IUser).id) {
+    
+    if (poll.createdBy.id !== userId) {
       throw appError({ code: 403, message: "您無法更新該投票", next });
     }
-
-    if (updatedPoll.status === "closed" || updatedPoll.status === "ended") {
+    
+    if (poll.status === "closed" || poll.status === "ended") {
       throw appError({ code: 400, message: "投票已經結束，無法更新", next });
     }
 
-    if (updatedPoll.status === "active") {
-      throw appError({ code: 400, message: "投票已經開始，無法更新", next });
-    }
-
-    const validationResult = await pollSchema
+    // 驗證更新資料
+    await updatePollSchema
       .validate(req.body)
-      .catch((err) => {
-        throw appError({ code: 400, message: err.errors.join(", "), next });
-      });
-    if (!validationResult) {
-      throw appError({ code: 400, message: "請確實填寫投票資訊", next });
-    }
+      .catch((err) =>
+        appError({ code: 400, message: err.errors.join(", "), next })
+      );
 
-    Object.assign(updatedPoll, req.body);
-    await updatedPoll.save();
+    const {
+      title,
+      description,
+      imageUrl,
+      tags,
+      optionsData,
+      startDate,
+      endDate,
+      isPrivate,
+      status,
+    } = req.body;
 
-    if (req.body.optionsData) {
-      for (const optionData of req.body.optionsData) {
-        let option = await Vote.findOne({
-          pollId: id,
-          title: optionData.title,
-        }).exec();
-        if (!option) {
-          option = await Vote.create({
-            title: optionData.title,
-            imageUrl: optionData.imageUrl,
-            pollId: id,
+    // 更新投票主體
+    poll.title = title ?? poll.title;
+    poll.description = description ?? poll.description;
+    poll.imageUrl = imageUrl ?? poll.imageUrl;
+    poll.tags = tags ?? poll.tags;
+    poll.startDate = startDate ?? poll.startDate;
+    poll.endDate = endDate ?? poll.endDate;
+    poll.isPrivate = isPrivate ?? poll.isPrivate;
+    poll.status = status ?? poll.status;
+
+    await poll.updateOne(poll).exec();
+
+    // 處理選項更新
+    if (optionsData && optionsData.length > 0) {
+      // 使用 map 來迭代每一個選項數據
+      const updatedOptions = optionsData.map(async (optionData: IOption) => {
+        // 檢查是否包含 id，如果有 id 則更新
+        if (optionData.id) {
+          return await Vote.findByIdAndUpdate(
+            optionData.id,
+            {
+              $set: {
+                title: optionData.title,
+                // 更新其他需要更新的欄位
+                imageUrl: optionData.imageUrl ?? null, // 這是一個示例，根據實際情況可能需要調整
+              },
+            },
+            { new: true }
+          ); // { new: true } 確保返回的是更新後的文檔
+        } else {
+          // 沒有 id 則新增選項
+          return await Vote.create({
+            ...optionData,
+            pollId: poll?.id,
           });
-          updatedPoll.options.push(option._id);
         }
-      }
-      await updatedPoll.save();
+      });
+
+      // 等待所有選項的更新或新增完成
+      const optionsResult = await Promise.all(updatedOptions);
+
+      // 更新 poll 文檔中的 options 陣列
+      poll.options = optionsResult.map((option) => option.id);
+      await poll.updateOne(poll).exec();
     }
 
-    const populatedPoll = await Poll.findById(id)
-      .populate("createdBy", "name avatar")
-      .populate("options")
-      .populate({
-        path: "comments",
-        populate: { path: "user", select: "name avatar" },
-      })
-      .exec();
+    // 重新加載更新後的投票資訊，包括關聯的選項等
+    const result = await Poll.findById(poll.id)
+      .populate("options", "title imageUrl")
+      .populate("createdBy", "name email");
 
-    successHandle(res, "更新投票資訊成功", { populatedPoll });
+    successHandle(res, "投票更新成功", {result});
   };
 
   // 刪除投票
@@ -248,14 +335,14 @@ class PollController {
       throw appError({ code: 400, message: "您已經喜歡過此投票", next });
     }
     const resultPollData = await Poll.findOneAndUpdate(
-      { _id: pollId },
+      { id: pollId },
       { $push: { like: { user } } },
       { new: true }
     )
       .populate("like.user", { name: 1, avatar: 1 })
       .exec();
     await User.findOneAndUpdate(
-      { _id: id },
+      { id: id },
       { $push: { likedPolls: { poll } } },
       { new: true }
     ).exec();
@@ -284,14 +371,14 @@ class PollController {
       throw appError({ code: 400, message: "您尚未喜歡過此投票", next });
     }
     const resultPollData = await Poll.findOneAndUpdate(
-      { _id: pollId },
+      { id: pollId },
       { $pull: { like: { user } } },
       { new: true }
     )
       .populate("like.user", "name avatar")
       .exec();
     await User.findOneAndUpdate(
-      { _id: id },
+      { id: id },
       { $pull: { likedPolls: { poll } } }
     ).exec();
     successHandle(res, "取消喜歡投票成功", { resultPollData });
@@ -322,33 +409,35 @@ class PollController {
   };
 
   public static calculateResultsForPoll = async (id: string) => {
-    const poll = await Poll.findById(id).exec();
-    if (!poll) return;
-    if (poll.status !== "ended") return;
+  const poll = await Poll.findById(id).exec();
+  if (!poll) return;
+  if (poll.status !== "ended") return;
 
-    poll.status = "closed";
-    await poll.save();
+  const options = await Vote.find({ pollId: id }).exec();
+  let maxVotes = 0;
+  let winnerVotes = [] as IVote[];
 
-    const options = await Vote.find({ pollId: id }).exec();
-    let maxVotes = 0;
-    let winnerVotes = [] as IVote[];
+  options.forEach((option) => {
+    const votesCount = option.voters.length;
+    if (votesCount > maxVotes) {
+      winnerVotes = [option];
+      maxVotes = votesCount;
+    } else if (votesCount === maxVotes) {
+      winnerVotes.push(option);
+    }
+  });
 
-    options.forEach((option) => {
-      const votesCount = option.voters.length;
-      if (votesCount > maxVotes) {
-        winnerVotes = [option];
-        maxVotes = votesCount;
-      } else if (votesCount === maxVotes) {
-        winnerVotes.push(option);
-      }
-    });
+  const winnerUpdates = winnerVotes.length > 0 ? winnerVotes.map((winner) => ({
+    option: winner._id,
+  })) : [];
 
-    const winnerUpdates = winnerVotes.map((winner) => ({
-      option: winner._id,
-    }));
+  poll.isWinner = winnerUpdates;
+  poll.status = "closed"; // Ensure the poll is closed regardless of votes
+  await poll.save();
 
-    return poll.updateOne({ isWinner: winnerUpdates, status: "closed" }, { new: true });
-  };
+  return poll;
+};
+
   // 結束投票
   public static endPoll: RequestHandler = async (req, res, next) => {
     const { id } = req.params;
@@ -360,7 +449,11 @@ class PollController {
     if (poll.status === "pending") {
       throw appError({ code: 400, message: "投票未開始無法結束", next });
     }
-    if (poll.status === "ended" || poll.status === "closed" || poll.isWinner.length > 0) {
+    if (
+      poll.status === "ended" ||
+      poll.status === "closed" ||
+      poll.isWinner.length > 0
+    ) {
       throw appError({ code: 400, message: "投票已經結束", next });
     }
 
@@ -368,23 +461,23 @@ class PollController {
       throw appError({ code: 403, message: "您無法結束該投票", next });
     }
 
-
     const updatedPoll = await PollController.calculateResultsForPoll(id);
+    if (!updatedPoll) {
+      throw appError({ code: 500, message: "結束投票失敗", next });
+    }
 
     updatedPoll
-      .populate({
+      .populate([
+        {
         path: "options",
         select: "title imageUrl voters",
-      })
-      .populate({
+        },{
         path: "createdBy",
         select: "name avatar",
-      })
-      .populate({
+      },{
         path: "isWinner.option",
         select: "title",
-      })
-      .exec();
+      }])
     successHandle(res, "結束投票成功", { result: updatedPoll });
   };
 }

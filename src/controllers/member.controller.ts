@@ -93,19 +93,19 @@ class MemberController {
     const isAlreadyFollowing =
       user.following &&
       user.following.some(
-        (following) => following.user._id.toString() === targetID
+        (following) => following.user.id.toString() === targetID
       );
     if (isAlreadyFollowing)
       throw appError({ code: 400, message: "您已經追蹤了該使用者", next });
 
     const resultUserData = await User.findOneAndUpdate(
-      { _id: id, "following.user": { $ne: targetID } },
+      { id, "following.user": { $ne: targetID } },
       { $addToSet: { following: { user: targetID } } },
       { new: true }
     ).select("-coin -updatedAt -isValidator -isSubscribed");
 
     await User.findOneAndUpdate(
-      { _id: targetID },
+      { id: targetID },
       { $addToSet: { followers: { user: id } } }
     );
 
@@ -129,7 +129,7 @@ class MemberController {
     const isFollowing =
       user.following &&
       user.following.some(
-        (following) => following.user._id.toString() === targetID
+        (following) => following.user.id.toString() === targetID
       );
     if (!isFollowing)
       throw appError({
@@ -139,12 +139,12 @@ class MemberController {
       });
 
     await User.findOneAndUpdate(
-      { _id: id },
+      { id: id },
       { $pull: { following: { user: targetID } } }
     );
 
     await User.findOneAndUpdate(
-      { _id: targetID },
+      { id: targetID },
       { $pull: { followers: { user: id } } }
     );
 
