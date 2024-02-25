@@ -85,7 +85,7 @@ const doc = {
       follwing: [
         {
           user: {
-            _id: "62e348927278654321000003",
+            id: "62e348927278654321000003",
             name: "Bob Smith",
             avatar: "https://i.imgur.com/xcLTrkV.png",
           },
