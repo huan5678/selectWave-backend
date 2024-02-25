@@ -1,5 +1,4 @@
 import { randomUUID } from 'crypto';
-import cron from 'node-cron';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { appError, generateToken, passwordCheck } from '@/utils';
@@ -30,7 +29,7 @@ export class AuthService {
   }, next: NextFunction): Promise<{ authToken: string; member: Omit<Member, 'passhash'> }> => {
     // get possible members
     const { email, password } = options;
-    const member = await AuthService.getMemberByAccountOrEmail(email);
+    const member = await User.findOne({ email }).select('+password');
     if (!member) {
       throw appError({ code: 404, message: '請確認 Email 是否正確', next });
     }
@@ -71,7 +70,7 @@ export class AuthService {
       });
 
       const verificationToken = jwt.sign(
-        { userId: memberData._id },
+        { userId: memberData.id },
         process.env.JWT_SECRET as string,
         { expiresIn: '24h' }
       );
@@ -79,7 +78,7 @@ export class AuthService {
       await memberData.save();
 
       const publicMember: Omit<Member, 'passhash'> = {
-        id: memberData._id,
+        id: memberData.id,
         email: memberData.email,
         name: memberData.name,
       };
@@ -128,11 +127,11 @@ export class AuthService {
       userData = user;
     }
 
-    token = generateToken({ userId: userData._id });
+    token = generateToken({ userId: userData.id });
 
     const authParams = new URLSearchParams([
       ['token', token],
-      ['id', userData._id as string],
+      ['id', userData.id as string],
       ['avatar', userData.avatar || ''],
       ['name', userData.name],
     ]).toString();
@@ -164,27 +163,20 @@ export class AuthService {
     }
   }
 
-  static updateValidationToken = () =>
+  static updateValidationToken = async () =>
   {
-    cron.schedule('0 1 * * *', async () =>
-    {
-      console.log('Running a job at 01:00 to update verification tokens');
-      const users = await User.find({ isValidator: false, verificationToken: { $ne: '' } });
+    const users = await User.find({ isValidator: false, verificationToken: { $ne: '' } });
 
-      users.forEach(async (user) =>
-      {
-        const newVerificationToken = jwt.sign(
-          { userId: user._id },
-          process.env.JWT_SECRET as string,
-          { expiresIn: '24h' } // 根據需要調整過期時間
-        );
-        user.verificationToken = newVerificationToken;
-        await user.save();
-      });
-    }, {
-      scheduled: true,
-      timezone: "Asia/Taipei"
+    users.forEach(async (user) =>
+    {
+      const newVerificationToken = jwt.sign(
+        { userId: user.id },
+        process.env.JWT_SECRET as string,
+        { expiresIn: '24h' } // 根據需要調整過期時間
+      );
+      user.verificationToken = newVerificationToken;
+      await user.save();
     });
-  };
+  }
 }
 

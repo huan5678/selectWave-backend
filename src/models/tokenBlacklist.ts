@@ -15,10 +15,20 @@ const tokenBlacklistSchema = new Schema<ITokenBlacklist>({
   versionKey: false,
     timestamps: true,
     toJSON: {
-      virtuals: true
+      virtuals: true,
+      transform: function (_doc, ret)
+      {
+        ret.id = ret._id;
+        delete ret._id;
+      }
     },
     toObject: {
-        virtuals: true
+      virtuals: true,
+      transform: function (_doc, ret)
+      {
+        ret.id = ret._id;
+        delete ret._id;
+      }
     },
 });
 

@@ -1,7 +1,7 @@
-import { IOption } from '@/types';
+import { IVote } from '@/types';
 import { Schema, model } from 'mongoose';
 
-const optionSchema = new Schema<IOption>({
+const voteSchema = new Schema<IVote>({
   title: {
     type: String,
     required: [true, '請填寫選項名稱'],
@@ -39,21 +39,31 @@ const optionSchema = new Schema<IOption>({
   versionKey: false,
     timestamps: true,
     toJSON: {
-      virtuals: true
+      virtuals: true,
+      transform: function (_doc, ret)
+      {
+        ret.id = ret._id;
+        delete ret._id;
+      }
     },
     toObject: {
-        virtuals: true
+      virtuals: true,
+      transform: function (_doc, ret)
+      {
+        ret.id = ret._id;
+        delete ret._id;
+      }
     },
 });
 
-optionSchema.post('save', async function(doc, next) {
+voteSchema.post('save', async function(doc, next) {
   await recalculateTotalVoters(doc.pollId);
   next();
 });
 
 async function recalculateTotalVoters(pollId: string) {
-  const OptionModel = model('Option');
-  const totalVoters = await OptionModel.aggregate([
+  const VoteModel = model('Vote');
+  const totalVoters = await VoteModel.aggregate([
     { $match: { pollId: pollId } },
     { $unwind: '$voters' },
     { $group: { _id: '$pollId', totalVoters: { $sum: 1 } } }
@@ -63,12 +73,15 @@ async function recalculateTotalVoters(pollId: string) {
   await PollModel.findByIdAndUpdate(pollId, { totalVoters: totalVoters[0]?.totalVoters || 0 });
 }
 
-optionSchema.pre(/^find/, function(next) {
-  (this as IOption).populate([{
+voteSchema.pre(/^find/, function(next) {
+  (this as IVote).populate([{
     path: 'voters.user',
     select: 'name avatar'
   }]);
   next();
 });
 
-export default model<IOption>('Option', optionSchema);
+// 索引優化
+voteSchema.index({ pollId: 1 });
+
+export default model<IVote>('Vote', voteSchema);

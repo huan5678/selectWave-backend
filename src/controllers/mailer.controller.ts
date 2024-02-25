@@ -69,7 +69,7 @@ export class MailServiceController {
     }
     // 生成新的 token
     const newVerificationToken = jwt.sign(
-      { userId: user._id },
+      { userId: user.id },
       process.env.JWT_SECRET as string,
       { expiresIn: "24h" } // Token 有效期 24 小时
     );
@@ -130,8 +130,8 @@ export class MailServiceController {
       });
     }
 
-    const token = generateToken({ userId: user._id });
-    await User.findByIdAndUpdate(user._id, { resetToken: token });
+    const token = generateToken({ userId: user.id });
+    await User.findByIdAndUpdate(user.id, { resetToken: token });
 
     await MailServiceController.transporter.verify();
     const info = await MailServiceController.transporter.sendMail({

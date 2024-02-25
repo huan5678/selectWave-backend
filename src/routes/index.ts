@@ -5,9 +5,9 @@ import imgurRouter from './imgur.router';
 import memberRouter from './member.router';
 import pollRouter from './poll.router';
 import commentRouter from './comment.router';
-import optionRouter from './option.router';
 import mailRouter from './mail.router';
 import contactRouter from './contact.router';
+import voteRouter from './vote.router';
 
 const apiRouter = Router();
 
@@ -27,7 +27,7 @@ apiRouter.use('/imgur', imgurRouter);
 apiRouter.use('/member', memberRouter);
 apiRouter.use('/poll', pollRouter);
 apiRouter.use('/comment', commentRouter);
-apiRouter.use('/option', optionRouter);
+apiRouter.use('/vote', voteRouter);
 apiRouter.use('/mail', mailRouter);
 apiRouter.use('/contact', contactRouter);
 

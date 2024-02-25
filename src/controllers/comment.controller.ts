@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import { Comment, Poll } from '@/models';
+import { Comment, Poll, User } from '@/models';
 import { appError, successHandle } from '@/utils';
 import { object, string } from 'yup';
 import { IUser } from '@/types';
@@ -27,9 +27,9 @@ class CommentController {
         content,
         pollId,
       });
-    const result = await Poll.findByIdAndUpdate({ _id: pollId }, { $push: { comments: { comment } } }, { new: true });
-    console.log(result);
-      successHandle(res, '評論創建成功', { comment });
+    await User.findByIdAndUpdate(id, { $push: { comments: comment.id } });
+    const result = await Poll.findByIdAndUpdate({ id: pollId }, { $push: { comments: { comment } } }, { new: true });
+    successHandle(res, '評論創建成功', { result });
   };
 
   // 更新評論
@@ -60,13 +60,15 @@ class CommentController {
 
   // 刪除評論
   public static deleteComment: RequestHandler = async (req, res, next) => {
-      const { id } = req.params;
+    const { id } = req.params;
+    const { id: userId } = req.user as IUser;
       const deletedComment = await Comment.findByIdAndDelete(id).exec();
       if (!deletedComment) {
         throw appError({ code: 404, message: '找不到評論', next});
       }
-      await Poll.findOne({ 'comments.comment': id }).updateOne({ $pull: { comments: { comment: id } } });
-      successHandle(res, '評論刪除成功', { });
+    const result = await Poll.findByIdAndUpdate({ id: deletedComment.pollId }, { $pull: { comments: { comment: id } } }, { new: true });
+    await User.findByIdAndUpdate(userId, { $pull: { comments: id } });
+    successHandle(res, '評論刪除成功', {result});
   };
 
   // 獲取特定評論
