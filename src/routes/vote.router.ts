@@ -50,7 +50,7 @@ voteRouter.post(
 
 voteRouter.put(
   /**
-   * #swagger.tags = ['Vote']
+   * #swagger.tags = ['Vote - 投票']
    * #swagger.description = '更改投票'
    * #swagger.path = '/api/vote/{id}'
    * #swagger.parameters['id'] = {
@@ -104,7 +104,7 @@ voteRouter.put(
 
 voteRouter.delete(
   /**
-   * #swagger.tags = ['Vote']
+   * #swagger.tags = ['Vote - 投票']
    * #swagger.description = '取消投票'
    * #swagger.path = '/api/vote/{id}'
    * #swagger.parameters['id'] = {
