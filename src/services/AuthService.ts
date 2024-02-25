@@ -70,7 +70,7 @@ export class AuthService {
       });
 
       const verificationToken = jwt.sign(
-        { userId: memberData._id },
+        { userId: memberData.id },
         process.env.JWT_SECRET as string,
         { expiresIn: '24h' }
       );
@@ -78,7 +78,7 @@ export class AuthService {
       await memberData.save();
 
       const publicMember: Omit<Member, 'passhash'> = {
-        id: memberData._id,
+        id: memberData.id,
         email: memberData.email,
         name: memberData.name,
       };
@@ -127,11 +127,11 @@ export class AuthService {
       userData = user;
     }
 
-    token = generateToken({ userId: userData._id });
+    token = generateToken({ userId: userData.id });
 
     const authParams = new URLSearchParams([
       ['token', token],
-      ['id', userData._id as string],
+      ['id', userData.id as string],
       ['avatar', userData.avatar || ''],
       ['name', userData.name],
     ]).toString();
@@ -170,7 +170,7 @@ export class AuthService {
     users.forEach(async (user) =>
     {
       const newVerificationToken = jwt.sign(
-        { userId: user._id },
+        { userId: user.id },
         process.env.JWT_SECRET as string,
         { expiresIn: '24h' } // 根據需要調整過期時間
       );

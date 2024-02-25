@@ -27,8 +27,8 @@ class CommentController {
         content,
         pollId,
       });
-    await User.findByIdAndUpdate(id, { $push: { comments: comment._id } });
-    const result = await Poll.findByIdAndUpdate({ _id: pollId }, { $push: { comments: { comment } } }, { new: true });
+    await User.findByIdAndUpdate(id, { $push: { comments: comment.id } });
+    const result = await Poll.findByIdAndUpdate({ id: pollId }, { $push: { comments: { comment } } }, { new: true });
     successHandle(res, '評論創建成功', { result });
   };
 
@@ -65,7 +65,7 @@ class CommentController {
       if (!deletedComment) {
         throw appError({ code: 404, message: '找不到評論', next});
       }
-    const result = await Poll.findByIdAndUpdate({ _id: deletedComment.pollId }, { $pull: { comments: { comment: id } } }, { new: true });
+    const result = await Poll.findByIdAndUpdate({ id: deletedComment.pollId }, { $pull: { comments: { comment: id } } }, { new: true });
     await User.findByIdAndUpdate(userId, { $pull: { comments: id } });
     successHandle(res, '評論刪除成功', {result});
   };
