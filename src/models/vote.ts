@@ -39,20 +39,10 @@ const voteSchema = new Schema<IVote>({
   versionKey: false,
     timestamps: true,
     toJSON: {
-      virtuals: true,
-      transform: function (_doc, ret)
-      {
-        ret.id = ret._id;
-        delete ret._id;
-      }
+      virtuals: true
     },
     toObject: {
-      virtuals: true,
-      transform: function (_doc, ret)
-      {
-        ret.id = ret._id;
-        delete ret._id;
-      }
+        virtuals: true
     },
 });
 
@@ -62,7 +52,7 @@ voteSchema.post('save', async function(doc, next) {
 });
 
 async function recalculateTotalVoters(pollId: string) {
-  const VoteModel = model('Vote');
+  const VoteModel = model('Option');
   const totalVoters = await VoteModel.aggregate([
     { $match: { pollId: pollId } },
     { $unwind: '$voters' },
@@ -80,8 +70,5 @@ voteSchema.pre(/^find/, function(next) {
   }]);
   next();
 });
-
-// 索引優化
-voteSchema.index({ pollId: 1 });
 
 export default model<IVote>('Vote', voteSchema);

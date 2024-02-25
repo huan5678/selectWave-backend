@@ -152,7 +152,7 @@ class AuthController {
     if (!user) {
       throw appError({ code: 404, message: "無效的重設連結或已過期", next });
     }
-    await User.findByIdAndUpdate(user.id, { resetToken: "", password }).exec();
+    await User.findByIdAndUpdate(user._id, { resetToken: "", password }).exec();
     return successHandle(_res, "成功重設密碼", { result: true });
   };
 

@@ -23,21 +23,6 @@ pollRouter.get(
     type: 'number',
     description: '每頁記錄數',
   }
-  * #swagger.parameters['q'] = {
-    in: 'query',
-    required: false,
-    type: 'string',
-    description: '搜尋關鍵字',
-  }
-  * #swagger.parameters['status'] = {
-    in: 'query',
-    required: false,
-    type: 'string',
-    schema: {
-      enum: ["active", "pending", "closed"],
-    },
-    description: '提案狀態',
-  }
   * #swagger.responses[200] = {
     schema: {
       status: true,

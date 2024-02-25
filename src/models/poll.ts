@@ -48,12 +48,14 @@ const pollSchema = new Schema<IPoll>({
   },
   options: [
     {
+      _id: false,
       type: Schema.Types.ObjectId,
       ref: 'Vote',
     },
   ],
   like: [
     {
+      _id: false,
       user: {
         type: Schema.Types.ObjectId,
         ref: 'User',
@@ -62,6 +64,7 @@ const pollSchema = new Schema<IPoll>({
   ],
   comments: [
     {
+      _id: false,
       comment: {
         type: Schema.Types.ObjectId,
         ref: 'Comment',
@@ -86,20 +89,10 @@ const pollSchema = new Schema<IPoll>({
   versionKey: false,
     timestamps: true,
     toJSON: {
-      virtuals: true,
-      transform: function (_doc, ret)
-      {
-        ret.id = ret._id;
-        delete ret._id;
-      }
+      virtuals: true
     },
     toObject: {
-      virtuals: true,
-      transform: function (_doc, ret)
-      {
-        ret.id = ret._id;
-        delete ret._id;
-      }
+        virtuals: true
     },
 });
 
@@ -130,7 +123,7 @@ pollSchema.post('save', async function() {
   wss.clients.forEach(client => {
     client.send(JSON.stringify({
       type: 'pollUpdate',
-      pollId: this.id,
+      pollId: this._id,
       totalVoters: this.totalVoters,
     }));
   });
@@ -156,16 +149,6 @@ pollSchema.pre(/^find/, function (next)
   )
   next();
 });
-
-// 考慮性能，只在需要時進行關聯查詢
-pollSchema.virtual('optionsDetails', {
-  ref: 'Vote',
-  localField: 'options',
-  foreignField: '_id',
-});
-
-// 索引優化
-pollSchema.index({ createdBy: 1, startDate: 1, endDate: 1, status: 1 });
 
 
 export default model<IPoll>('Poll', pollSchema);

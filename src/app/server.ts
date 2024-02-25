@@ -11,18 +11,14 @@ const { DATABASE_PASSWORD, DATABASE_PATH } = process.env;
 
 const isProduction = process.env.NODE_ENV === "production";
 
-import { agenda, initializeAgenda} from "@/services/AgendaService";
+import agenda from "@/services/AgendaService";
 import { catchGlobalError } from "./exception";
 
 mongoose.set("strictQuery", false);
 
 mongoose
   .connect(DATABASE_PATH?.replace("<password>", `${DATABASE_PASSWORD}`) ?? "")
-  .then(() => {
-    Logger.log("資料庫連線成功");
-
-    initializeAgenda().then(() => Logger.log("Agenda 初始化完成"));
-  })
+  .then(() => Logger.log("資料庫連線成功"))
   .catch((error) => Logger.warn(`資料庫連線錯誤: ${error.message}`));
 
 const port = parseInt(process.env.PORT || "8081");
@@ -35,6 +31,12 @@ const wss = new WebSocketServer({ port: 8082 });
 initWebSocketServer(wss, server);
 app.use(attachWsToRequest(wss));
 webSocketService(wss);
+
+agenda.on("ready", () =>
+{
+  Logger.log('Agenda is ready');
+  agenda.start();
+});
 
 server.on("error", (error) => {
   Logger.error(`伺服器錯誤： ${error}`);
@@ -49,13 +51,8 @@ if (!isProduction) {
 
 catchGlobalError();
 
-process.on("SIGINT", async () => {
-  await agenda.stop();
-  Logger.log('Agenda has been stopped.');
-
+process.on("SIGINT", () => {
   server.close(() => {
-    Logger.log('HTTP server closed.');
     process.exit(0);
   });
 });
-
