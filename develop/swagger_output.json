@@ -1075,6 +1075,36 @@
             "required": false,
             "type": "number",
             "description": "每頁記錄數"
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "搜尋關鍵字"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "enum": {
+                  "type": "array",
+                  "example": [
+                    "active",
+                    "pending",
+                    "closed"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "description": "提案狀態"
           }
         ],
         "responses": {
