@@ -140,8 +140,8 @@ pollRouter.put(
     type: 'object',
     description: '更新提案',
     schema: {
-      $ref: "#/definitions/PollUpdate"
-    },
+      $ref: "#/definitions/PollCreate"
+      },
     }
    * #swagger.responses[200] = {
     schema: {
