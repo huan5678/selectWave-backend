@@ -25,20 +25,10 @@ const contactSchema = new Schema<IContact>({
   timestamps: { createdAt: 'createdTime', updatedAt: 'updateTime' },
   versionKey: false,
     toJSON: {
-      virtuals: true,
-      transform: function (_doc, ret)
-      {
-        ret.id = ret._id;
-        delete ret._id;
-      }
+      virtuals: true
     },
     toObject: {
-      virtuals: true,
-      transform: function (_doc, ret)
-      {
-        ret.id = ret._id;
-        delete ret._id;
-      }
+        virtuals: true
     },
 });
 

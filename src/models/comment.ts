@@ -5,12 +5,12 @@ const commentSchema = new Schema<IComment>({
   pollId: {
     type: Schema.Types.ObjectId,
     ref: 'Poll',
-    required: [true, '請確實填寫投票 ID'],
+    required: [true, '請確實填寫投票'],
   },
   author: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: [true, '請確實填寫留言者 ID'],
+    required: [true, '請確實填寫留言者'],
   },
   content: {
     type: String,
@@ -33,20 +33,10 @@ const commentSchema = new Schema<IComment>({
   timestamps: { createdAt: 'createdTime', updatedAt: 'updateTime' },
   versionKey: false,
     toJSON: {
-      virtuals: true,
-      transform: function (_doc, ret)
-      {
-        ret.id = ret._id;
-        delete ret._id;
-      }
+      virtuals: true
     },
     toObject: {
-      virtuals: true,
-      transform: function (_doc, ret)
-      {
-        ret.id = ret._id;
-        delete ret._id;
-      }
+        virtuals: true
     },
 });
 
@@ -80,20 +70,20 @@ commentSchema.post('save', async function(doc, next) {
 
   const userIdsToNotify = new Set();
 
-  userIdsToNotify.add(poll.createdBy.id.toString());
+  userIdsToNotify.add(poll.createdBy._id.toString());
 
   poll.like.forEach(like => {
-    userIdsToNotify.add(like.user.id.toString());
+    userIdsToNotify.add(like.user._id.toString());
   });
 
   poll.options.forEach(option => {
     option.voters.forEach(voter => {
-      userIdsToNotify.add(voter.user.id.toString());
+      userIdsToNotify.add(voter.user._id.toString());
     });
   });
 
   poll.comments.forEach(comment => {
-    userIdsToNotify.add(comment.author.id.toString());
+    userIdsToNotify.add(comment.author._id.toString());
   });
 
   const wss = require('@/app').wss;
@@ -111,7 +101,6 @@ commentSchema.post('save', async function(doc, next) {
   next();
 });
 
-// 優化：提高查詢效率
-commentSchema.index({ pollId: 1, author: 1 });
+
 
 export default model<IComment>('Comment', commentSchema);

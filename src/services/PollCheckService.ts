@@ -21,12 +21,13 @@ export class PollService
 
       const pollsToEnd = await Poll.find({ endDate: { $lte: now }, status: 'ended' });
 
-      for (let poll of pollsToEnd) {
-        await PollController.calculateResultsForPoll(poll._id.toString());
-      }
       const totalPollsToEnd = await Poll.countDocuments({ status: 'closed' });
 
       Logger.log(`目前有 ${ totalPollsToEnd } 筆投票已經結束`, 'INFO');
+
+      for (let poll of pollsToEnd) {
+        await PollController.calculateResultsForPoll(poll._id);
+      }
 
   }
 }
