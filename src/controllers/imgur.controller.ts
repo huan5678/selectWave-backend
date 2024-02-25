@@ -6,7 +6,7 @@ const ImgurClient = Imgur.ImgurClient;
 import { appError, successHandle } from '@/utils';
 
 const client = new ImgurClient({
-  clientId: process.env.IMGUR_CLIENTID,
+  clientId: process.env.IMGUR_CLIENT_ID,
   clientSecret: process.env.IMGUR_CLIENT_SECRET,
   refreshToken: process.env.IMGUR_REFRESH_TOKEN,
 });
