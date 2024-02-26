@@ -1,12 +1,12 @@
-import type { Request, Response, RequestHandler } from 'express';
-import { Document } from 'mongoose';
+import type { Request, Response, RequestHandler } from "express";
+import { Document } from "mongoose";
 
 export interface IContact extends Document {
-    name: string;
-    email: string;
-    message: string;
-    quests: string;
-    createdAt: Date;
+  name: string;
+  email: string;
+  message: string;
+  quests: string;
+  createdAt: Date;
 }
 
 export interface IEmailSubscriber extends Document {
@@ -21,19 +21,20 @@ export interface IUser extends Document {
   email: string;
   password: string;
   avatar: string;
-  gender: 'male' | 'female' | 'x';
+  gender: "male" | "female" | "x";
+  birthday?: Date;
   socialMedia?: [
     {
       type: string;
       id: string;
-    },
+    }
   ];
   followers?: {
-    user: IUser['_id'];
+    user: IUser["_id"];
     createdAt: Date;
   }[];
   following?: {
-    user: IUser['_id'];
+    user: IUser["_id"];
     createdAt: Date;
   }[];
   isValidator: boolean;
@@ -46,7 +47,9 @@ export interface IUser extends Document {
   facebookId?: string;
   lineId?: string;
   discordId?: string;
-  likedPolls: IPoll['_id'][];
+  githubId?: string;
+  likedPolls: IPoll["_id"][];
+  comments: IComment["_id"][];
 }
 
 export interface CreateUserRequest {
@@ -54,14 +57,14 @@ export interface CreateUserRequest {
   password: string;
   name?: string;
   avatar?: string;
-  gender?: 'male' | 'female' | 'x';
+  gender?: "male" | "female" | "x";
   socialMedia?: Array<{ type: string; id: string }>;
 }
 
 export interface UpdateUserRequest {
   name?: string;
   avatar?: string;
-  gender?: 'male' | 'female' | 'x';
+  gender?: "male" | "female" | "x";
 }
 export interface IPoll extends Document {
   id: string;
@@ -76,19 +79,18 @@ export interface IPoll extends Document {
   isPrivate: boolean;
   totalVoters: number;
   like: {
-    user: IUser['_id'];
+    user: IUser["_id"];
   }[];
   comments: {
-    comment: IComment['_id'];
+    comment: IComment["_id"];
   }[];
   options: {
-    optionId: IOption['_id'];
+    optionId: IVote["_id"];
   }[];
-  status: 'pending' | 'active' | 'ended' | 'closed';
-  isWinner:
-    {
-      options: IOption['_id'];
-    }[];
+  status: "pending" | "active" | "ended" | "closed";
+  isWinner: {
+    option: IVote["_id"];
+  }[];
 }
 
 export interface CreatePollRequest {
@@ -101,16 +103,22 @@ export interface CreatePollRequest {
   isPrivate?: boolean;
 }
 
-export interface IOption extends Document {
-  id?: string;
+export interface IVote extends Document {
+  id: string;
   title: string;
   imageUrl: string;
-  pollId: IPoll['_id'];
+  pollId: IPoll["_id"];
   voters: {
-    user: IUser['_id'];
+    user: IUser["_id"];
     createdTime: Date;
   }[];
   isWinner: boolean;
+}
+
+export interface IOption {
+  title: string;
+  imageUrl?: string;
+  id?: string;
 }
 
 export interface CreateOptionRequest {
@@ -120,9 +128,9 @@ export interface CreateOptionRequest {
 }
 
 export interface IComment extends Document {
-  _id?: string;
-  author: IUser['_id'];
-  pollId: IPoll['_id'];
+  id: string;
+  author: IUser["_id"];
+  pollId: IPoll["_id"];
   content: string;
   createdTime: Date;
   edited: boolean;
@@ -136,7 +144,7 @@ export interface CreateCommentRequest {
 }
 
 export interface ITokenBlacklist extends Document {
-  _id?: string;
+  id: string;
   token: string;
   expiresAt: Date;
 }
@@ -199,12 +207,9 @@ export type TokenPayload = {
   exp: number;
 };
 
-declare global
-{
-  namespace Express
-  {
-    export interface Request
-    {
+declare global {
+  namespace Express {
+    export interface Request {
       headers: {
         authorization?: string;
       };

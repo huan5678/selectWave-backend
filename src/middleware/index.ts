@@ -1,6 +1,8 @@
-import type { NextFunction, Response } from "express";
+import type { NextFunction, Response, Request } from "express";
 import session from "express-session";
 import { object, string, number } from "yup";
+import { WebSocketServer } from 'ws';
+
 import { ApiExcludeProps, TokenPayload } from "@/types";
 import { TokenBlacklist, User } from "@/models";
 import { appError, getToken, handleErrorAsync, verifyToken } from "@/utils";
@@ -82,3 +84,20 @@ export const isAuthor = handleErrorAsync(
     }
   }
 );
+
+export const attachWsToRequest = (wss: WebSocketServer) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
+    req.wss = wss;
+    next();
+  };
+};
+
+export const initWebSocketServer = (wss: WebSocketServer, server: any): WebSocketServer => {
+  server.on('upgrade', (request: any, socket: any, head: any) => {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit('connection', ws, request);
+    });
+  });
+  return wss;
+};
+

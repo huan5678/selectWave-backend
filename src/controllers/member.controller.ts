@@ -17,7 +17,7 @@ class MemberController {
     // 添加skip和limit進行分頁
     const users = await User.find()
       .select(
-        "-gender -coin -followers -following -socialMedia -updatedAt -isValidator -isSubscribed -likedPolls"
+        "-gender -birthday -coin -followers -following -socialMedia -updatedAt -isValidator -isSubscribed -likedPolls"
       )
       .skip((page - 1) * limit)
       .limit(limit);
@@ -38,6 +38,10 @@ class MemberController {
         path: 'likedPolls.poll',
         select: {createdBy: 0, like: 0, comments: 0, options: 0, isPrivate: 0, createdTime: 0, createdAt: 0, updatedAt: 0}
       })
+      .populate({
+        path: 'comments',
+        select: {createdBy: 0, like: 0, comments: 0, options: 0, isPrivate: 0, createdTime: 0, createdAt: 0, updatedAt: 0}
+      })
       .exec();
     if (!user)
       throw appError({
@@ -55,7 +59,7 @@ class MemberController {
 
   public static updateProfile: RequestHandler = async (req: any, res, next) => {
     const { user } = req;
-    const validFields = ["name", "avatar", "gender", "socialMedia"];
+    const validFields = ["name", "avatar", "gender", "socialMedia" , "birthday"];
     let updateData = {};
     for (let field of validFields) {
       if (req.body[field] !== undefined) {
@@ -89,19 +93,19 @@ class MemberController {
     const isAlreadyFollowing =
       user.following &&
       user.following.some(
-        (following) => following.user._id.toString() === targetID
+        (following) => following.user.id.toString() === targetID
       );
     if (isAlreadyFollowing)
       throw appError({ code: 400, message: "您已經追蹤了該使用者", next });
 
     const resultUserData = await User.findOneAndUpdate(
-      { _id: id, "following.user": { $ne: targetID } },
+      { id, "following.user": { $ne: targetID } },
       { $addToSet: { following: { user: targetID } } },
       { new: true }
     ).select("-coin -updatedAt -isValidator -isSubscribed");
 
     await User.findOneAndUpdate(
-      { _id: targetID },
+      { id: targetID },
       { $addToSet: { followers: { user: id } } }
     );
 
@@ -121,11 +125,11 @@ class MemberController {
 
     const user = await User.findById(id);
     if (!user) throw appError({ code: 404, message: "找不到使用者", next });
-    console.log(user.following);
+
     const isFollowing =
       user.following &&
       user.following.some(
-        (following) => following.user._id.toString() === targetID
+        (following) => following.user.id.toString() === targetID
       );
     if (!isFollowing)
       throw appError({
@@ -135,12 +139,12 @@ class MemberController {
       });
 
     await User.findOneAndUpdate(
-      { _id: id },
+      { id: id },
       { $pull: { following: { user: targetID } } }
     );
 
     await User.findOneAndUpdate(
-      { _id: targetID },
+      { id: targetID },
       { $pull: { followers: { user: id } } }
     );
 

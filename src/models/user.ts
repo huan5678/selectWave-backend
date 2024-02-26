@@ -15,6 +15,7 @@ const userSchema = new Schema<IUser>(
         },
         message: '請填寫正確 email 格式',
       },
+      index: true,
       unique: true,
       select: false,
     },
@@ -44,6 +45,9 @@ const userSchema = new Schema<IUser>(
       type: String,
       enum: ['male', 'female', 'x'],
       default: 'x',
+    },
+    birthday: {
+      type: Date,
     },
     followers: [
       {
@@ -97,6 +101,10 @@ const userSchema = new Schema<IUser>(
       type: String,
       select: false,
     },
+    githubId: {
+      type: String,
+      select: false,
+    },
     isValidator: {
       type: Boolean,
       default: false,
@@ -128,34 +136,80 @@ const userSchema = new Schema<IUser>(
         },
       },
     ],
+    comments: [
+      {
+        _id: false,
+        comment: {
+          type: Schema.Types.ObjectId,
+          ref: 'Comment',
+        },
+      },
+    ]
   },
   {
     versionKey: false,
     timestamps: true,
     toJSON: {
-      virtuals: true
+      virtuals: true,
+      transform: (_doc, ret) =>
+      {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.password;
+        delete ret.resetToken;
+        delete ret.verificationToken;
+        return ret;
+      }
     },
     toObject: {
-        virtuals: true
+      virtuals: true,
+      transform: (_doc, ret) =>
+      {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.password;
+        delete ret.resetToken;
+        delete ret.verificationToken;
+        return ret;
+      }
     },
   },
 );
 
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+userSchema.pre('save', async function (next)
+{
+  // 如果 email 字段被修改了，則轉換為小寫
+  if (this.isModified('email')) {
+    this.email = this.email.trim().toLowerCase();
+  }
+  // 如果密碼被修改了，則對密碼進行加密
+  if (this.isModified('password')) {
+    const salt = await bcrypt.genSalt(12);
+    this.password = await bcrypt.hash(this.password, salt);
+  }
   next();
 });
 
-userSchema.statics.findWithoutSensitiveData = function (query) {
-  return this.find(query).select('-password -resetToken');
-};
+userSchema.post('save', async function() {
+  if (this.isModified('followers')) {
+    const wss = require('@/app').wss;
+    this.followers?.forEach(follower => {
+      const client = wss.clients.find(client => client.userId === follower.user.toString());
+      if (client) {
+        client.send(JSON.stringify({
+          type: 'notification',
+          message: `${this.name} now follows you.`,
+        }));
+      }
+    });
+  }
+});
 
 userSchema.methods.toJSON = function () {
   const user = this.toObject();
   delete user.password;
   delete user.resetToken;
+  delete user.verificationToken;
   return user;
 };
 

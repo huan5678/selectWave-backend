@@ -13,7 +13,7 @@
     ],
     "skipLibCheck": true,
     /* Bundler mode */
-    "moduleResolution": "Bundler",
+    "moduleResolution": "Node",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -26,9 +26,13 @@
     "baseUrl": ".",
     "noImplicitAny": false,
     "esModuleInterop": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types"
+    ],
     "paths": {
       "@/*": [
-        "./src/*"
+        "src/*"
       ],
       "@develop/*": [
         "develop/*"
@@ -36,7 +40,7 @@
     }
   },
   "include": [
-    "src"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules"

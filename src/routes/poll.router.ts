@@ -8,8 +8,8 @@ const pollRouter = Router();
 
 pollRouter.get(
   /**
-  * #swagger.tags = ['Poll - 投票']
-  * #swagger.description = '獲取所有投票'
+  * #swagger.tags = ['Poll - 提案']
+  * #swagger.description = '獲取所有提案'
   * #swagger.path = '/api/poll/'
   * #swagger.parameters['page'] = {
     in: 'query',
@@ -23,17 +23,32 @@ pollRouter.get(
     type: 'number',
     description: '每頁記錄數',
   }
+  * #swagger.parameters['q'] = {
+    in: 'query',
+    required: false,
+    type: 'string',
+    description: '搜尋關鍵字',
+  }
+  * #swagger.parameters['status'] = {
+    in: 'query',
+    required: false,
+    type: 'string',
+    schema: {
+      enum: ["active", "pending", "closed"],
+    },
+    description: '提案狀態',
+  }
   * #swagger.responses[200] = {
     schema: {
       status: true,
-      message: "獲取投票列表成功",
+      message: "獲取提案列表成功",
       result: [
         {
           $ref: "#/definitions/Poll"
         },
       ],
     },
-    description: "獲取投票列表成功"
+    description: "獲取提案列表成功"
   }
   */
   '/',
@@ -42,28 +57,28 @@ pollRouter.get(
 
 pollRouter.get(
   /**
-   * #swagger.tags = ['Poll - 投票']
-   * #swagger.description = '根據 ID 獲取投票詳情'
+   * #swagger.tags = ['Poll - 提案']
+   * #swagger.description = '根據 ID 獲取提案詳情'
    * #swagger.path = '/api/poll/{id}'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,
     type: 'string',
-    description: '投票ID'
+    description: '提案ID'
     }
    * #swagger.responses[200] = {
     schema: {
       status: true,
-      message: "獲取投票詳細資訊成功",
+      message: "獲取提案詳細資訊成功",
       result: {
         $ref: "#/definitions/Poll"
       }
     },
-    description: "獲取投票詳細資訊成功"
+    description: "獲取提案詳細資訊成功"
     }
    * #swagger.responses[404] = {
     schema: { $ref: "#/definitions/ErrorPollNotFound" },
-    description: "找不到投票"
+    description: "找不到提案"
     }
    */
   '/:id',
@@ -72,14 +87,14 @@ pollRouter.get(
 
 pollRouter.post(
   /**
-   * #swagger.tags = ['Poll - 投票']
-   * #swagger.description = '創建新投票'
+   * #swagger.tags = ['Poll - 提案']
+   * #swagger.description = '創建新提案'
    * #swagger.path = '/api/poll/'
    * #swagger.parameters['body'] = {
     in: 'body',
     required: true,
     type: 'object',
-    description: '新投票',
+    description: '新提案',
     schema: {
       $ref: "#/definitions/PollCreate"
       },
@@ -87,18 +102,18 @@ pollRouter.post(
    * #swagger.responses[200] = {
     schema: {
     status: true,
-    message: "投票創建成功",
+    message: "提案創建成功",
     result: {
       $ref: "#/definitions/Poll"
       }
     },
-    description: "投票創建成功"
+    description: "提案創建成功"
     }
     * #swagger.responses[400] = {
     schema: {
       $ref: "#/definitions/ErrorPollValidation"
     },
-    description: "請確實填寫投票資訊"
+    description: "請確實填寫提案資訊"
     }
    * #swagger.security = [{
     "Bearer": []
@@ -110,46 +125,46 @@ pollRouter.post(
 
 pollRouter.put(
   /**
-   * #swagger.tags = ['Poll - 投票']
-   * #swagger.description = '更新投票'
+   * #swagger.tags = ['Poll - 提案']
+   * #swagger.description = '更新提案'
    * #swagger.path = '/api/poll/{id}'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,
     type: 'string',
-    description: '投票ID'
+    description: '提案ID'
     }
     * #swagger.parameters['body'] = {
     in: 'body',
     required: true,
     type: 'object',
-    description: '更新投票',
+    description: '更新提案',
     schema: {
-      $ref: "#/definitions/PollUpdate"
-    },
+      $ref: "#/definitions/PollCreate"
+      },
     }
    * #swagger.responses[200] = {
     schema: {
       status: true,
-      message: "投票更新成功",
+      message: "提案更新成功",
       result: {
       $ref: "#/definitions/Poll"
       }
     },
-    description: "投票更新成功"
+    description: "提案更新成功"
     }
     * #swagger.responses[400] = {
     schema: {
       $ref: "#/definitions/ErrorPollValidation"
     },
-    description: "請確實填寫投票資訊"
+    description: "請確實填寫提案資訊"
     }
    * #swagger.responses[404] = {
     schema: {
       $ref: "#/definitions/ErrorPollNotFound"
     }
   },
-    description: "找不到投票"
+    description: "找不到提案"
     }
    * #swagger.security = [{
     "Bearer": []
@@ -161,27 +176,27 @@ pollRouter.put(
 
 pollRouter.delete(
   /**
-   * #swagger.tags = ['Poll - 投票']
-   * #swagger.description = '刪除投票'
+   * #swagger.tags = ['Poll - 提案']
+   * #swagger.description = '刪除提案'
    * #swagger.path = '/api/poll/{id}'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,
     type: 'string',
-    description: '投票ID'
+    description: '提案ID'
     }
     * #swagger.responses[200] = {
     schema: {
       status: true,
-      message: "刪除投票成功"
+      message: "刪除提案成功"
     },
-    description: "刪除投票成功"
+    description: "刪除提案成功"
     }
     * #swagger.responses[404] = {
     schema: {
       ref: "#/definitions/ErrorPollNotFound"
     },
-    description: "找不到投票"
+    description: "找不到提案"
     }
     * #swagger.security = [{
     "Bearer": []
@@ -193,30 +208,30 @@ pollRouter.delete(
 
 pollRouter.get(
   /**
-   * #swagger.tags = ['Poll - 投票']
-   * #swagger.description = '投票按讚'
+   * #swagger.tags = ['Poll - 提案']
+   * #swagger.description = '提案按讚'
    * #swagger.path = '/api/poll/{id}/like'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,
     type: 'string',
-    description: '投票ID'
+    description: '提案ID'
     }
    * #swagger.responses[200] = {
     schema: {
       status: true,
-      message: "投票按讚成功",
+      message: "提案按讚成功",
       result: {
       $ref: "#/definitions/Poll"
       }
     },
-    description: "投票按讚成功"
+    description: "提案按讚成功"
     }
    * #swagger.responses[404] = {
     schema: {
       $ref: "#/definitions/ErrorPollNotFound"
     },
-    description: "找不到投票"
+    description: "找不到提案"
     }
    * #swagger.security = [{
     "Bearer": []
@@ -228,30 +243,30 @@ pollRouter.get(
 
 pollRouter.delete(
   /**
-   * #swagger.tags = ['Poll - 投票']
-   * #swagger.description = '取消投票按讚'
+   * #swagger.tags = ['Poll - 提案']
+   * #swagger.description = '取消提案按讚'
    * #swagger.path = '/api/poll/{id}/like'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,
     type: 'string',
-    description: '投票ID'
+    description: '提案ID'
     }
    * #swagger.responses[200] = {
     schema: {
       status: true,
-      message: "取消投票按讚成功",
+      message: "取消提案按讚成功",
       result: {
       $ref: "#/definitions/Poll"
       }
     },
-    description: "取消投票按讚成功"
+    description: "取消提案按讚成功"
     }
    * #swagger.responses[404] = {
     schema: {
       $ref: "#/definitions/ErrorPollNotFound"
     },
-    description: "找不到投票"
+    description: "找不到提案"
     }
    * #swagger.security = [{
     "Bearer": []
@@ -261,33 +276,33 @@ pollRouter.delete(
   handleErrorAsync(PollController.unlikePoll),
 );
 
-//投票開始
+//提案啟動投票開始
 pollRouter.get(
   /**
-   * #swagger.tags = ['Poll - 投票']
-   * #swagger.description = '投票開始'
+   * #swagger.tags = ['Poll - 提案']
+   * #swagger.description = '投票活動開始投票'
    * #swagger.path = '/api/poll/{id}/start'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,
     type: 'string',
-    description: '投票ID'
+    description: '提案ID'
     }
    * #swagger.responses[200] = {
     schema: {
       status: true,
-      message: "投票開始成功",
+      message: "提案開始成功",
       result: {
       $ref: "#/definitions/Poll"
       }
     },
-    description: "投票開始成功"
+    description: "提案開始成功"
     }
    * #swagger.responses[404] = {
     schema: {
       $ref: "#/definitions/ErrorPollNotFound"
     },
-    description: "找不到投票"
+    description: "找不到提案"
     }
    * #swagger.security = [{
     "Bearer": []
@@ -297,33 +312,33 @@ pollRouter.get(
   handleErrorAsync(PollController.startPoll),
 );
 
-//投票結束
+//提案結束
 pollRouter.get(
   /**
-   * #swagger.tags = ['Poll - 投票']
-   * #swagger.description = '投票結束'
+   * #swagger.tags = ['Poll - 提案']
+   * #swagger.description = '投票活動關閉結算投票結果'
    * #swagger.path = '/api/poll/{id}/end'
    * #swagger.parameters['id'] = {
     in: 'path',
     required: true,
     type: 'string',
-    description: '投票ID'
+    description: '提案ID'
     }
    * #swagger.responses[200] = {
     schema: {
       status: true,
-      message: "投票結束成功",
+      message: "提案結束成功",
       result: {
       $ref: "#/definitions/Poll"
       }
     },
-    description: "投票結束成功"
+    description: "提案結束成功"
     }
    * #swagger.responses[404] = {
     schema: {
       $ref: "#/definitions/ErrorPollNotFound"
     },
-    description: "找不到投票"
+    description: "找不到提案"
     }
    * #swagger.security = [{
     "Bearer": []

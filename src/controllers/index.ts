@@ -5,4 +5,4 @@ export { default as MailServiceController } from './mailer.controller';
 export { default as MemberController } from './member.controller';
 export { default as PollController } from './poll.controller';
 export { default as CommentController } from './comment.controller';
-export { default as OptionController } from './option.controller';
+export { default as VoteController } from './vote.controller';

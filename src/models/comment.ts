@@ -5,12 +5,12 @@ const commentSchema = new Schema<IComment>({
   pollId: {
     type: Schema.Types.ObjectId,
     ref: 'Poll',
-    required: [true, '請確實填寫投票'],
+    required: [true, '請確實填寫投票 ID'],
   },
   author: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: [true, '請確實填寫留言者'],
+    required: [true, '請確實填寫留言者 ID'],
   },
   content: {
     type: String,
@@ -33,10 +33,20 @@ const commentSchema = new Schema<IComment>({
   timestamps: { createdAt: 'createdTime', updatedAt: 'updateTime' },
   versionKey: false,
     toJSON: {
-      virtuals: true
+      virtuals: true,
+      transform: function (_doc, ret)
+      {
+        ret.id = ret._id;
+        delete ret._id;
+      }
     },
     toObject: {
-        virtuals: true
+      virtuals: true,
+      transform: function (_doc, ret)
+      {
+        ret.id = ret._id;
+        delete ret._id;
+      }
     },
 });
 
@@ -48,5 +58,60 @@ commentSchema.pre(/^find/, function(next) {
   next();
 });
 
+
+commentSchema.post('save', async function(doc, next) {
+  const Poll = model('Poll');
+
+  const poll = await Poll.findById(doc.pollId)
+    .populate('createdBy')
+    .populate('like.user')
+    .populate({
+      path: 'options',
+      populate: {
+        path: 'voters.user',
+      }
+    })
+    .populate({
+      path: 'comments',
+      populate: {
+        path: 'author',
+      }
+    });
+
+  const userIdsToNotify = new Set();
+
+  userIdsToNotify.add(poll.createdBy.id.toString());
+
+  poll.like.forEach(like => {
+    userIdsToNotify.add(like.user.id.toString());
+  });
+
+  poll.options.forEach(option => {
+    option.voters.forEach(voter => {
+      userIdsToNotify.add(voter.user.id.toString());
+    });
+  });
+
+  poll.comments.forEach(comment => {
+    userIdsToNotify.add(comment.author.id.toString());
+  });
+
+  const wss = require('@/app').wss;
+  wss.clients.forEach(client => {
+    if (userIdsToNotify.has(client.userId) && client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify({
+        type: 'newComment',
+        message: 'A new comment has been added to a poll you are interested in.',
+        pollId: doc.pollId,
+        commentId: doc._id,
+      }));
+    }
+  });
+
+  next();
+});
+
+// 優化：提高查詢效率
+commentSchema.index({ pollId: 1, author: 1 });
 
 export default model<IComment>('Comment', commentSchema);
