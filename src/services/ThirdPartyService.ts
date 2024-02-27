@@ -99,12 +99,12 @@ export const useGoogleCallback = async (req, res, _next) =>
     });
     const authToken = generateToken({ userId: userData._id });
 
-    res.redirect(`${process.env.FRONTEND_DOMAIN}/?token=${authToken}`);
+    res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
   }
   if (user) {
     const authToken = generateToken({ userId: user._id });
 
-    res.redirect(`${process.env.FRONTEND_DOMAIN}/?token=${authToken}`);
+    res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
   }
 }
 
@@ -154,12 +154,12 @@ export const useFacebookCallback = async (req, res, _next) =>
     });
     const authToken = generateToken({ userId: userData._id });
 
-    res.redirect(`${process.env.FRONTEND_DOMAIN}/?token=${authToken}`);
+    res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
   }
   if (user) {
     const authToken = generateToken({ userId: user._id });
 
-    res.redirect(`${process.env.FRONTEND_DOMAIN}/?token=${authToken}`);
+    res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
   }
 
 }
@@ -236,12 +236,12 @@ export const useLineCallback = async (req, res, _next) =>
     });
     const authToken = generateToken({ userId: userData._id });
 
-    res.redirect(`${process.env.FRONTEND_DOMAIN}/?token=${authToken}`);
+    res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
   }
   if (user) {
     const authToken = generateToken({ userId: user._id });
 
-    res.redirect(`${process.env.FRONTEND_DOMAIN}/?token=${authToken}`);
+    res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
   }
 }
 
@@ -303,12 +303,12 @@ export const useDiscordCallback = async (req, res, _next) =>
     });
     const authToken = generateToken({ userId: userData._id });
 
-    res.redirect(`${process.env.FRONTEND_DOMAIN}/?token=${authToken}`);
+    res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
   }
   if (user) {
     const authToken = generateToken({ userId: user._id });
 
-    res.redirect(`${process.env.FRONTEND_DOMAIN}/?token=${authToken}`);
+    res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
   }
 }
 
@@ -365,12 +365,12 @@ export const useGithubCallback = async (req, res, _next) =>
     });
     const authToken = generateToken({ userId: userData._id });
 
-    res.redirect(`${process.env.FRONTEND_DOMAIN}/?token=${authToken}`);
+    res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
   }
   if (user) {
     const authToken = generateToken({ userId: user._id });
 
-    res.redirect(`${process.env.FRONTEND_DOMAIN}/?token=${authToken}`);
+    res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
   }
 }
 
