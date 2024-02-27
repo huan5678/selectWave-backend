@@ -11,7 +11,7 @@ export const ErrorSchema = {
     status: false,
     message: "缺少 Token",
   },
-  ErrorUserNotFound: {
+  ErrorEmailNotFound: {
     status: false,
     message: "已無此使用者請重新註冊 | 請確認 Email 是否正確 | 此 Email 未註冊",
   },

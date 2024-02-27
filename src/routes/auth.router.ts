@@ -159,7 +159,7 @@ authRouter.get(
   }
   * #swagger.responses[404] = {
     schema: {
-      $ref: "#/definitions/ErrorUserNotFound"
+      $ref: "#/definitions/ErrorEmailNotFound"
     },
     description: "取得使用者資訊失敗"
   }
@@ -189,7 +189,7 @@ authRouter.post(
   }
   * #swagger.responses[404] = {
     schema: {
-      $ref: "#/definitions/ErrorUserNotFound"
+      $ref: "#/definitions/ErrorEmailNotFound"
     },
     description: "重設密碼失敗"
   }
@@ -244,7 +244,7 @@ authRouter.post(
   }
   * #swagger.responses[404] = {
     schema: {
-    $ref: "#/definitions/ErrorUserNotFound"
+    $ref: "#/definitions/ErrorEmailNotFound"
     },
     description: "更新密碼失敗"
   }
