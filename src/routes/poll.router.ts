@@ -38,6 +38,18 @@ pollRouter.get(
     },
     description: '提案狀態',
   }
+  * #swagger.parameters['sort'] = {
+    in: 'query',
+    required: false,
+    type: 'string',
+    description: '排序欄位 使用欄位名稱表示升冪 例如: createdTime, 加上-為降冪 例如: -createdTime',
+  }
+  * #swagger.parameters['createdBy'] = {
+    in: 'query',
+    required: false,
+    type: 'string',
+    description: '發起者ID',
+  }
   * #swagger.responses[200] = {
     schema: {
       status: true,

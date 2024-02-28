@@ -1,9 +1,8 @@
 import { RequestHandler, Response } from "express"; // Import missing modules
-
 import { Poll, Vote, User } from "@/models";
 import { appError, successHandle } from "@/utils";
 import { array, boolean, date, object, string } from "yup";
-import { IVote, IPoll, IUser, IOption } from "@/types";
+import { IVote, IPoll, IUser, IOption, CreatePollRequest } from "@/types";
 
 const pollSchema = object({
   title: string()
@@ -53,8 +52,8 @@ const dateSchema = date()
 
 class PollController {
   // 創建新投票
-  public static createPoll: RequestHandler = async (
-    req: any,
+  public static createPoll = async (
+    req: Request & { body: CreatePollRequest, user: IUser },
     res: Response,
     next
   ) => {
@@ -145,25 +144,28 @@ class PollController {
 
   // 獲取所有投票
   public static getAllPolls: RequestHandler = async (req, res: Response) => {
-    let { page = 1, limit = 10, status, q } = req.query;
+    let { page = 1, limit = 10, status, q, sort, createdBy } = req.query;
 
     // 轉換為數字並進行合理性檢查
     page = Math.max(Number(page), 1); // 確保頁碼至少為1
     limit = Math.max(Number(limit), 1); // 確保每頁至少有1條記錄
 
     const skip = (page - 1) * limit;
-    const polls = await Poll.find(
-      q
-        ? {
+
+    const queryConditions = {
+        ...(q && {
             $or: [
-              { title: { $regex: q, $options: "i" } },
-            { description: { $regex: q, $options: "i" } },
-            { tags: { $in: [q] } },
+                { title: { $regex: q, $options: "i" } },
+                { description: { $regex: q, $options: "i" } },
+                { tags: { $in: [q] } },
             ],
-          }
-        : {},
-      status ? { status: status } : {}
-    )
+        }),
+        ...(status && { status: status }),
+        ...(createdBy && { createdBy: createdBy }),
+    };
+
+    const polls = await Poll.find(queryConditions)
+      .sort(sort as string || { createdAt: -1 })
       .select("-comments -options")
       .skip(skip)
       .limit(limit)

@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
 import { IPoll } from '@/types';
+import customEmitter from '@/services/EventEmitter';
 
 const pollSchema = new Schema<IPoll>({
   title: {
@@ -126,13 +127,9 @@ pollSchema.pre('save', async function(next) {
 });
 
 pollSchema.post('save', async function() {
-  const wss = require('@/app').wss;
-  wss.clients.forEach(client => {
-    client.send(JSON.stringify({
-      type: 'pollUpdate',
-      pollId: this.id,
-      totalVoters: this.totalVoters,
-    }));
+  customEmitter.emit('pollUpdated', {
+    pollId: this._id,
+    totalVoters: this.totalVoters,
   });
 });
 

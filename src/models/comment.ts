@@ -1,3 +1,4 @@
+import customEmitter from '@/services/EventEmitter';
 import { IComment } from '@/types';
 import { Schema, model } from 'mongoose';
 
@@ -96,16 +97,9 @@ commentSchema.post('save', async function(doc, next) {
     userIdsToNotify.add(comment.author.id.toString());
   });
 
-  const wss = require('@/app').wss;
-  wss.clients.forEach(client => {
-    if (userIdsToNotify.has(client.userId) && client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify({
-        type: 'newComment',
-        message: 'A new comment has been added to a poll you are interested in.',
-        pollId: doc.pollId,
-        commentId: doc._id,
-      }));
-    }
+  customEmitter.emit('commentAdded', {
+    pollId: doc.pollId,
+    commentId: doc._id,
   });
 
   next();

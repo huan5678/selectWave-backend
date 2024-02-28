@@ -2,8 +2,40 @@ import { Logger, verifyToken } from "@/utils";
 import { WebSocket } from "vite";
 import { randomUUID } from "crypto";
 import { User } from "@/models";
+import customEmitter from "./EventEmitter";
 
-export const webSocketService = (wss) => {
+export const webSocketService = (wss) =>
+{
+  customEmitter.on('pollUpdated', data => {
+      wss.clients.forEach(client => {
+          client.send(JSON.stringify({
+              type: 'pollUpdate',
+              ...data
+          }));
+      });
+  });
+
+  customEmitter.on('commentAdded', data =>
+  {
+    wss.clients.forEach(client => {
+      client.send(JSON.stringify({
+        type: 'commentAdded',
+        ...data
+      }));
+    });
+  });
+
+  customEmitter.on('userUpdated', data =>
+  {
+    wss.clients.forEach(client =>
+    {
+      client.send(JSON.stringify({
+        type: 'userUpdated',
+        ...data
+      }));
+    });
+  });
+
   wss.on("connection", (ws: WebSocket & { id: string, userId: string }) => {
     ws.id = randomUUID();
 

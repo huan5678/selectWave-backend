@@ -285,7 +285,7 @@
           },
           "404": {
             "schema": {
-              "$ref": "#/definitions/ErrorUserNotFound"
+              "$ref": "#/definitions/ErrorEmailNotFound"
             },
             "description": "取得使用者資訊失敗"
           }
@@ -348,7 +348,7 @@
           },
           "404": {
             "schema": {
-              "$ref": "#/definitions/ErrorUserNotFound"
+              "$ref": "#/definitions/ErrorEmailNotFound"
             },
             "description": "重設密碼失敗"
           }
@@ -490,7 +490,7 @@
           },
           "404": {
             "schema": {
-              "$ref": "#/definitions/ErrorUserNotFound"
+              "$ref": "#/definitions/ErrorEmailNotFound"
             },
             "description": "更新密碼失敗"
           }
@@ -1105,6 +1105,20 @@
               }
             },
             "description": "提案狀態"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "排序欄位 使用欄位名稱表示升冪 例如: createdTime, 加上-為降冪 例如: -createdTime"
+          },
+          {
+            "name": "createdBy",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "發起者ID"
           }
         ],
         "responses": {
@@ -1631,7 +1645,7 @@
     "/api/vote/{id}": {
       "put": {
         "tags": [
-          "Vote"
+          "Vote - 投票"
         ],
         "description": "更改投票",
         "parameters": [
@@ -1715,7 +1729,7 @@
       },
       "delete": {
         "tags": [
-          "Vote"
+          "Vote - 投票"
         ],
         "description": "取消投票",
         "parameters": [
@@ -2853,7 +2867,7 @@
         }
       }
     },
-    "ErrorUserNotFound": {
+    "ErrorEmailNotFound": {
       "type": "object",
       "properties": {
         "status": {
