@@ -2,9 +2,15 @@ import { RequestHandler } from "express";
 import { TokenPayload } from "@/types";
 import { object, string } from "yup";
 import { AuthService } from "@/services";
-import { appError, getToken, successHandle, verifyToken } from "@/utils";
+import { appError, getToken, successHandle, validateInput, verifyToken } from "@/utils";
 import MailServiceController from "./mailer.controller";
 import { TokenBlacklist, User } from "@/models";
+
+const inputSchema = object({
+  email: string().email().required().lowercase(),
+  password: string().required(),
+  confirmPassword: string(),
+});
 
 const emailInputSchema = object({
   email: string().required().email(),
@@ -38,21 +44,10 @@ class AuthController {
   };
 
   public static registerHandler: RequestHandler = async (req, res, next) => {
-    const inputSchema = object({
-      email: string().email().required().lowercase(),
-      password: string().required(),
-      confirmPassword: string().required(),
-    });
-    if (req.body.password !== req.body.confirmPassword)
+    if (!(await validateInput(inputSchema, req.body, next))) return;
+    const { email, password, confirmPassword } = req.body;
+    if (password !== confirmPassword)
       throw appError({ code: 400, message: "密碼不一致", next });
-    const isValidate = await inputSchema.validate(req.body);
-    if (!isValidate)
-      throw appError({
-        code: 400,
-        message: "請確認輸入的欄位格式是否正確",
-        next,
-      });
-    const { email, password } = inputSchema.cast(req.body);
     // check member existence
     if (await AuthService.getMemberByAccountOrEmail(email)) {
       throw appError({ code: 400, message: "此 Email 已註冊", next });
@@ -72,20 +67,8 @@ class AuthController {
   };
 
   public static loginHandler: RequestHandler = async (req, res, next) => {
-    // validate input
-    const inputSchema = object({
-      email: string().required().email(),
-      password: string().required(),
-    });
-    const isValidate = await inputSchema.validate(req.body);
-    if (!isValidate)
-      throw appError({
-        code: 400,
-        message: "請確認輸入的欄位格式是否正確",
-        next,
-      });
-
-    const { email, password } = inputSchema.cast(req.body);
+    if (!(await validateInput(inputSchema, req.body, next))) return;
+    const { email, password } = req.body;
     const { authToken, member } = await AuthService.login(
       { email, password },
       next
@@ -108,14 +91,10 @@ class AuthController {
     req,
     res,
     next
-  ) => {
-    const isValidate = await emailInputSchema.validate(req.body);
-    if (!isValidate)
-      throw appError({
-        code: 400,
-        message: "Email 格式有誤，請確認輸入是否正確",
-      });
-    const { email } = emailInputSchema.cast(req.body);
+  ) =>
+  {
+    if (!(await validateInput(emailInputSchema, req.body, next))) return;
+    const { email } = req.body;
     const member = await AuthService.getMemberByAccountOrEmail(email);
     if (!member) {
       throw appError({ code: 404, message: "此 Email 未註冊", next });
@@ -135,12 +114,6 @@ class AuthController {
     if (password !== confirmPassword) {
       throw appError({ code: 400, message: "密碼不一致", next });
     }
-    const isValidate = await emailInputSchema.validate(req.body);
-    if (!isValidate)
-      throw appError({
-        code: 400,
-        message: "Email 格式有誤，請確認輸入是否正確",
-      });
     if (!token) {
       throw appError({ code: 400, message: "缺少 token", next });
     }
@@ -161,11 +134,6 @@ class AuthController {
     res,
     next
   ) => {
-    const inputSchema = object({
-      email: string().required().email(),
-      password: string().required(),
-      confirmPassword: string().required(),
-    });
     if (req.body.password !== req.body.confirmPassword)
       throw appError({ code: 400, message: "密碼不一致", next });
 
