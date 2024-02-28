@@ -1,5 +1,5 @@
 import jsonWebToken, { type JwtPayload } from 'jsonwebtoken';
-import { ObjectSchema, Schema, date as dateSchema, object } from 'yup';
+import { Schema, date as dateSchema, object } from 'yup';
 import { Data, ResponseError } from '@/types';
 import { NextFunction, Request, Response } from 'express';
 
