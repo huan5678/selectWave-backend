@@ -101,6 +101,11 @@ export interface CreatePollRequest {
   startDate?: Date;
   endDate?: Date;
   isPrivate?: boolean;
+  optionsData: {
+    title: string;
+    imageUrl?: string;
+  }[];
+  status?: "pending" | "active";
 }
 
 export interface IVote extends Document {

@@ -3,6 +3,7 @@ import validator from 'validator';
 import bcrypt from 'bcryptjs';
 import { passwordRule } from '@/utils';
 import { IUser } from '@/types';
+import customEmitter from '@/services/EventEmitter';
 
 const userSchema = new Schema<IUser>(
   {
@@ -192,15 +193,9 @@ userSchema.pre('save', async function (next)
 
 userSchema.post('save', async function() {
   if (this.isModified('followers')) {
-    const wss = require('@/app').wss;
-    this.followers?.forEach(follower => {
-      const client = wss.clients.find(client => client.userId === follower.user.toString());
-      if (client) {
-        client.send(JSON.stringify({
-          type: 'notification',
-          message: `${this.name} now follows you.`,
-        }));
-      }
+    customEmitter.emit('userUpdated', {
+      userId: this._id,
+      followers: this.followers,
     });
   }
 });

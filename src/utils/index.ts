@@ -117,11 +117,11 @@ export const appError = (options: {
   const error: ResponseError = new Error(message);
   error.code = code;
   Logger.error(error);
-  next
-    ? next(error)
-    : () => {
-        throw error;
-      };
+  if (next) {
+    next(error);
+  } else {
+    throw error;
+  }
 };
 
 export const catchError = (error: Error, next: NextFunction) =>
