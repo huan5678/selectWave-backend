@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 import jsonWebToken from 'jsonwebtoken';
 import { Contact, EmailSubscriber } from "@/models";
-import { appError, successHandle } from "@/utils";
+import { appError, successHandle, validateInput } from "@/utils";
 import { object, string } from "yup";
 
 const { JWT_SECRET } = process.env;
@@ -17,14 +17,10 @@ const emailSubscriberSchema = object({
 });
 
 class ContactController {
-  public static create: RequestHandler = async (req, res, next) => {
-    const validate = await contactSchema
-      .validate(req.body, { abortEarly: false })
-      .catch((err) => {
-        throw appError({ code: 400, message: err.errors.join(", "), next });
-      });
-    const { name, email, message } = validate;
-    const { quests } = req.body;
+  public static create: RequestHandler = async (req, res, next) =>
+  {
+    if (!(await validateInput(contactSchema, req.body, next))) return;
+    const { name, email, message, quests } = req.body;
     const contact = new Contact({ contact: { name, email, message, quests } });
     await contact.save();
     return successHandle(res, "感謝您的留言", {});

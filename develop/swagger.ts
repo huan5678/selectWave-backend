@@ -18,7 +18,7 @@ const doc = {
     `,
   },
   securityDefinitions: {
-    bearerAuth: {
+    Bearer: {
       type: "apiKey",
       in: "header",
       name: "authorization",

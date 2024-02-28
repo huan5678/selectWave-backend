@@ -18,6 +18,8 @@ const userSchema = new Schema<IUser>(
       },
       index: true,
       unique: true,
+      lowercase: true,
+      trim: true,
       select: false,
     },
     password: {
@@ -32,6 +34,20 @@ const userSchema = new Schema<IUser>(
       },
       select: false,
     },
+    webAuthnCredentials: [{
+    credentialID: {
+      type: Buffer,
+      required: true,
+    },
+    publicKey: {
+      type: String,
+      required: true,
+    },
+    counter: {
+      type: Number,
+      required: true,
+    }
+  }],
     name: {
       type: String,
       minLength: [1, '名稱請大於 1 個字'],
@@ -179,10 +195,6 @@ const userSchema = new Schema<IUser>(
 
 userSchema.pre('save', async function (next)
 {
-  // 如果 email 字段被修改了，則轉換為小寫
-  if (this.isModified('email')) {
-    this.email = this.email.trim().toLowerCase();
-  }
   // 如果密碼被修改了，則對密碼進行加密
   if (this.isModified('password')) {
     const salt = await bcrypt.genSalt(12);

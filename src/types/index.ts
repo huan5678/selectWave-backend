@@ -20,6 +20,11 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
+  webAuthnCredentials: {
+    credentialID: Buffer;
+    publicKey: string;
+    counter: number;
+  }[];
   avatar: string;
   gender: "male" | "female" | "x";
   birthday?: Date;

@@ -1,8 +1,7 @@
 import { RequestHandler } from 'express';
 import multer from 'multer';
 import path from 'path';
-const Imgur = await import('imgur');
-const ImgurClient = Imgur.ImgurClient;
+import { ImgurClient } from 'imgur';
 import { appError, successHandle } from '@/utils';
 
 const client = new ImgurClient({
@@ -35,8 +34,11 @@ class ImgurController {
         const response = await client.upload({
           image: req.files[0].buffer.toString('base64'),
           type: 'base64',
-          album: process.env.IMGUR_ALBUMid,
+          album: process.env.IMGUR_ALBUM_ID,
         });
+        if (response.success !== true) {
+          throw appError({ code: 500, message: '上傳失敗', next });
+        }
         successHandle(res, '成功上傳圖片', { result: response.data.link });
       } catch (error) {
         if (error instanceof Error) {

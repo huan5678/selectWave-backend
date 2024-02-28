@@ -26,6 +26,7 @@ app.use(
     [
       { path: '/auth/login', method: 'POST' },
       { path: '/auth/register', method: 'POST' },
+      { path: '/auth/reset-password', method: 'POST' },
       { path: '/auth/reset-password', method: 'PUT' },
       { path: '/auth/verify', method: 'GET' },
       { path: '/auth/verify', method: 'POST' },

@@ -1,5 +1,5 @@
 import jsonWebToken, { type JwtPayload } from 'jsonwebtoken';
-import { date as dateSchema, object } from 'yup';
+import { ObjectSchema, Schema, date as dateSchema, object } from 'yup';
 import { Data, ResponseError } from '@/types';
 import { NextFunction, Request, Response } from 'express';
 
@@ -161,4 +161,17 @@ export const randomPassword = () => {
 
 export const handleErrorAsync = (func: Function) => {
   return (req: Request, res: Response, next: NextFunction) => func(req, res, next).catch((error: Error) => catchError(error, next));
+};
+
+export const validateInput = async (schema: Schema, data, next: NextFunction) => {
+  try {
+    await schema.validate(data);
+    return true;
+  } catch (error: unknown) {
+    if (error instanceof Error && 'errors' in error) {
+      const yupError = error as { errors: string[] };
+      throw appError({ code: 400, message: yupError.errors.join(", "), next });
+    }
+    throw appError({ code: 400, message: '驗證失敗', next });
+  }
 };

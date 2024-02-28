@@ -140,7 +140,7 @@ export class MailServiceController {
       subject: "「選集」 忘記密碼驗證通知信",
       html: resetPasswordTemplate({
         userName: user.name,
-        resetUrl: `${this.FRONTEND_DOMAIN}/verify-account?token=${token}`,
+        resetUrl: `${this.FRONTEND_DOMAIN}/#/resetpassword?token=${token}`,
       }),
     });
     if (info.accepted.length === 0) {
