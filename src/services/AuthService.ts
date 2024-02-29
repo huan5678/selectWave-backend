@@ -1,9 +1,9 @@
 import { randomUUID } from 'crypto';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { appError, generateToken, passwordCheck } from '@/utils';
+import { appError, generateToken, passwordCheck, verifyToken } from '@/utils';
 import { User } from '@/models';
-import { IUser, ThirdPartyProfile } from '@/types';
+import { IUser, ThirdPartyProfile, TokenPayload } from '@/types';
 import { randomPassword } from '@/utils';
 import { NextFunction } from 'express';
 
@@ -89,7 +89,7 @@ export class AuthService {
     }
   };
 
-  static getMemberByAccountOrEmail = async (email: string): Promise<Member | null> =>
+  static getMemberByAccountOrEmail = async (email: string) =>
   {
     const userDocument = await User.findOne({ email }).exec();
 
@@ -103,7 +103,9 @@ export class AuthService {
       avatar: userDocument.avatar,
     };
 
-    return member || null;
+    if (!member) {
+      throw appError({ code: 404, message: "已無此使用者請重新註冊" });
+    }
   };
 
   static thirdPartyAuthCreateMember = async (
@@ -178,5 +180,44 @@ export class AuthService {
       await user.save();
     });
   }
+
+  static resetPasswordByRestToken = async (token: string, password: string, next: NextFunction) =>
+  {
+    try {
+      const decoded = verifyToken(token as string) as TokenPayload;
+      if (!decoded) {
+        throw appError({ code: 400, message: "無效的 token", next });
+      }
+      const user = await User.findOne({ resetToken: token }).exec();
+      if (!user) {
+        throw appError({ code: 404, message: "無效的重設連結或已過期", next });
+      }
+      await User.findByIdAndUpdate(user.id, { resetToken: "", password }).exec();
+      return true;
+    } catch (error) {
+      throw appError({ message: (error as Error).message, next });
+    }
+  }
+  static verifyUserByToken = async (token: string, next: NextFunction) =>
+  {
+    try {
+      const decoded = verifyToken(token as string) as TokenPayload;
+      if (!decoded) {
+        throw appError({ code: 400, message: "無效的 token", next });
+      }
+      const user = await User.findOne({ verificationToken: token }).exec();
+
+      if (!user) {
+        throw appError({ code: 404, message: "無效的驗證連結或已過期", next });
+      }
+
+      user.verificationToken = "";
+      user.isValidator = true;
+      await user.save();
+    } catch (error) {
+      throw appError({ message: (error as Error).message, next });
+    }
+  }
 }
 
+export default AuthService;

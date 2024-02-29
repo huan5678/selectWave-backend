@@ -1,36 +1,44 @@
 import Agenda from 'agenda';
 import { Logger } from "@/utils";
-import { PollService } from './PollCheckService';
-import { AuthService } from './AuthService';
+import { AuthService, PollService } from './index';
 
-const dbPath = process.env.DATABASE_PATH || '';
-const dbPassword = process.env.DATABASE_PASSWORD || '';
+class AgendaService {
+  private agenda: Agenda;
 
-const connectionString = dbPath.replace('<password>', dbPassword);
+  constructor() {
+    const dbPath = process.env.DATABASE_PATH || '';
+    const dbPassword = process.env.DATABASE_PASSWORD || '';
 
-const agenda = new Agenda({
-  db: { address: connectionString, collection: 'agendaJobs' }
-});
+    const connectionString = dbPath.replace('<password>', dbPassword);
 
-agenda.define('check poll status', async () => {
-  await PollService.startPollCheckService();
-});
+    this.agenda = new Agenda({
+      db: { address: connectionString, collection: 'agendaJobs' }
+    });
 
+    this.agenda.define('check poll status', async () => {
+      await PollService.startPollCheckService();
+    });
 
-agenda.define('update validation tokens', async () => {
-  Logger.log('Running a job at 01:00 to update verification tokens');
-  await AuthService.updateValidationToken();
-});
+    this.agenda.define('update validation tokens', async () => {
+      Logger.log('Running a job at 01:00 to update verification tokens');
+      await AuthService.updateValidationToken();
+    });
 
-agenda.on('start', job => Logger.log(`Job ${job.attrs.name} started`));
-agenda.on('complete', job => Logger.log(`Job ${job.attrs.name} finished`));
-agenda.on('fail', (err, job) => Logger.log(`Job ${job.attrs.name} failed with error: ${err.message}`));
+    this.agenda.on('start', job => Logger.log(`Job ${job.attrs.name} started`));
+    this.agenda.on('complete', job => Logger.log(`Job ${job.attrs.name} finished`));
+    this.agenda.on('fail', (err, job) => Logger.log(`Job ${job.attrs.name} failed with error: ${err.message}`));
+  }
 
-async function initializeAgenda() {
-  await agenda.start();
+  async initializeAgenda() {
+    await this.agenda.start();
 
-  await agenda.every('1 minute', 'check poll status');
-  await agenda.schedule('1 day at 01:00', 'update validation tokens', {});
+    await this.agenda.every('1 minute', 'check poll status');
+    await this.agenda.schedule('1 day at 01:00', 'update validation tokens', {});
+  }
+
+  async stopAgenda() {
+    await this.agenda.stop();
+  }
 }
 
-export { agenda, initializeAgenda };
+export default new AgendaService();

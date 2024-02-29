@@ -147,6 +147,13 @@ export interface IComment extends Document {
   updateTime: Date;
 }
 
+export interface ITag extends Document {
+  id: string;
+  name: string;
+  createdAt: Date;
+  usageCount: number;
+}
+
 export interface CreateCommentRequest {
   pollId: string;
   userId: string;

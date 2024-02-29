@@ -30,3 +30,5 @@ export class PollService
 
   }
 }
+
+export default PollService;

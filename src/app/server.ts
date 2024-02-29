@@ -11,7 +11,7 @@ const { DATABASE_PASSWORD, DATABASE_PATH } = process.env;
 
 const isProduction = process.env.NODE_ENV === "production";
 
-import { agenda, initializeAgenda} from "@/services/AgendaService";
+import { AgendaService } from "@/services";
 import { catchGlobalError } from "./exception";
 
 mongoose.set("strictQuery", false);
@@ -21,7 +21,7 @@ mongoose
   .then(() => {
     Logger.log("資料庫連線成功");
 
-    initializeAgenda().then(() => Logger.log("Agenda 初始化完成"));
+    AgendaService.initializeAgenda().then(() => Logger.log("Agenda 初始化完成"));
   })
   .catch((error) => Logger.warn(`資料庫連線錯誤: ${error.message}`));
 
@@ -49,7 +49,7 @@ if (!isProduction) {
 catchGlobalError();
 
 process.on("SIGINT", async () => {
-  await agenda.stop();
+  await AgendaService.stopAgenda();
   Logger.log('Agenda has been stopped.');
 
   server.close(() => {

@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose';
+import customEmitter from '@/utils';
 import { IPoll } from '@/types';
-import customEmitter from '@/services/EventEmitter';
+
 
 const pollSchema = new Schema<IPoll>({
   title: {
@@ -21,7 +22,8 @@ const pollSchema = new Schema<IPoll>({
   },
   tags: [
     {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: 'Tag',
     },
   ],
   createdBy: {
