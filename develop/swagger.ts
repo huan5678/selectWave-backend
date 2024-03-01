@@ -157,7 +157,16 @@ const doc = {
       title: "最喜歡的程式語言",
       description: "選擇您最喜歡的程式語言。",
       imageUrl: "https://i.imgur.com/D3hp8H6.png",
-      tags: ["程式語言", "技術"],
+      tags: [
+        {
+        id: "標籤ID",
+        name: "程式語言",
+        },
+        {
+          id: "標籤ID",
+          name: "技術",
+        },
+      ],
       createdBy: {
         id: "用戶ID",
         name: "John Doe",
@@ -229,6 +238,16 @@ const doc = {
       message: "我想要聯絡你們。",
       quests: "意見提供",
     },
+    Tag: [
+      {
+        id: "標籤ID",
+        name: "程式語言",
+      },
+      {
+        id: "標籤ID",
+        name: "前端",
+      },
+    ],
     // Error Response
     ...ErrorSchema,
   },

@@ -103,10 +103,11 @@ export interface CreatePollRequest {
   description: string;
   imageUrl?: string;
   tags?: string[];
-  startDate?: Date;
-  endDate?: Date;
+  startDate?: Date | null;
+  endDate?: Date | null;
+  createdBy: IUser["_id"];
   isPrivate?: boolean;
-  optionsData: {
+  optionsData?: {
     title: string;
     imageUrl?: string;
   }[];
@@ -145,6 +146,13 @@ export interface IComment extends Document {
   createdTime: Date;
   edited: boolean;
   updateTime: Date;
+}
+
+export interface ITag extends Document {
+  id: string;
+  name: string;
+  createdAt: Date;
+  usageCount: number;
 }
 
 export interface CreateCommentRequest {

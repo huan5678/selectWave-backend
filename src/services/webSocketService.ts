@@ -1,8 +1,8 @@
-import { Logger, verifyToken } from "@/utils";
+import customEmitter, { Logger, verifyToken } from "@/utils";
 import { WebSocket } from "vite";
 import { randomUUID } from "crypto";
 import { User } from "@/models";
-import customEmitter from "./EventEmitter";
+
 
 export const webSocketService = (wss) =>
 {

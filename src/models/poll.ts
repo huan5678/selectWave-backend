@@ -1,6 +1,8 @@
 import { Schema, model } from 'mongoose';
+import customEmitter from '@/utils';
 import { IPoll } from '@/types';
-import customEmitter from '@/services/EventEmitter';
+import { Tag } from '@/models';
+
 
 const pollSchema = new Schema<IPoll>({
   title: {
@@ -21,7 +23,8 @@ const pollSchema = new Schema<IPoll>({
   },
   tags: [
     {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: 'Tag',
     },
   ],
   createdBy: {
@@ -123,6 +126,25 @@ pollSchema.pre('save', async function(next) {
 
     poll.totalVoters = totalVoters;
   }
+
+  if (this.isNew || this.isModified('tags')) {
+    const currentTags = this.tags;
+    const previousTags = this.modifiedPaths().includes('tags') ? this._id.tags : [];
+    
+    // 計算新增和移除的標籤
+    const addedTags = currentTags.filter(tag => !previousTags.includes(tag));
+    const removedTags = previousTags.filter(tag => !currentTags.includes(tag));
+
+    // 增加新關聯標籤的 usageCount
+    if (addedTags.length > 0) {
+      await Tag.updateMany({ _id: { $in: addedTags } }, { $inc: { usageCount: 1 } });
+    }
+
+    // 減少移除標籤的 usageCount
+    if (removedTags.length > 0) {
+      await Tag.updateMany({ _id: { $in: removedTags } }, { $inc: { usageCount: -1 } });
+    }
+  }
   next();
 });
 
@@ -150,7 +172,22 @@ pollSchema.pre(/^find/, function (next)
       path: 'isWinner.option',
       select: 'title imageUrl'
     }
-  )
+  );
+  (this as IPoll).populate(
+    {
+      path: 'tags',
+      select: 'name'
+    }
+  );
+  next();
+});
+
+pollSchema.pre(/^remove/, async function(next) {
+  // 減少所有關聯標籤的 usageCount
+  await Tag.updateMany(
+    { _id: { $in: (this as IPoll).tags } },
+    { $inc: { usageCount: -1 } }
+  );
   next();
 });
 

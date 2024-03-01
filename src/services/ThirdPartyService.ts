@@ -8,30 +8,23 @@ import { Strategy as GitHubStrategy } from 'passport-github2';
 import { User } from '@/models';
 import { IUser } from '@/types';
 import { generateToken, randomPassword } from '@/utils';
-
-const googleRedirectUrl = `${process.env.BACKEND_DOMAIN}/api/auth/google/callback`;
-const googleClientId = process.env.GOOGLE_CLIENT_ID;
-const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
-const lineRedirectUrl = `${process.env.BACKEND_DOMAIN}/api/auth/line/callback`;
-const lineChannelId = process.env.LINE_CHANNEL_ID;
-const lineChannelSecret = process.env.LINE_CHANNEL_SECRET;
-const lineState = 'mongodb-express-line-login';
-const facebookClientId = process.env.FACEBOOK_CLIENT_ID;
-const facebookClientSecret = process.env.FACEBOOK_CLIENT_SECRET;
-const facebookRedirectUrl = `${process.env.BACKEND_DOMAIN}/api/auth/facebook/callback`;
-const discordClientId = process.env.DISCORD_CLIENT_ID;
-const discordClientSecret = process.env.DISCORD_CLIENT_SECRET;
-
-const discordRedirectUrl = `${process.env.BACKEND_DOMAIN}/api/auth/discord/callback`;
-const githubClientId = process.env.GITHUB_CLIENT_ID;
-const githubClientSecret = process.env.GITHUB_CLIENT_SECRET;
-const githubRedirectUrl = `${process.env.BACKEND_DOMAIN}/api/auth/github/callback`;
+import config from './config';
 
 const tokenHeader = {
   'Content-Type': 'application/x-www-form-urlencoded',
 };
 
-function createOAuthTokenExchangeOptions(
+class thirdPartyAuthService
+{
+  static initialize() {
+    passport.use(this.googleStrategy());
+    passport.use(this.facebookStrategy());
+    passport.use(this.lineStrategy());
+    passport.use(this.discordStrategy());
+    passport.use(this.githubStrategy());
+  }
+
+  static createOAuthTokenExchangeOptions(
     code: string,
     clientId: string,
     clientSecret: string,
@@ -49,27 +42,81 @@ function createOAuthTokenExchangeOptions(
     return new URLSearchParams(options).toString();
   }
 
-const useGoogleStrategy = new
-  GoogleStrategy({
-    clientID: googleClientId as string,
-    clientSecret: googleClientSecret as string,
-    callbackURL: googleRedirectUrl,
-  },
-    function (_accessToken, _refreshToken, profile, done)
-    {
-      console.log('profile', profile);
-      return done(null, profile);
-    }
-);
+  static googleStrategy() {
+    return new GoogleStrategy({
+      clientID: config.googleClientId as string,
+      clientSecret: config.googleClientSecret as string,
+      callbackURL: config.googleRedirectUrl,
+    },
+      async (_accessToken, _refreshToken, profile, done) =>
+      {
+        return done(null, profile);
+      }
+    );
+  }
 
-export const useGoogleCallback = async (req, res, _next) =>
-{
+  static facebookStrategy() {
+    return new FacebookStrategy({
+      clientID: config.facebookClientId as string,
+      clientSecret: config.facebookClientSecret as string,
+      callbackURL: config.facebookRedirectUrl,
+    },
+      async (_accessToken, _refreshToken, profile, done) =>
+      {
+        return done(null, profile);
+      }
+    );
+  }
+
+  static lineStrategy() {
+    return new LineStrategy({
+      channelID: config.lineChannelId as string,
+      channelSecret: config.lineChannelSecret as string,
+      callbackURL: config.lineRedirectUrl,
+      scope: ['profile', 'openid', 'email'],
+      botPrompt: 'normal',
+    },
+      async (_accessToken, _refreshToken, _params, profile, done) =>
+      {
+        return done(null, profile);
+      }
+    );
+  }
+
+  static discordStrategy() {
+    return new DiscordStrategy({
+      clientID: config.discordClientId as string,
+      clientSecret: config.discordClientSecret as string,
+      callbackURL: config.discordRedirectUrl,
+      scope: ['identify', 'email'],
+    },
+      async (_accessToken, _refreshToken, profile, done) =>
+      {
+        return done(null, profile);
+      }
+    );
+  }
+
+  static githubStrategy() {
+    return new GitHubStrategy({
+      clientID: config.githubClientId as string,
+      clientSecret: config.githubClientSecret as string,
+      callbackURL: config.githubRedirectUrl,
+    },
+      async (_accessToken, _refreshToken, profile, done) =>
+      {
+        return done(null, profile);
+      }
+    );
+  }
+
+  static async googleCallback(req, res, _next) {
     const code = req.query.code as string;
-    const queryString = createOAuthTokenExchangeOptions(
+    const queryString = this.createOAuthTokenExchangeOptions(
       code,
-      googleClientId as string,
-      googleClientSecret as string,
-      googleRedirectUrl,
+      config.googleClientId as string,
+      config.googleClientSecret as string,
+      config.googleRedirectUrl,
     );
     const url = 'https://oauth2.googleapis.com/token';
     const response = await axios.post(url, queryString);
@@ -83,113 +130,78 @@ export const useGoogleCallback = async (req, res, _next) =>
           Authorization: `Bearer ${id_token}`,
         },
       },
-  );
-  const { id, email, name, picture } = data;
+    );
+    const { id, email, name, picture } = data;
 
-  const user = await User.findOne({ email }) as unknown as IUser;
+    const user = await User.findOne({ email }) as unknown as IUser;
 
-  if (!user) {
-    const userData = await User.create({
-      name,
-      email,
-      avatar: picture,
-      password: randomPassword(),
-      googleId: id,
-      isValidator: true,
-    });
-    const authToken = generateToken({ userId: userData._id });
+    if (!user) {
+      const userData = await User.create({
+        name,
+        email,
+        avatar: picture,
+        password: randomPassword(),
+        googleId: id,
+        isValidator: true,
+      });
+      const authToken = generateToken({ userId: userData._id });
 
-    res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
-  }
-  if (user) {
-    const authToken = generateToken({ userId: user._id });
-
-    res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
-  }
-}
-
-const useFacebookStrategy = new
-  FacebookStrategy({
-    clientID: facebookClientId as string,
-    clientSecret: facebookClientSecret as string,
-    callbackURL: facebookRedirectUrl,
-  },
-    async (_accessToken, _refreshToken, profile, done) =>
-    {
-      console.log('profile', profile);
-      if (profile) {
-          return done(null, profile);
-        }
+      res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
     }
-);
+    if (user) {
+      const authToken = generateToken({ userId: user._id });
 
-export const useFacebookCallback = async (req, res, _next) =>
-{
-  const code = req.query.code as string;
-  const queryString = createOAuthTokenExchangeOptions(
-    code,
-    facebookClientId as string,
-    facebookClientSecret as string,
-    facebookRedirectUrl,
-  );
-  const url = 'https://graph.facebook.com/v19.0/oauth/access_token';
-  const response = await axios.get(`${url}?${queryString}`);
-  const { access_token } = response.data;
-
-  const { data } = await axios.get(
-    `https://graph.facebook.com/v19.0/me?fields=id,name,email,picture&access_token=${access_token}`,
-  );
-  const { id, email, name, picture } = data;
-
-  const user = await User.findOne({ email }) as unknown as IUser;
-
-  if (!user) {
-    const userData = await User.create({
-      name,
-      email,
-      avatar: picture.data.url,
-      password: randomPassword(),
-      facebookId: id,
-      isValidator: true,
-    });
-    const authToken = generateToken({ userId: userData._id });
-
-    res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
-  }
-  if (user) {
-    const authToken = generateToken({ userId: user._id });
-
-    res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
-  }
-
-}
-
-const useLineStrategy = new
-  LineStrategy({
-    channelID: lineChannelId as string,
-    channelSecret: lineChannelSecret as string,
-    callbackURL: lineRedirectUrl,
-    scope: ['profile', 'openid', 'email'],
-    botPrompt: 'normal',
-  },
-    async (_accessToken, _refreshToken, _params, profile, done) =>
-    {
-      console.log('profile', profile);
-      if (profile) {
-          return done(null, profile);
-        }
+      res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
     }
-);
+  }
 
-export const useLineCallback = async (req, res, _next) =>
-{
-  const code = req.query.code as string;
+  static async facebookCallback(req, res, _next) {
+    const code = req.query.code as string;
+    const queryString = this.createOAuthTokenExchangeOptions(
+      code,
+      config.facebookClientId as string,
+      config.facebookClientSecret as string,
+      config.facebookRedirectUrl,
+    );
+    const url = 'https://graph.facebook.com/v19.0/oauth/access_token';
+    const response = await axios.get(`${url}?${queryString}`);
+    const { access_token } = response.data;
+
+    const { data } = await axios.get(
+      `https://graph.facebook.com/v19.0/me?fields=id,name,email,picture&access_token=${access_token}`,
+    );
+    const { id, email, name, picture } = data;
+
+    const user = await User.findOne({ email }) as unknown as IUser;
+
+    if (!user) {
+      const userData = await User.create({
+        name,
+        email,
+        avatar: picture.data.url,
+        password: randomPassword(),
+        facebookId: id,
+        isValidator: true,
+      });
+      const authToken = generateToken({ userId: userData._id });
+
+      res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
+    }
+    if (user) {
+      const authToken = generateToken({ userId: user._id });
+
+      res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
+    }
+  }
+
+  static async lineCallback(req, res, _next) {
+    const code = req.query.code as string;
     const options = {
       code,
-      client_id: lineChannelId as string,
-      client_secret: lineChannelSecret as string,
-      redirect_uri: lineRedirectUrl as string,
-      state: lineState as string,
+      client_id: config.lineChannelId as string,
+      client_secret: config.lineChannelSecret as string,
+      redirect_uri: config.lineRedirectUrl as string,
+      state: config.lineState as string,
       grant_type: 'authorization_code',
     };
     const url = 'https://api.line.me/oauth2/v2.1/token';
@@ -202,7 +214,7 @@ export const useLineCallback = async (req, res, _next) =>
 
     const verifyBody = {
       id_token,
-      client_id: lineChannelId as string,
+      client_id: config.lineChannelId as string,
     };
 
     const verifyBodyString = new URLSearchParams(verifyBody).toString();
@@ -213,70 +225,53 @@ export const useLineCallback = async (req, res, _next) =>
       {
         headers: tokenHeader,
       },
-  );
+    );
     const { data } = await axios.get('https://api.line.me/v2/profile', {
       headers: {
         Authorization: `Bearer ${access_token}`,
       },
     });
 
-  const { userId, displayName, pictureUrl } = data;
-  const email = getVerifyData.email;
+    const { userId, displayName, pictureUrl } = data;
+    const email = getVerifyData.email;
 
-  const user = await User.findOne({ email }) as unknown as IUser || await User.findOne({ lineId: userId }) as unknown as IUser;
+    const user = await User.findOne({ email }) as unknown as IUser || await User.findOne({ lineId: userId }) as unknown as IUser;
 
-  if (!user) {
-    const userData = await User.create({
-      name: displayName,
-      email,
-      avatar: pictureUrl,
-      password: randomPassword(),
-      lineId: userId,
-      isValidator: true,
-    });
-    const authToken = generateToken({ userId: userData._id });
+    if (!user) {
+      const userData = await User.create({
+        name: displayName,
+        email,
+        avatar: pictureUrl,
+        password: randomPassword(),
+        lineId: userId,
+        isValidator: true,
+      });
+      const authToken = generateToken({ userId: userData._id });
 
-    res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
-  }
-  if (user) {
-    const authToken = generateToken({ userId: user._id });
-
-    res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
-  }
-}
-
-const useDiscordStrategy = new
-  DiscordStrategy({
-    clientID: discordClientId as string,
-    clientSecret: discordClientSecret as string,
-    callbackURL: discordRedirectUrl,
-    scope: ['identify', 'email'],
-  },
-    async (_accessToken, _refreshToken, profile, done) =>
-    {
-      console.log('profile', profile);
-      if (profile) {
-          return done(null, profile);
-        }
+      res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
     }
-);
+    if (user) {
+      const authToken = generateToken({ userId: user._id });
 
-export const useDiscordCallback = async (req, res, _next) =>
-{
-  const code = req.query.code as string;
-  const options = {
+      res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
+    }
+  }
+
+  static async discordCallback(req, res, _next) {
+    const code = req.query.code as string;
+    const options = {
       code,
-      client_id: discordClientId as string,
-      client_secret: discordClientSecret as string,
-      redirect_uri: discordRedirectUrl as string,
+      client_id: config.discordClientId as string,
+      client_secret: config.discordClientSecret as string,
+      redirect_uri: config.discordRedirectUrl as string,
       grant_type: 'authorization_code',
       scope: 'email identify',
     };
-  const url = 'https://discord.com/api/oauth2/token';
+    const url = 'https://discord.com/api/oauth2/token';
 
-  const queryString = new URLSearchParams(options).toString();
+    const queryString = new URLSearchParams(options).toString();
 
-  const response = await axios.post(url, queryString);
+    const response = await axios.post(url, queryString);
 
     const { access_token } = response.data;
 
@@ -285,102 +280,78 @@ export const useDiscordCallback = async (req, res, _next) =>
         Authorization: `Bearer ${access_token}`,
       },
     });
-  
-  const { id, email } = data.user;
-  const avatar = `https://cdn.discordapp.com/avatars/${id}/${data.avatar}.png`;
-  const name = data.username;
 
-  const user = await User.findOne({ email }) as unknown as IUser || await User.findOne({ discordId: id }) as unknown as IUser;
+    const { id, email } = data.user;
+    const avatar = `https://cdn.discordapp.com/avatars/${id}/${data.avatar}.png`;
+    const name = data.username;
 
-  if (!user) {
-    const userData = await User.create({
-      name,
-      email,
-      avatar,
-      password: randomPassword(),
-      discordId: id,
-      isValidator: true,
-    });
-    const authToken = generateToken({ userId: userData._id });
+    const user = await User.findOne({ email }) as unknown as IUser || await User.findOne({ discordId: id }) as unknown as IUser;
 
-    res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
-  }
-  if (user) {
-    const authToken = generateToken({ userId: user._id });
+    if (!user) {
+      const userData = await User.create({
+        name,
+        email,
+        avatar,
+        password: randomPassword(),
+        discordId: id,
+        isValidator: true,
+      });
+      const authToken = generateToken({ userId: userData._id });
 
-    res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
-  }
-}
-
-const useGitHubStrategy = new
-  GitHubStrategy({
-    clientID: githubClientId as string,
-    clientSecret: githubClientSecret as string,
-    callbackURL: githubRedirectUrl,
-  },
-    async (_accessToken, _refreshToken, profile, done) =>
-    {
-      console.log('profile', profile);
-      if (profile) {
-          return done(null, profile);
-        }
+      res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
     }
-);
+    if (user) {
+      const authToken = generateToken({ userId: user._id });
 
-export const useGithubCallback = async (req, res, _next) =>
-{
-  const code = req.query.code as string;
-  const options = {
-    code,
-    client_id: githubClientId as string,
-    client_secret: githubClientSecret as string,
-    redirect_uri: githubRedirectUrl as string,
-  };
-  const url = 'https://github.com/login/oauth/access_token';
-  const queryString = new URLSearchParams(options).toString();
-  const response = await axios.post(url, queryString, {
-    headers: tokenHeader,
-  });
-
-  const { access_token } = response.data;
-
-  const { data } = await axios.get('https://api.github.com/user', {
-    headers: {
-      Authorization: `Bearer ${access_token}`,
-    },
-  });
-
-  const { id, email, name, avatar_url } = data;
-
-  const user = await User.findOne({ email }) as unknown as IUser || await User.findOne({ githubId: id }) as unknown as IUser;
-
-  if (!user) {
-    const userData = await User.create({
-      name,
-      email,
-      avatar: avatar_url,
-      password: randomPassword(),
-      githubId: id,
-      isValidator: true,
-    });
-    const authToken = generateToken({ userId: userData._id });
-
-    res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
+      res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
+    }
   }
-  if (user) {
-    const authToken = generateToken({ userId: user._id });
 
-    res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
+  static async githubCallback(req, res, _next) {
+    const code = req.query.code as string;
+    const options = {
+      code,
+      client_id: config.githubClientId as string,
+      client_secret: config.githubClientSecret as string,
+      redirect_uri: config.githubRedirectUrl as string,
+    };
+    const url = 'https://github.com/login/oauth/access_token';
+    const queryString = new URLSearchParams(options).toString();
+    const response = await axios.post(url, queryString, {
+      headers: tokenHeader,
+    });
+
+    const { access_token } = response.data;
+
+    const { data } = await axios.get('https://api.github.com/user', {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    });
+
+    const { id, email, name, avatar_url } = data;
+
+    const user = await User.findOne({ email }) as unknown as IUser || await User.findOne({ githubId: id }) as unknown as IUser;
+
+    if (!user) {
+      const userData = await User.create({
+        name,
+        email,
+        avatar: avatar_url,
+        password: randomPassword(),
+        githubId: id,
+        isValidator: true,
+      });
+      const authToken = generateToken({ userId: userData._id });
+
+      res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
+    }
+    if (user) {
+      const authToken = generateToken({ userId: user._id });
+
+      res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
+    }
   }
 }
 
-export const usePassport = () =>
-{
-  passport.use(useGoogleStrategy);
-  passport.use(useFacebookStrategy);
-  passport.use(useLineStrategy);
-  passport.use(useDiscordStrategy);
-  passport.use(useGitHubStrategy);
-};
-
-export default passport;
+export default thirdPartyAuthService;

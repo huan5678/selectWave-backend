@@ -6,8 +6,7 @@ import Routes from '@/routes';
 import * as Exception from '@/app/exception';
 import { sessionMiddleware, verifyMiddleware } from '@/middleware';
 import swaggerRouter from '@/routes/swagger.router';
-import passport from 'passport';
-import { usePassport } from '@/services';
+import { thirdPartyAuthService } from '@/services';
 
 const app = express();
 
@@ -16,8 +15,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 app.use(morgan('dev'));
-usePassport();
-app.use(passport.initialize());
+thirdPartyAuthService.initialize();
 app.use(swaggerRouter);
 
 app.use(
@@ -48,6 +46,8 @@ app.use(
       { path: '/contact/', method: 'POST' },
       { path: '/contact/subscribe', method: 'POST' },
       { path: '/contact/subscribe', method: 'PUT' },
+      { path: '/contact/subscribe', method: 'DELETE' },
+      { path: '/tag/', method: 'GET' },
   ]),
   Routes,
 );

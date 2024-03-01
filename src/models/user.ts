@@ -1,9 +1,9 @@
 import { Schema, model } from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcryptjs';
-import { passwordRule } from '@/utils';
+import customEmitter, { passwordRule } from '@/utils';
 import { IUser } from '@/types';
-import customEmitter from '@/services/EventEmitter';
+
 
 const userSchema = new Schema<IUser>(
   {

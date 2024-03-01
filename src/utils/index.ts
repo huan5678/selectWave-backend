@@ -1,7 +1,8 @@
+import { NextFunction, Request, Response } from 'express';
+import { EventEmitter } from 'events';
 import jsonWebToken, { type JwtPayload } from 'jsonwebtoken';
 import { Schema, date as dateSchema, object } from 'yup';
 import { Data, ResponseError } from '@/types';
-import { NextFunction, Request, Response } from 'express';
 
 const { JWT_SECRET, JWT_EXPIRES_DAY } = process.env;
 
@@ -175,3 +176,7 @@ export const validateInput = async (schema: Schema, data, next: NextFunction) =>
     throw appError({ code: 400, message: '驗證失敗', next });
   }
 };
+
+const customEmitter = new EventEmitter();
+
+export default customEmitter;

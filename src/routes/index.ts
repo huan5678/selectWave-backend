@@ -8,6 +8,7 @@ import voteRouter from './vote.router';
 import commentRouter from './comment.router';
 import mailRouter from './mail.router';
 import contactRouter from './contact.router';
+import tagRouter from './tag.router';
 
 
 const apiRouter = Router();
@@ -24,11 +25,12 @@ apiRouter.use((req: Request, _, next: NextFunction) => {
 
 
 apiRouter.use('/auth', authRouter);
-apiRouter.use('/imgur', imgurRouter);
 apiRouter.use('/member', memberRouter);
 apiRouter.use('/poll', pollRouter);
 apiRouter.use('/vote', voteRouter);
+apiRouter.use('/tag', tagRouter);
 apiRouter.use('/comment', commentRouter);
+apiRouter.use('/imgur', imgurRouter);
 apiRouter.use('/mail', mailRouter);
 apiRouter.use('/contact', contactRouter);
 

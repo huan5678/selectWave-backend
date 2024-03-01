@@ -1,7 +1,7 @@
-import MemberController from '@/controllers/member.controller';
-
-import { handleErrorAsync } from '@/utils';
 import { Router } from 'express';
+import MemberController from '@/controllers/member.controller';
+import { handleErrorAsync } from '@/utils';
+
 
 const memberRouter = Router();
 

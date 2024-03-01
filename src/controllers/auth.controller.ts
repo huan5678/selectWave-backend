@@ -1,10 +1,8 @@
 import { RequestHandler } from "express";
-import { TokenPayload } from "@/types";
 import { object, string } from "yup";
-import { AuthService } from "@/services";
-import { appError, getToken, successHandle, validateInput, verifyToken } from "@/utils";
+import { AuthService, TokenBlackListService } from "@/services";
+import { appError, getToken, successHandle, validateInput } from "@/utils";
 import MailServiceController from "./mailer.controller";
-import { TokenBlacklist, User } from "@/models";
 
 const inputSchema = object({
   email: string().email().required().lowercase(),
@@ -26,19 +24,7 @@ class AuthController {
     if (!token) {
       throw appError({ code: 400, message: "缺少 token", next });
     }
-    const decoded = verifyToken(token as string) as TokenPayload;
-    if (!decoded) {
-      throw appError({ code: 400, message: "無效的 token", next });
-    }
-    const user = await User.findOne({ verificationToken: token }).exec();
-
-    if (!user) {
-      throw appError({ code: 404, message: "無效的驗證連結或已過期", next });
-    }
-
-    user.verificationToken = "";
-    user.isValidator = true;
-    await user.save();
+    const user = await AuthService.verifyUserByToken(token as string, next);
 
     return successHandle(res, "使用者成功驗證", { result: user });
   };
@@ -49,21 +35,18 @@ class AuthController {
     if (password !== confirmPassword)
       throw appError({ code: 400, message: "密碼不一致", next });
     // check member existence
-    if (await AuthService.getMemberByAccountOrEmail(email)) {
-      throw appError({ code: 400, message: "此 Email 已註冊", next });
-    } else {
-      const { authToken } = await AuthService.registerMember(
-        {
-          email,
-          password,
-        },
-        next
-      );
-      req.body.token = authToken;
-      req.body.email = email;
-      MailServiceController.sendVerificationEmail(req, res, next);
-      return successHandle(res, "註冊成功", { result: { token: authToken } });
-    }
+    await AuthService.getMemberByAccountOrEmail(email);
+    const { authToken } = await AuthService.registerMember(
+      {
+        email,
+        password,
+      },
+      next
+    );
+    req.body.token = authToken;
+    req.body.email = email;
+    MailServiceController.sendVerificationEmail(req, res, next);
+    return successHandle(res, "註冊成功", { result: { token: authToken } });
   };
 
   public static loginHandler: RequestHandler = async (req, res, next) => {
@@ -80,9 +63,7 @@ class AuthController {
     if (!token) {
       throw appError({ code: 400, message: "缺少 token", next });
     }
-    const decodedToken = verifyToken(token) as TokenPayload;
-    const expiresAt = new Date(decodedToken.exp * 1000);
-    await TokenBlacklist.create({ token, expiresAt });
+    await TokenBlackListService.createTokenBlackList(token);
 
     return successHandle(res, "成功登出", { result: true });
   };
@@ -95,14 +76,8 @@ class AuthController {
   {
     if (!(await validateInput(emailInputSchema, req.body, next))) return;
     const { email } = req.body;
-    const member = await AuthService.getMemberByAccountOrEmail(email);
-    if (!member) {
-      throw appError({ code: 404, message: "此 Email 未註冊", next });
-    }
+    await AuthService.getMemberByAccountOrEmail(email);
     MailServiceController.sendResetEmail(req, res, next);
-    successHandle(res, "成功送出重設密碼信件，請收信並進行重設步驟", {
-      result: true,
-    });
   };
 
   public static verifyResetPasswordHandler: RequestHandler = async (
@@ -117,16 +92,8 @@ class AuthController {
     if (!token) {
       throw appError({ code: 400, message: "缺少 token", next });
     }
-    const decoded = verifyToken(token as string) as TokenPayload;
-    if (!decoded) {
-      throw appError({ code: 400, message: "無效的 token", next });
-    }
-    const user = await User.findOne({ resetToken: token });
-    if (!user) {
-      throw appError({ code: 404, message: "無效的重設連結或已過期", next });
-    }
-    await User.findByIdAndUpdate(user.id, { resetToken: "", password }).exec();
-    return successHandle(_res, "成功重設密碼", { result: true });
+    const result = await AuthService.resetPasswordByRestToken(token, password, next);
+    return successHandle(_res, "成功重設密碼", { result });
   };
 
   public static changePasswordHandler: RequestHandler = async (
@@ -142,10 +109,7 @@ class AuthController {
       throw appError({ code: 400, message: "invalid input", next });
 
     const { email, password } = inputSchema.cast(req.body);
-    const member = await AuthService.getMemberByAccountOrEmail(email);
-    if (!member) {
-      throw appError({ code: 404, message: "已無此使用者請重新註冊" });
-    }
+    await AuthService.getMemberByAccountOrEmail(email);
     await AuthService.updatePassword({ email, password, next });
     successHandle(res, "success", { result: true });
   };

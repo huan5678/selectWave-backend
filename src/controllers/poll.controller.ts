@@ -1,8 +1,8 @@
-import { RequestHandler, Response } from "express"; // Import missing modules
-import { Poll, Vote, User } from "@/models";
+import { NextFunction, RequestHandler, Response } from "express"; // Import missing modules
 import { appError, successHandle } from "@/utils";
 import { array, boolean, date, object, string } from "yup";
-import { IVote, IPoll, IUser, IOption, CreatePollRequest } from "@/types";
+import { IVote, IUser, IOption, CreatePollRequest } from "@/types";
+import { PollService, TagService, VoteService } from "@/services";
 
 const pollSchema = object({
   title: string()
@@ -55,7 +55,7 @@ class PollController {
   public static createPoll = async (
     req: Request & { body: CreatePollRequest, user: IUser },
     res: Response,
-    next
+    next: NextFunction
   ) => {
     // 驗證請求的資料是否符合規範
     const validationResult = await pollSchema
@@ -114,11 +114,13 @@ class PollController {
     if ((startDate && new Date(startDate) < now) || status === "active")
       isStartNow = true;
 
-    const newPoll = await Poll.create({
+    const tagInstances = await TagService.createMultipleTags(tags as string[]);
+
+    const newPoll = await PollService.createPoll({
       title,
       description,
       imageUrl,
-      tags,
+      tags: tagInstances && tagInstances.map((tag) => tag.id),
       createdBy: req.user.id,
       isPrivate,
       startDate: startDate ? new Date(startDate) : isStartNow ? now : null,
@@ -127,17 +129,14 @@ class PollController {
     });
 
     // 建立 Vote 資料
-    const optionInstances = await Promise.all(
-      optionsData.map((optionData) =>
-        Vote.create({ ...optionData, pollId: newPoll.id })
-      )
-    );
+    const optionInstances = await VoteService.createOptions(optionsData as IOption[], newPoll.id);
     newPoll.options = optionInstances.map((option) => option.id);
     await newPoll.save();
-    const poll = await Poll.findById(newPoll.id)
-      .populate("createdBy", "name avatar")
-      .populate("options", "title imageUrl")
-      .exec();
+    const populates = [
+      { path: "createdBy", select: "name avatar" },
+      { path: "options", select: "title imageUrl" },
+    ]
+    const poll = await PollService.getPoll({id: newPoll.id, populates, next});
 
     successHandle(res, "投票創建成功", { poll });
   };
@@ -164,15 +163,10 @@ class PollController {
         ...(createdBy && { createdBy: createdBy }),
     };
 
-    const polls = await Poll.find(queryConditions)
-      .sort(sort as string || { createdAt: -1 })
-      .select("-comments -options")
-      .skip(skip)
-      .limit(limit)
-      .exec();
+    const polls = await PollService.getPolls(queryConditions, sort as string, skip, limit);
 
     // 可以選擇性地添加總記錄數
-    const total = await Poll.countDocuments();
+    const total = await PollService.countDocuments(queryConditions);
 
     successHandle(res, "獲取投票列表成功", { polls, total, page, limit });
   };
@@ -184,26 +178,15 @@ class PollController {
     next
   ) => {
     const { id } = req.params;
-    const poll = await Poll.findById(id)
-      .populate("options")
-      .populate("createdBy")
-      .populate({
-        path: "comments.comment",
-        select: "content author createdTime updatedTime edited",
-      })
-      .populate({
-        path: "isWinner.option",
-        select: "title imageUrl",
-        populate: { path: "voters.user", select: "name avatar" },
-      })
-      .exec();
-    if (!poll) {
-      throw appError({
-        code: 404,
-        message: "找不到該投票資訊，請檢查ID是否正確",
-        next,
-      });
-    }
+    const poll = await PollService.getPoll({
+      id,
+      populates:[
+        { path: "createdBy" },
+        { path: "options" },
+        { path: "comments.comment", select: "content author createdTime updatedTime edited" },
+        { path: "isWinner.option", select: "title imageUrl", populate: { path: "voters.user", select: "name avatar" } },
+    ], next
+    });
     successHandle(res, "獲取投票詳細資訊成功", { poll });
   };
 
@@ -211,31 +194,23 @@ class PollController {
   public static updatePoll: RequestHandler = async (req, res, next) => {
     const { id } = req.params;
     const { id: userId } = req.user as IUser;
-    const poll = await Poll.findById(id).exec();
-
-    
-    if (!poll) {
-      throw appError({
-        code: 404,
-        message: "找不到該投票資訊，請檢查ID是否正確",
-        next,
-      });
-    }
-    
-    if (poll.createdBy.id !== userId) {
-      throw appError({ code: 403, message: "您無法更新該投票", next });
-    }
-    
-    if (poll.status === "closed" || poll.status === "ended") {
-      throw appError({ code: 400, message: "投票已經結束，無法更新", next });
-    }
 
     // 驗證更新資料
     await updatePollSchema
       .validate(req.body)
       .catch((err) =>
         appError({ code: 400, message: err.errors.join(", "), next })
-      );
+    );
+
+    const poll = await PollService.getPoll({ id, next });
+
+    if (poll.createdBy.id !== userId) {
+      throw appError({ code: 403, message: "您無法更新該投票", next });
+    }
+
+    if (poll.status === "closed" || poll.status === "ended") {
+      throw appError({ code: 400, message: "投票已經結束，無法更新", next });
+    }
 
     const {
       title,
@@ -249,11 +224,13 @@ class PollController {
       status,
     } = req.body;
 
+    const tagInstances = await TagService.createMultipleTags(tags as string[]);
+
     // 更新投票主體
     poll.title = title ?? poll.title;
     poll.description = description ?? poll.description;
     poll.imageUrl = imageUrl ?? poll.imageUrl;
-    poll.tags = tags ?? poll.tags;
+    poll.tags = tagInstances && tagInstances.map((tag) => tag.id);
     poll.startDate = startDate ?? poll.startDate;
     poll.endDate = endDate ?? poll.endDate;
     poll.isPrivate = isPrivate ?? poll.isPrivate;
@@ -263,42 +240,17 @@ class PollController {
 
     // 處理選項更新
     if (optionsData && optionsData.length > 0) {
-      // 使用 map 來迭代每一個選項數據
-      const updatedOptions = optionsData.map(async (optionData: IOption) => {
-        // 檢查是否包含 id，如果有 id 則更新
-        if (optionData.id) {
-          return await Vote.findByIdAndUpdate(
-            optionData.id,
-            {
-              $set: {
-                title: optionData.title,
-                // 更新其他需要更新的欄位
-                imageUrl: optionData.imageUrl ?? null, // 這是一個示例，根據實際情況可能需要調整
-              },
-            },
-            { new: true }
-          ); // { new: true } 確保返回的是更新後的文檔
-        } else {
-          // 沒有 id 則新增選項
-          return await Vote.create({
-            ...optionData,
-            pollId: poll?.id,
-          });
-        }
-      });
+      const updatedOptions = await VoteService.updateOption(poll._id, optionsData);
 
-      // 等待所有選項的更新或新增完成
-      const optionsResult = await Promise.all(updatedOptions);
-
-      // 更新 poll 文檔中的 options 陣列
-      poll.options = optionsResult.map((option) => option.id);
+      poll.options = updatedOptions.map((option) => option?.id as IVote["_id"]);
       await poll.updateOne(poll).exec();
     }
 
-    // 重新加載更新後的投票資訊，包括關聯的選項等
-    const result = await Poll.findById(poll.id)
-      .populate("options", "title imageUrl")
-      .populate("createdBy", "name email");
+    const result = await PollService.getPoll({
+      id, populates: [
+        { path: "createdBy", select: "name avatar" },
+        { path: "options", select: "title imageUrl" },
+    ], next });
 
     successHandle(res, "投票更新成功", {result});
   };
@@ -310,45 +262,20 @@ class PollController {
     next
   ) => {
     const { id } = req.params;
-    const poll = await Poll.findById(id).exec();
-    if (!poll) {
-      throw appError({ code: 404, message: "找不到投票", next });
+    if (!id) {
+      throw appError({ code: 400, message: "請提供投票 ID", next });
     }
-    const options = await Vote.find({ pollId: id });
-    await Promise.all(options.map((option) => option.deleteOne()));
-    await poll.deleteOne();
+    await PollService.deletePoll(id, next);
+    await VoteService.deleteOptionByPollId(id);
     successHandle(res, "刪除投票成功", {});
   };
 
   // 喜歡投票
   public static likePoll: RequestHandler = async (req, res: Response, next) => {
-    const pollId = req.params.id;
-    const { id } = req.user as IUser;
-    const poll = (await Poll.findById(pollId)) as IPoll;
-    const user = (await User.findById(id).exec()) as IUser;
-    if (!poll) {
-      throw appError({ code: 404, message: "找不到投票", next });
-    }
-    const existingFollower = poll.like.find((like) => {
-      return like.user.toString() === user.id;
-    });
-
-    if (existingFollower) {
-      throw appError({ code: 400, message: "您已經喜歡過此投票", next });
-    }
-    const resultPollData = await Poll.findOneAndUpdate(
-      { id: pollId },
-      { $push: { like: { user } } },
-      { new: true }
-    )
-      .populate("like.user", { name: 1, avatar: 1 })
-      .exec();
-    await User.findOneAndUpdate(
-      { id: id },
-      { $push: { likedPolls: { poll } } },
-      { new: true }
-    ).exec();
-    successHandle(res, "喜歡投票成功", { resultPollData });
+    const { id } = req.params;
+    const { id: UserId } = req.user as IUser;
+    const result = await PollService.likePoll(id, UserId, next);
+    successHandle(res, "喜歡投票成功", { result });
   };
 
   // 取消喜歡投票
@@ -357,33 +284,16 @@ class PollController {
     res: Response,
     next
   ) => {
-    const { id } = req.user as IUser;
-    const pollId = req.params.id;
+    const { id } = req.params;
+    const { id: userId } = req.user as IUser;
 
-    const poll = await Poll.findById(pollId).exec();
-    const user = (await User.findById(id).exec()) as IUser;
+    if (!id) {
+      throw appError({ code: 400, message: "請提供投票 ID", next });
+    }
 
-    if (!poll) {
-      throw appError({ code: 404, message: "找不到投票", next });
-    }
-    const existingFollower = poll.like.find(
-      (like) => like.user.toString() === user.id
-    );
-    if (!existingFollower) {
-      throw appError({ code: 400, message: "您尚未喜歡過此投票", next });
-    }
-    const resultPollData = await Poll.findOneAndUpdate(
-      { id: pollId },
-      { $pull: { like: { user } } },
-      { new: true }
-    )
-      .populate("like.user", "name avatar")
-      .exec();
-    await User.findOneAndUpdate(
-      { id: id },
-      { $pull: { likedPolls: { poll } } }
-    ).exec();
-    successHandle(res, "取消喜歡投票成功", { resultPollData });
+    const result = await PollService.unlikePoll(id, userId, next);
+
+    successHandle(res, "取消喜歡投票成功", { result });
   };
 
   // 開始投票
@@ -393,77 +303,19 @@ class PollController {
     next
   ) => {
     const { id } = req.params;
-    const poll = await Poll.findById(id).exec();
-    if (!poll) {
-      throw appError({ code: 404, message: "找不到投票", next });
-    }
-    if (poll.status !== "pending") {
-      throw appError({ code: 400, message: "投票已經開始或是結束", next });
-    }
+    const result = await PollService.startPoll(id, req, next);
 
-    if (poll.createdBy.id !== (req.user as IUser).id) {
-      throw appError({ code: 403, message: "您無法開始該投票", next });
-    }
-
-    poll.status = "active";
-    await poll.save();
-    successHandle(res, "開始投票成功", { result: poll });
+    successHandle(res, "開始投票成功", { result });
   };
 
-  public static calculateResultsForPoll = async (id: string) => {
-  const poll = await Poll.findById(id).exec();
-  if (!poll) return;
-  if (poll.status !== "ended") return;
-
-  const options = await Vote.find({ pollId: id }).exec();
-  let maxVotes = 0;
-  let winnerVotes = [] as IVote[];
-
-  options.forEach((option) => {
-    const votesCount = option.voters.length;
-    if (votesCount > maxVotes) {
-      winnerVotes = [option];
-      maxVotes = votesCount;
-    } else if (votesCount === maxVotes) {
-      winnerVotes.push(option);
-    }
-  });
-
-  const winnerUpdates = winnerVotes.length > 0 ? winnerVotes.map((winner) => ({
-    option: winner._id,
-  })) : [];
-
-  poll.isWinner = winnerUpdates;
-  poll.status = "closed"; // Ensure the poll is closed regardless of votes
-  await poll.save();
-
-  return poll;
-};
 
   // 結束投票
   public static endPoll: RequestHandler = async (req, res, next) => {
     const { id } = req.params;
     const { id: userId } = req.user as IUser;
-    const poll = (await Poll.findById(id).exec()) as IPoll;
-    if (!poll) {
-      throw appError({ code: 404, message: "找不到投票", next });
-    }
-    if (poll.status === "pending") {
-      throw appError({ code: 400, message: "投票未開始無法結束", next });
-    }
-    if (
-      poll.status === "ended" ||
-      poll.status === "closed" ||
-      poll.isWinner.length > 0
-    ) {
-      throw appError({ code: 400, message: "投票已經結束", next });
-    }
+    await PollService.endPoll(id, userId, next);
 
-    if (poll.createdBy.id !== userId) {
-      throw appError({ code: 403, message: "您無法結束該投票", next });
-    }
-
-    const updatedPoll = await PollController.calculateResultsForPoll(id);
+    const updatedPoll = await PollService.calculateResultsForPoll(id);
     if (!updatedPoll) {
       throw appError({ code: 500, message: "結束投票失敗", next });
     }
