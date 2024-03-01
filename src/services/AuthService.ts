@@ -178,5 +178,6 @@ export class AuthService {
       await user.save();
     });
   }
+
 }
 

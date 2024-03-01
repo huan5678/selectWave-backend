@@ -175,3 +175,4 @@ export const validateInput = async (schema: Schema, data, next: NextFunction) =>
     throw appError({ code: 400, message: '驗證失敗', next });
   }
 };
+

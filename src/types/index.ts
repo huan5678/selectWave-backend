@@ -20,10 +20,9 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
-  webAuthnCredentials: {
-    credentialID: Buffer;
-    publicKey: string;
-    counter: number;
+  credentials: {
+    credential: ICredential["_id"];
+    createdAt: Date;
   }[];
   avatar: string;
   gender: "male" | "female" | "x";
@@ -55,6 +54,13 @@ export interface IUser extends Document {
   githubId?: string;
   likedPolls: IPoll["_id"][];
   comments: IComment["_id"][];
+}
+
+export interface ICredential extends Document {
+  name: String,
+  externalId:  String,
+  publicKey:  String,
+  dateAdded: Date,
 }
 
 export interface CreateUserRequest {

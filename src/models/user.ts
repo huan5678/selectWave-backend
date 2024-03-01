@@ -1,20 +1,20 @@
-import { Schema, model } from 'mongoose';
-import validator from 'validator';
-import bcrypt from 'bcryptjs';
-import { passwordRule } from '@/utils';
-import { IUser } from '@/types';
-import customEmitter from '@/services/EventEmitter';
+import { Schema, model } from "mongoose";
+import validator from "validator";
+import bcrypt from "bcryptjs";
+import { passwordRule } from "@/utils";
+import { IUser } from "@/types";
+import customEmitter from "@/services/EventEmitter";
 
 const userSchema = new Schema<IUser>(
   {
     email: {
       type: String,
-      required: [true, 'email為必要資訊'],
+      required: [true, "email為必要資訊"],
       validate: {
         validator(value: string) {
           return validator.isEmail(value);
         },
-        message: '請填寫正確 email 格式',
+        message: "請填寫正確 email 格式",
       },
       index: true,
       unique: true,
@@ -24,44 +24,43 @@ const userSchema = new Schema<IUser>(
     },
     password: {
       type: String,
-      minLength: [8, '密碼至少 8 個字'],
-      required: [true, '密碼欄位，請確實填寫'],
+      minLength: [8, "密碼至少 8 個字"],
+      required: [true, "密碼欄位，請確實填寫"],
       validate: {
         validator(v: string): boolean {
           return passwordRule.test(v);
         },
-        message: '密碼需符合至少有 1 個數字， 1 個大寫英文， 1 個小寫英文, 1 個特殊符號，且長度至少為 8 個字元',
+        message:
+          "密碼需符合至少有 1 個數字， 1 個大寫英文， 1 個小寫英文, 1 個特殊符號，且長度至少為 8 個字元",
       },
       select: false,
     },
-    webAuthnCredentials: [{
-    credentialID: {
-      type: Buffer,
-      required: true,
-    },
-    publicKey: {
-      type: String,
-      required: true,
-    },
-    counter: {
-      type: Number,
-      required: true,
-    }
-  }],
+    credentials: [
+      {
+        credential: {
+          type: Schema.Types.ObjectId,
+          ref: "Credentials",
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
     name: {
       type: String,
-      minLength: [1, '名稱請大於 1 個字'],
-      maxLength: [ 50, '名稱長度過長，最多只能 50 個字' ],
+      minLength: [1, "名稱請大於 1 個字"],
+      maxLength: [50, "名稱長度過長，最多只能 50 個字"],
       default: `使用者 #${Math.floor(Math.random() * 1000000)}`,
     },
     avatar: {
       type: String,
-      default: 'https://i.imgur.com/xcLTrkV.png',
+      default: "https://i.imgur.com/xcLTrkV.png",
     },
     gender: {
       type: String,
-      enum: ['male', 'female', 'x'],
-      default: 'x',
+      enum: ["male", "female", "x"],
+      default: "x",
     },
     birthday: {
       type: Date,
@@ -69,7 +68,7 @@ const userSchema = new Schema<IUser>(
     followers: [
       {
         _id: false,
-        user: { type: Schema.Types.ObjectId, ref: 'User' },
+        user: { type: Schema.Types.ObjectId, ref: "User" },
         createdAt: {
           type: Date,
           default: Date.now,
@@ -79,7 +78,7 @@ const userSchema = new Schema<IUser>(
     following: [
       {
         _id: false,
-        user: { type: Schema.Types.ObjectId, ref: 'User' },
+        user: { type: Schema.Types.ObjectId, ref: "User" },
         createdAt: {
           type: Date,
           default: Date.now,
@@ -128,7 +127,7 @@ const userSchema = new Schema<IUser>(
     },
     verificationToken: {
       type: String,
-      default: '',
+      default: "",
       select: false,
     },
     isSubscribed: {
@@ -149,7 +148,7 @@ const userSchema = new Schema<IUser>(
         _id: false,
         poll: {
           type: Schema.Types.ObjectId,
-          ref: 'Poll',
+          ref: "Poll",
         },
       },
     ],
@@ -158,54 +157,51 @@ const userSchema = new Schema<IUser>(
         _id: false,
         comment: {
           type: Schema.Types.ObjectId,
-          ref: 'Comment',
+          ref: "Comment",
         },
       },
-    ]
+    ],
   },
   {
     versionKey: false,
     timestamps: true,
     toJSON: {
       virtuals: true,
-      transform: (_doc, ret) =>
-      {
+      transform: (_doc, ret) => {
         ret.id = ret._id;
         delete ret._id;
         delete ret.password;
         delete ret.resetToken;
         delete ret.verificationToken;
         return ret;
-      }
+      },
     },
     toObject: {
       virtuals: true,
-      transform: (_doc, ret) =>
-      {
+      transform: (_doc, ret) => {
         ret.id = ret._id;
         delete ret._id;
         delete ret.password;
         delete ret.resetToken;
         delete ret.verificationToken;
         return ret;
-      }
+      },
     },
-  },
+  }
 );
 
-userSchema.pre('save', async function (next)
-{
+userSchema.pre("save", async function (next) {
   // 如果密碼被修改了，則對密碼進行加密
-  if (this.isModified('password')) {
+  if (this.isModified("password")) {
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
   }
   next();
 });
 
-userSchema.post('save', async function() {
-  if (this.isModified('followers')) {
-    customEmitter.emit('userUpdated', {
+userSchema.post("save", async function () {
+  if (this.isModified("followers")) {
+    customEmitter.emit("userUpdated", {
       userId: this._id,
       followers: this.followers,
     });
@@ -220,4 +216,4 @@ userSchema.methods.toJSON = function () {
   return user;
 };
 
-export default model<IUser>('User', userSchema);
+export default model<IUser>("User", userSchema);

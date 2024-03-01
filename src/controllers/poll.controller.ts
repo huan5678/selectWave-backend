@@ -172,7 +172,7 @@ class PollController {
       .exec();
 
     // 可以選擇性地添加總記錄數
-    const total = await Poll.countDocuments();
+    const total = await Poll.countDocuments(queryConditions);
 
     successHandle(res, "獲取投票列表成功", { polls, total, page, limit });
   };
