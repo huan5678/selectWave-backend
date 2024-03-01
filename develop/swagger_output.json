@@ -434,10 +434,6 @@
             "schema": {
               "type": "object",
               "properties": {
-                "email": {
-                  "type": "string",
-                  "example": "example@example.com"
-                },
                 "password": {
                   "type": "string",
                   "example": "Abc@12345"
@@ -1773,11 +1769,16 @@
             "name": "name",
             "in": "body",
             "required": true,
-            "description": "標籤名稱",
             "schema": {
               "type": "object",
-              "properties": {}
-            }
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "標籤名稱"
+                }
+              }
+            },
+            "description": "標籤名稱"
           }
         ],
         "responses": {
@@ -1900,6 +1901,15 @@
             "in": "path",
             "required": true,
             "type": "string",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "標籤名稱"
+                }
+              }
+            },
             "description": "標籤ID"
           },
           {
