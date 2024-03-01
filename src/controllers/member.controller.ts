@@ -1,5 +1,4 @@
 import { RequestHandler } from "express";
-import { User } from "@/models";
 import { appError, successHandle } from "@/utils";
 import validator from "validator";
 import { AuthService, MemberService } from "@/services";
@@ -13,7 +12,7 @@ class MemberController {
     let limit = parseInt(req.query.limit as string, 10) || 10; // 預設限制為10
 
     // 獲取總用戶數，用於計算總頁數
-    const totalCount = await User.countDocuments();
+    const totalCount = await MemberService.countMembers();
     const skip = (page - 1) * limit;
 
     // 添加skip和limit進行分頁

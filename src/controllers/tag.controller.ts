@@ -4,7 +4,6 @@ import { appError, successHandle, validateInput } from "@/utils";
 import { object, string } from "yup";
 import { TagService } from "@/services";
 
-
 const tagSchema = object({
   name: string().required("缺少標籤名稱"),
 });
@@ -14,7 +13,7 @@ class TagController {
   {
     const { name } = req.body;
     if (!(await validateInput(tagSchema, req.body, next))) return;
-    
+
     try {
       const tag = await TagService.createTag(name);
       successHandle(res, "標籤創建成功", { result: tag });
@@ -57,6 +56,7 @@ class TagController {
   {
     try {
       const { id } = req.params;
+      if (!id) throw appError({ code: 400, message: "請提供標籤 ID", next });
       const { name } = req.body;
       if (!(await validateInput(tagSchema, req.body, next))) return;
       const tag = await Tag.findByIdAndUpdate(id, { name }, { new: true }).exec();
@@ -70,6 +70,7 @@ class TagController {
   {
     try {
       const { id } = req.params;
+      if (!id) throw appError({ code: 400, message: "請提供標籤 ID", next });
       await Tag.findByIdAndDelete(id).exec();
       successHandle(res, "標籤刪除成功", { result: null });
     } catch (error) {

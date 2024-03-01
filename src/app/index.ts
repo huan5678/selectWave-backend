@@ -46,6 +46,8 @@ app.use(
       { path: '/contact/', method: 'POST' },
       { path: '/contact/subscribe', method: 'POST' },
       { path: '/contact/subscribe', method: 'PUT' },
+      { path: '/contact/subscribe', method: 'DELETE' },
+      { path: '/tag/', method: 'GET' },
   ]),
   Routes,
 );

@@ -64,6 +64,13 @@ tagRouter.get(
       },
       description: "獲取標籤詳情成功"
     }
+    * #swagger.responses[404] = {
+      schema: {
+        status: false,
+        message: "無此標籤",
+      },
+      description: "無此標籤"
+    }
    */
   '/:id',
   handleErrorAsync(TagController.getTagById));
@@ -89,6 +96,16 @@ tagRouter.post(
       },
       description: "標籤創建成功"
     }
+    * #swagger.responses[500] = {
+      schema: {
+        status: false,
+        message: "標籤創建失敗",
+      },
+      description: "標籤創建失敗"
+    }
+    * #swagger.security = [{
+    "Bearer": []
+    }]
    */
   '/',
   handleErrorAsync(TagController.createTag));
@@ -120,6 +137,23 @@ tagRouter.put(
       },
       description: "標籤更新成功"
     }
+    * #swagger.responses[400] = {
+      schema: {
+        status: false,
+        message: "請提供標籤 ID",
+      },
+      description: "請提供標籤 ID"
+    }
+    * #swagger.responses[500] = {
+      schema: {
+        status: false,
+        message: "標籤更新失敗",
+      },
+      description: "標籤更新失敗"
+    }
+    * #swagger.security = [{
+    "Bearer": []
+    }]
    */
   '/:id',
   handleErrorAsync(TagController.updateTag));
@@ -145,6 +179,23 @@ tagRouter.delete(
       },
       description: "標籤刪除成功"
     }
+    * #swagger.responses[400] = {
+      schema: {
+        status: false,
+        message: "請提供標籤 ID",
+      },
+      description: "請提供標籤 ID"
+    }
+    * #swagger.responses[500] = {
+      schema: {
+        status: false,
+        message: "標籤刪除失敗",
+      },
+      description: "標籤刪除失敗"
+    }
+    * #swagger.security = [{
+    "Bearer": []
+    }]
    */
   '/:id',
   handleErrorAsync(TagController.deleteTag));

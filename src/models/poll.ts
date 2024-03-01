@@ -152,7 +152,13 @@ pollSchema.pre(/^find/, function (next)
       path: 'isWinner.option',
       select: 'title imageUrl'
     }
-  )
+  );
+  (this as IPoll).populate(
+    {
+      path: 'tags',
+      select: 'name'
+    }
+  );
   next();
 });
 

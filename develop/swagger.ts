@@ -229,6 +229,16 @@ const doc = {
       message: "我想要聯絡你們。",
       quests: "意見提供",
     },
+    Tag: [
+      {
+        id: "標籤ID",
+        name: "程式語言",
+      },
+      {
+        id: "標籤ID",
+        name: "前端",
+      },
+    ],
     // Error Response
     ...ErrorSchema,
   },

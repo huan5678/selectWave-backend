@@ -1,8 +1,8 @@
 import { RequestHandler } from "express";
-import { Comment, Poll, User } from "@/models";
 import { appError, successHandle, validateInput } from "@/utils";
 import { object, string } from "yup";
 import { IUser } from "@/types";
+import { CommentService } from "@/services";
 
 const createCommentSchema = object({
   pollId: string().required("請輸入投票ID"),
@@ -26,17 +26,7 @@ class CommentController {
     if (!(await validateInput(createCommentSchema, req.body, next))) return;
 
     const { content, pollId } = req.body;
-    const comment = await Comment.create({
-      author: id,
-      content,
-      pollId,
-    });
-    await User.findByIdAndUpdate(id, { $push: { comments: comment.id } });
-    const result = await Poll.findByIdAndUpdate(
-      { id: pollId },
-      { $push: { comments: { comment } } },
-      { new: true }
-    );
+    const result = await CommentService.createComment(id, content, pollId);
     successHandle(res, "評論創建成功", { result });
   };
 
@@ -44,25 +34,17 @@ class CommentController {
   public static updateComment: RequestHandler = async (req, res, next) => {
     const { id } = req.user as IUser;
     if (!(await validateInput(updateCommentSchema, req.body, next))) return;
-
     const commentId = req.params.id;
-    const { content } = req.body;
-    const comment = await Comment.findById(commentId);
-    if (!comment) {
-      throw appError({
-        code: 404,
-        message: "找不到評論",
-        next,
-      });
+    if (!commentId) {
+      throw appError({ code: 400, message: "請輸入評論ID", next });
     }
+    const { content } = req.body;
+    const comment = await CommentService.getComment(commentId, next);
+
     if (comment.author.id !== id) {
       throw appError({ code: 403, message: "沒有權限更新評論", next });
     }
-    const updatedComment = await Comment.findByIdAndUpdate(
-      commentId,
-      { content, edited: true, updateTime: Date.now() },
-      { new: true }
-    );
+    const updatedComment = await CommentService.updateComment(commentId, content);
     successHandle(res, "評論更新成功", { updatedComment });
   };
 
@@ -70,26 +52,16 @@ class CommentController {
   public static deleteComment: RequestHandler = async (req, res, next) => {
     const { id } = req.params;
     const { id: userId } = req.user as IUser;
-    const deletedComment = await Comment.findByIdAndDelete(id).exec();
-    if (!deletedComment) {
-      throw appError({ code: 404, message: "找不到評論", next });
-    }
-    const result = await Poll.findByIdAndUpdate(
-      { id: deletedComment.pollId },
-      { $pull: { comments: { comment: id } } },
-      { new: true }
-    );
-    await User.findByIdAndUpdate(userId, { $pull: { comments: id } });
+    if (!id) throw appError({ code: 400, message: "請輸入評論ID", next });
+    const result = await CommentService.deleteComment(id, userId);
     successHandle(res, "評論刪除成功", { result });
   };
 
   // 獲取特定評論
   public static getComment: RequestHandler = async (req, res, next) => {
     const { id } = req.params;
-    const comment = await Comment.findById(id).exec();
-    if (!comment) {
-      throw appError({ code: 404, message: "找不到評論", next });
-    }
+    if (!id) throw appError({ code: 400, message: "請輸入評論ID", next });
+    const comment = await CommentService.getComment(id, next);
     successHandle(res, "獲取評論成功", { comment });
   };
 }

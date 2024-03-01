@@ -103,10 +103,11 @@ export interface CreatePollRequest {
   description: string;
   imageUrl?: string;
   tags?: string[];
-  startDate?: Date;
-  endDate?: Date;
+  startDate?: Date | null;
+  endDate?: Date | null;
+  createdBy: IUser["_id"];
   isPrivate?: boolean;
-  optionsData: {
+  optionsData?: {
     title: string;
     imageUrl?: string;
   }[];

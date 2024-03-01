@@ -2828,6 +2828,22 @@
         }
       }
     },
+    "Tag": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "標籤ID"
+          },
+          "name": {
+            "type": "string",
+            "example": "前端"
+          }
+        }
+      }
+    },
     "ErrorTokenExpired": {
       "type": "object",
       "properties": {
