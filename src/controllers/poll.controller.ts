@@ -208,8 +208,8 @@ class PollController {
       throw appError({ code: 403, message: "您無法更新該投票", next });
     }
 
-    if (poll.status === "closed" || poll.status === "ended") {
-      throw appError({ code: 400, message: "投票已經結束，無法更新", next });
+    if (poll.status !== "pending") {
+      throw appError({ code: 400, message: "投票已經開始或是結束，無法更新", next });
     }
 
     const {
