@@ -8,6 +8,7 @@ const tagSchema = new Schema<ITag>(
       require: [ true, "請填入標籤的名稱" ],
       minLength: [ 1, "投票標題請大於 1 個字" ],
       maxLength: [ 50, "投票標題長度過長，最多只能 50 個字" ],
+      unique: true, // 標籤名稱不可重複
     },
     usageCount: {
       type: Number,
