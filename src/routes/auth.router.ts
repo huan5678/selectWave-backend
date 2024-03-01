@@ -212,7 +212,6 @@ authRouter.post(
     type: 'object',
     description: '更新帳號密碼',
     schema: {
-        email: 'example@example.com',
         password: 'Abc@12345',
         confirmPassword: 'Abc@12345',
       },

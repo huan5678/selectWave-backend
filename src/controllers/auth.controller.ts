@@ -3,6 +3,7 @@ import { object, string } from "yup";
 import { AuthService, TokenBlackListService } from "@/services";
 import { appError, getToken, successHandle, validateInput } from "@/utils";
 import MailServiceController from "./mailer.controller";
+import { IUser } from "@/types";
 
 const inputSchema = object({
   email: string().email().required().lowercase(),
@@ -107,8 +108,8 @@ class AuthController {
     const isValidate = await inputSchema.validate(req.body);
     if (!isValidate)
       throw appError({ code: 400, message: "invalid input", next });
-
-    const { email, password } = inputSchema.cast(req.body);
+    const { email } = req.user as IUser;
+    const { password } = inputSchema.cast(req.body);
     await AuthService.getMemberByAccountOrEmail(email);
     await AuthService.updatePassword({ email, password, next });
     successHandle(res, "success", { result: true });
