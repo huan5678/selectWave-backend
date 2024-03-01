@@ -613,74 +613,6 @@
         }
       }
     },
-    "/api/imgur/upload": {
-      "post": {
-        "tags": [
-          "Imgur - 圖片"
-        ],
-        "description": "上傳圖片",
-        "consumes": [
-          "multipart/form-data"
-        ],
-        "parameters": [
-          {
-            "name": "upload-image",
-            "in": "formData",
-            "type": "file",
-            "required": true,
-            "description": "上傳圖片"
-          }
-        ],
-        "responses": {
-          "200": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "boolean",
-                  "example": true
-                },
-                "message": {
-                  "type": "string",
-                  "example": "上傳成功"
-                },
-                "result": {
-                  "type": "string",
-                  "example": "https://i.imgur.com/xcLTrkV.png"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            },
-            "description": "上傳成功"
-          },
-          "401": {
-            "schema": {
-              "$ref": "#/definitions/ErrorJsonWebToken"
-            },
-            "description": "未登入"
-          },
-          "404": {
-            "schema": {
-              "$ref": "#/definitions/ErrorImageNotFound"
-            },
-            "description": "請上傳檔案"
-          },
-          "500": {
-            "schema": {
-              "$ref": "#/definitions/ErrorImageFormat"
-            },
-            "description": "檔案格式錯誤，僅限上傳 jpg、jpeg 與 png 格式。 圖片大小不可超過 2MB"
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
     "/api/member/": {
       "get": {
         "tags": [
@@ -1781,6 +1713,357 @@
         ]
       }
     },
+    "/api/tag/": {
+      "get": {
+        "tags": [
+          "Tag - 標籤"
+        ],
+        "description": "獲取所有標籤",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "搜尋關鍵字"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "排序欄位 使用欄位名稱表示升冪 例如: createdTime, 加上-為降冪 例如: -createdTime"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "成功取得標籤列表"
+                },
+                "result": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Tag"
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "獲取標籤列表成功"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tag - 標籤"
+        ],
+        "description": "新增標籤",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "body",
+            "required": true,
+            "description": "標籤名稱",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "標籤創建成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Tag"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "標籤創建成功"
+          },
+          "500": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "標籤創建失敗"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "標籤創建失敗"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/tag/{id}": {
+      "get": {
+        "tags": [
+          "Tag - 標籤"
+        ],
+        "description": "根據 ID 獲取標籤詳情",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "標籤ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "成功取得標籤資訊"
+                },
+                "result": {
+                  "$ref": "#/definitions/Tag"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "獲取標籤詳情成功"
+          },
+          "404": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "無此標籤"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "無此標籤"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Tag - 標籤"
+        ],
+        "description": "更新標籤",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "標籤ID"
+          },
+          {
+            "name": "name",
+            "in": "body",
+            "required": true,
+            "description": "標籤名稱",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "標籤更新成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Tag"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "標籤更新成功"
+          },
+          "400": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "請提供標籤 ID"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "請提供標籤 ID"
+          },
+          "500": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "標籤更新失敗"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "標籤更新失敗"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Tag - 標籤"
+        ],
+        "description": "刪除標籤",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "標籤ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "標籤刪除成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Tag"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "標籤刪除成功"
+          },
+          "400": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "請提供標籤 ID"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "請提供標籤 ID"
+          },
+          "500": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "標籤刪除失敗"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "標籤刪除失敗"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
     "/api/comment/{id}": {
       "get": {
         "tags": [
@@ -2007,6 +2290,74 @@
               "$ref": "#/definitions/ErrorCommentFormat"
             },
             "description": "請確實填寫評論資訊"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/imgur/upload": {
+      "post": {
+        "tags": [
+          "Imgur - 圖片"
+        ],
+        "description": "上傳圖片",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "upload-image",
+            "in": "formData",
+            "type": "file",
+            "required": true,
+            "description": "上傳圖片"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "上傳成功"
+                },
+                "result": {
+                  "type": "string",
+                  "example": "https://i.imgur.com/xcLTrkV.png"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "上傳成功"
+          },
+          "401": {
+            "schema": {
+              "$ref": "#/definitions/ErrorJsonWebToken"
+            },
+            "description": "未登入"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ErrorImageNotFound"
+            },
+            "description": "請上傳檔案"
+          },
+          "500": {
+            "schema": {
+              "$ref": "#/definitions/ErrorImageFormat"
+            },
+            "description": "檔案格式錯誤，僅限上傳 jpg、jpeg 與 png 格式。 圖片大小不可超過 2MB"
           }
         },
         "security": [
@@ -2603,12 +2954,18 @@
         },
         "tags": {
           "type": "array",
-          "example": [
-            "程式語言",
-            "技術"
-          ],
           "items": {
-            "type": "string"
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "標籤ID"
+              },
+              "name": {
+                "type": "string",
+                "example": "技術"
+              }
+            }
           }
         },
         "createdBy": {

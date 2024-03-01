@@ -84,6 +84,9 @@ tagRouter.post(
     in: 'body',
     required: true,
     type: 'string',
+    schema: {
+      name: '標籤名稱'
+    },
     description: '標籤名稱'
     }
     * #swagger.responses[200] = {
@@ -119,6 +122,9 @@ tagRouter.put(
     in: 'path',
     required: true,
     type: 'string',
+    schema: {
+      name: '標籤名稱'
+    },
     description: '標籤ID'
     }
     * #swagger.parameters['name'] = {
