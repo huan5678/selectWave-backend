@@ -49,8 +49,7 @@ export class MailServiceController {
       html,
     };
     await MailServiceController.transporter.verify();
-    const info = await MailServiceController.transporter.sendMail(mailConfig);
-    successHandle(_res, "驗證信已寄出", { result: info });
+    await MailServiceController.transporter.sendMail(mailConfig);
   };
 
   public static resendVerificationEmail: RequestHandler = async (
