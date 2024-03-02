@@ -165,6 +165,28 @@ export class AuthService {
     }
   }
 
+  static createVerificationToken = async (email: string, next: NextFunction) =>
+  {
+    const user = await User.findOne({ email: email.trim().toLowerCase() });
+    if (!user) {
+      throw appError({
+        code: 400,
+        message: "無此帳號，請再次確認註冊 Email 帳號，或是重新註冊新帳號",
+        next,
+      });
+    }
+    const token = jwt.sign(
+      { userId: user.id },
+      process.env.JWT_SECRET as string,
+      { expiresIn: "24h" } // Token 有效期 24 小时
+    );
+
+    // 更新 user.verificationToken
+    user.verificationToken = token;
+    await user.save();
+    return token;
+  }
+
   static updateValidationToken = async () =>
   {
     const users = await User.find({ isValidator: false, verificationToken: { $ne: '' } });
@@ -179,6 +201,21 @@ export class AuthService {
       user.verificationToken = newVerificationToken;
       await user.save();
     });
+  }
+
+  static createResetToken = async (email: string, next: NextFunction) =>
+  {
+    const user = await User.findOne({ email: email.trim().toLowerCase() });
+    if (!user) {
+      throw appError({
+        code: 400,
+        message: "無此帳號，請再次確認註冊 Email 帳號，或是重新註冊新帳號",
+        next,
+      });
+    }
+    const token = generateToken({ userId: user.id });
+    await User.findByIdAndUpdate(user.id, { resetToken: token });
+    return [ token, user.name ];
   }
 
   static resetPasswordByRestToken = async (token: string, password: string, next: NextFunction) =>

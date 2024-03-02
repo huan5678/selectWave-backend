@@ -2,6 +2,7 @@ export { default as AgendaService } from "./AgendaService";
 export { default as AuthService } from "./AuthService";
 export { default as CommentService } from "./CommentService";
 export { default as ContactService } from "./ContactService";
+export { default as MailService } from "./MailService";
 export { default as MemberService } from "./MemberService";
 export { default as PollService } from "./PollService";
 export { default as TagService } from "./TagService";
