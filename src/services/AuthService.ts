@@ -229,7 +229,9 @@ export class AuthService {
       if (!user) {
         throw appError({ code: 404, message: "無效的重設連結或已過期", next });
       }
-      await User.findByIdAndUpdate(user.id, { resetToken: "", password }).exec();
+      user.password = password;
+      user.resetToken = "";
+      await user.save();
       return true;
     } catch (error) {
       throw appError({ message: (error as Error).message, next });
