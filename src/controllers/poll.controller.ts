@@ -114,7 +114,7 @@ class PollController {
     if ((startDate && new Date(startDate) < now) || status === "active")
       isStartNow = true;
 
-    const tagInstances = await TagService.createMultipleTags(tags as string[]);
+    const tagInstances = tags && await TagService.createMultipleTags(tags as string[]);
 
     const newPoll = await PollService.createPoll({
       title,
@@ -224,13 +224,13 @@ class PollController {
       status,
     } = req.body;
 
-    const tagInstances = await TagService.createMultipleTags(tags as string[]);
+    const tagInstances = tags && await TagService.createMultipleTags(tags as string[]);
 
     // 更新投票主體
     poll.title = title ?? poll.title;
     poll.description = description ?? poll.description;
     poll.imageUrl = imageUrl ?? poll.imageUrl;
-    poll.tags = tagInstances && tagInstances.map((tag) => tag.id);
+    poll.tags = tagInstances && poll.tags && poll.tags.concat(tagInstances.map((tag) => tag.id)) || tagInstances.map((tag) => tag.id) || poll.tags || [];
     poll.startDate = startDate ?? poll.startDate;
     poll.endDate = endDate ?? poll.endDate;
     poll.isPrivate = isPrivate ?? poll.isPrivate;

@@ -1,8 +1,15 @@
 import { Tag } from "@/models";
 import { ITag } from "@/types";
+import { appError } from "@/utils";
+import { NextFunction } from "express";
 
 class TagService {
-  static createTag = async (name: string): Promise<ITag> => {
+  static createTag = async (name: string, next:NextFunction): Promise<ITag> =>
+  {
+    const tag = await Tag.findOne({ name }).exec();
+    if (tag) {
+      throw appError({ code: 400, message: "標籤已存在", next });
+    }
     return Tag.create({ name });
   }
 
@@ -23,21 +30,11 @@ class TagService {
   }
 
   static createMultipleTags = async (tagNames: string[]): Promise<ITag[]> => {
-    const tagDocuments = tagNames.map(name => ({ name }));
-    return Tag.insertMany(tagDocuments);
-  }
-
-  static createTagsIfNotExist = async (tagNames: string[]): Promise<ITag[]> => {
-    const existingTags = await Tag.find({ name: { $in: tagNames } });
-    const existingTagNames = existingTags.map(tag => tag.name);
-
+    const tags = await Tag.find({ name: { $in: tagNames } });
+    const existingTagNames = tags.map(tag => tag.name);
     const newTagNames = tagNames.filter(name => !existingTagNames.includes(name));
-
-    if (newTagNames.length > 0) {
-      return this.createMultipleTags(newTagNames);
-    }
-
-    return Tag.find({ name: { $in: tagNames } });
+    const newTags = await Tag.create(newTagNames.map(name => ({ name })));
+    return tags.concat(newTags);
   }
 }
 

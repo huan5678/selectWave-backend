@@ -1,7 +1,6 @@
 import { Schema, model } from 'mongoose';
 import customEmitter from '@/utils';
 import { IPoll } from '@/types';
-import { Tag } from '@/models';
 
 
 const pollSchema = new Schema<IPoll>({
@@ -128,21 +127,11 @@ pollSchema.pre('save', async function(next) {
   }
 
   if (this.isNew || this.isModified('tags')) {
-    const currentTags = this.tags;
-    const previousTags = this.modifiedPaths().includes('tags') ? this._id.tags : [];
-    
+    const addedTags = this.isNew ? this.tags : this.get('tags');
+    const TagModel = model('Tag');
     // 計算新增和移除的標籤
-    const addedTags = currentTags.filter(tag => !previousTags.includes(tag));
-    const removedTags = previousTags.filter(tag => !currentTags.includes(tag));
-
-    // 增加新關聯標籤的 usageCount
-    if (addedTags.length > 0) {
-      await Tag.updateMany({ _id: { $in: addedTags } }, { $inc: { usageCount: 1 } });
-    }
-
-    // 減少移除標籤的 usageCount
-    if (removedTags.length > 0) {
-      await Tag.updateMany({ _id: { $in: removedTags } }, { $inc: { usageCount: -1 } });
+    if (addedTags && addedTags.length > 0) {
+      await TagModel.updateMany({ _id: { $in: addedTags } }, { $inc: { usageCount: 1 } });
     }
   }
   next();
@@ -184,7 +173,8 @@ pollSchema.pre(/^find/, function (next)
 
 pollSchema.pre(/^remove/, async function(next) {
   // 減少所有關聯標籤的 usageCount
-  await Tag.updateMany(
+  const TagModel = model('Tag');
+  await TagModel.updateMany(
     { _id: { $in: (this as IPoll).tags } },
     { $inc: { usageCount: -1 } }
   );

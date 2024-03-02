@@ -15,7 +15,7 @@ class TagController {
     if (!(await validateInput(tagSchema, req.body, next))) return;
 
     try {
-      const tag = await TagService.createTag(name);
+      const tag = await TagService.createTag(name, next);
       successHandle(res, "標籤創建成功", { result: tag });
     } catch (error) {
       throw appError({ code: 500, message: `標籤創建失敗 ${(error as Error).message}`, next });
