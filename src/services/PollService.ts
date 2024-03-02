@@ -81,9 +81,6 @@ export class PollService {
         next,
       });
     }
-    if (poll.status === "active") {
-      throw appError({ code: 400, message: "投票進行中無法刪除", next });
-    }
     await Poll.findByIdAndDelete(id).exec();
   };
 
