@@ -11,6 +11,11 @@ const inputSchema = object({
   confirmPassword: string(),
 });
 
+const passwordSchema = object({
+  password: string().required(),
+  confirmPassword: string().required(),
+});
+
 const emailInputSchema = object({
   email: string().required().email(),
 });
@@ -105,11 +110,11 @@ class AuthController {
     if (req.body.password !== req.body.confirmPassword)
       throw appError({ code: 400, message: "密碼不一致", next });
 
-    const isValidate = await inputSchema.validate(req.body);
+    const isValidate = await passwordSchema.validate(req.body);
     if (!isValidate)
       throw appError({ code: 400, message: "invalid input", next });
     const { email } = req.user as IUser;
-    const { password } = inputSchema.cast(req.body);
+    const { password } = passwordSchema.cast(req.body);
     await AuthService.getMemberByAccountOrEmail(email);
     await AuthService.updatePassword({ email, password, next });
     successHandle(res, "success", { result: true });

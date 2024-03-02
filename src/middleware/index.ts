@@ -3,7 +3,7 @@ import session from "express-session";
 import { object, string, number } from "yup";
 import { WebSocketServer } from 'ws';
 
-import { ApiExcludeProps, TokenPayload } from "@/types";
+import { ApiExcludeProps, IUser, TokenPayload } from "@/types";
 import { TokenBlacklist, User } from "@/models";
 import { appError, getToken, handleErrorAsync, verifyToken } from "@/utils";
 
@@ -74,10 +74,12 @@ export const isAuthor = handleErrorAsync(
         });
       }
       const currentUser = await User.findById(userId).exec();
+      const {email} = await User.findById(userId).select('email').exec() as IUser;
       if (!currentUser) {
         throw appError({ code: 404, message: "無此使用者", next });
       }
       req.user = currentUser;
+      req.user.email = email;
       next();
     } catch (err) {
       throw appError({ code: 401, message: "驗證失敗，請重新登入！", next });
