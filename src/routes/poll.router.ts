@@ -10,7 +10,7 @@ pollRouter.get(
   /**
   * #swagger.tags = ['Poll - 提案']
   * #swagger.description = '獲取所有提案'
-  * #swagger.path = '/api/poll/'
+  * #swagger.path = '/api/poll'
   * #swagger.parameters['page'] = {
     in: 'query',
     required: false,
@@ -101,7 +101,7 @@ pollRouter.post(
   /**
    * #swagger.tags = ['Poll - 提案']
    * #swagger.description = '創建新提案'
-   * #swagger.path = '/api/poll/'
+   * #swagger.path = '/api/poll'
    * #swagger.parameters['body'] = {
     in: 'body',
     required: true,
