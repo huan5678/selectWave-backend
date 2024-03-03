@@ -53,7 +53,7 @@ const dateSchema = date()
 class PollController {
   // 創建新投票
   public static createPoll = async (
-    req: Request & { body: CreatePollRequest, user: IUser },
+    req: Request & { body: CreatePollRequest; user: IUser },
     res: Response,
     next: NextFunction
   ) => {
@@ -114,7 +114,8 @@ class PollController {
     if ((startDate && new Date(startDate) < now) || status === "active")
       isStartNow = true;
 
-    const tagInstances = tags && await TagService.createMultipleTags(tags as string[]);
+    const tagInstances =
+      tags && (await TagService.createMultipleTags(tags as string[]));
 
     const newPoll = await PollService.createPoll({
       title,
@@ -129,14 +130,17 @@ class PollController {
     });
 
     // 建立 Vote 資料
-    const optionInstances = await VoteService.createOptions(optionsData as IOption[], newPoll.id);
+    const optionInstances = await VoteService.createOptions(
+      optionsData as IOption[],
+      newPoll.id
+    );
     newPoll.options = optionInstances.map((option) => option.id);
     await newPoll.save();
     const populates = [
       { path: "createdBy", select: "name avatar" },
       { path: "options", select: "title imageUrl" },
-    ]
-    const poll = await PollService.getPoll({id: newPoll.id, populates, next});
+    ];
+    const poll = await PollService.getPoll({ id: newPoll.id, populates, next });
 
     successHandle(res, "投票創建成功", { poll });
   };
@@ -145,28 +149,33 @@ class PollController {
   public static getAllPolls: RequestHandler = async (req, res: Response) => {
     let { page = 1, limit = 10, status, q, sort, createdBy } = req.query;
 
-    // 轉換為數字並進行合理性檢查
-    page = Math.max(Number(page), 1); // 確保頁碼至少為1
-    limit = Math.max(Number(limit), 1); // 確保每頁至少有1條記錄
+    page = Math.max(Number(page), 1);
+    limit = Math.max(Number(limit), 1);
+
+    const queryConditions = {
+      ...(q && {
+        $or: [
+          { title: { $regex: q, $options: "i" } },
+          { description: { $regex: q, $options: "i" } },
+          { tags: { $in: [q] } },
+        ],
+      }),
+      ...(status && { status: status }),
+      ...(createdBy && { createdBy: createdBy }),
+    };
+
+    const total = await PollService.countDocuments(queryConditions);
+    const totalPages = Math.ceil(total / limit); // 計算總頁數
+    page = Math.min(page, totalPages); // 確保請求的頁數不會超過總頁數
 
     const skip = (page - 1) * limit;
 
-    const queryConditions = {
-        ...(q && {
-            $or: [
-                { title: { $regex: q, $options: "i" } },
-                { description: { $regex: q, $options: "i" } },
-                { tags: { $in: [q] } },
-            ],
-        }),
-        ...(status && { status: status }),
-        ...(createdBy && { createdBy: createdBy }),
-    };
-
-    const polls = await PollService.getPolls(queryConditions, sort as string, skip, limit);
-
-    // 可以選擇性地添加總記錄數
-    const total = await PollService.countDocuments(queryConditions);
+    const polls = await PollService.getPolls(
+      queryConditions,
+      sort as string,
+      skip,
+      limit
+    );
 
     successHandle(res, "獲取投票列表成功", { polls, total, page, limit });
   };
@@ -180,12 +189,20 @@ class PollController {
     const { id } = req.params;
     const poll = await PollService.getPoll({
       id,
-      populates:[
+      populates: [
         { path: "createdBy" },
         { path: "options" },
-        { path: "comments.comment", select: "content author createdTime updatedTime edited" },
-        { path: "isWinner.option", select: "title imageUrl", populate: { path: "voters.user", select: "name avatar" } },
-    ], next
+        {
+          path: "comments.comment",
+          select: "content author createdTime updatedTime edited",
+        },
+        {
+          path: "isWinner.option",
+          select: "title imageUrl",
+          populate: { path: "voters.user", select: "name avatar" },
+        },
+      ],
+      next,
     });
     successHandle(res, "獲取投票詳細資訊成功", { poll });
   };
@@ -200,7 +217,7 @@ class PollController {
       .validate(req.body)
       .catch((err) =>
         appError({ code: 400, message: err.errors.join(", "), next })
-    );
+      );
 
     const poll = await PollService.getPoll({ id, next });
 
@@ -209,7 +226,11 @@ class PollController {
     }
 
     if (poll.status !== "pending") {
-      throw appError({ code: 400, message: "投票已經開始或是結束，無法更新", next });
+      throw appError({
+        code: 400,
+        message: "投票已經開始或是結束，無法更新",
+        next,
+      });
     }
 
     const {
@@ -224,13 +245,20 @@ class PollController {
       status,
     } = req.body;
 
-    const tagInstances = tags && await TagService.createMultipleTags(tags as string[]);
+    const tagInstances =
+      tags && (await TagService.createMultipleTags(tags as string[]));
 
     // 更新投票主體
     poll.title = title ?? poll.title;
     poll.description = description ?? poll.description;
     poll.imageUrl = imageUrl ?? poll.imageUrl;
-    poll.tags = tagInstances && poll.tags && poll.tags.concat(tagInstances.map((tag) => tag.id)) || tagInstances.map((tag) => tag.id) || poll.tags || [];
+    poll.tags =
+      (tagInstances &&
+        poll.tags &&
+        poll.tags.concat(tagInstances.map((tag) => tag.id))) ||
+      tagInstances.map((tag) => tag.id) ||
+      poll.tags ||
+      [];
     poll.startDate = startDate ?? poll.startDate;
     poll.endDate = endDate ?? poll.endDate;
     poll.isPrivate = isPrivate ?? poll.isPrivate;
@@ -240,19 +268,25 @@ class PollController {
 
     // 處理選項更新
     if (optionsData && optionsData.length > 0) {
-      const updatedOptions = await VoteService.updateOption(poll._id, optionsData);
+      const updatedOptions = await VoteService.updateOption(
+        poll._id,
+        optionsData
+      );
 
       poll.options = updatedOptions.map((option) => option?.id as IVote["_id"]);
       await poll.updateOne(poll).exec();
     }
 
     const result = await PollService.getPoll({
-      id, populates: [
+      id,
+      populates: [
         { path: "createdBy", select: "name avatar" },
         { path: "options", select: "title imageUrl" },
-    ], next });
+      ],
+      next,
+    });
 
-    successHandle(res, "投票更新成功", {result});
+    successHandle(res, "投票更新成功", { result });
   };
 
   // 刪除投票
@@ -308,7 +342,6 @@ class PollController {
     successHandle(res, "開始投票成功", { result });
   };
 
-
   // 結束投票
   public static endPoll: RequestHandler = async (req, res, next) => {
     const { id } = req.params;
@@ -320,18 +353,20 @@ class PollController {
       throw appError({ code: 500, message: "結束投票失敗", next });
     }
 
-    updatedPoll
-      .populate([
-        {
+    updatedPoll.populate([
+      {
         path: "options",
         select: "title imageUrl voters",
-        },{
+      },
+      {
         path: "createdBy",
         select: "name avatar",
-      },{
+      },
+      {
         path: "isWinner.option",
         select: "title",
-      }])
+      },
+    ]);
     successHandle(res, "結束投票成功", { result: updatedPoll });
   };
 }
