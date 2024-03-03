@@ -7,6 +7,30 @@ const commentRouter = Router();
 commentRouter.get(
   /**
    * #swagger.tags = ['Comment - 評論']
+   * #swagger.description = '獲取使用者所有評論'
+   * #swagger.path = '/api/comment'
+* #swagger.responses[200] = {
+  schema: {
+    status: true,
+    message: "獲取評論成功",
+    result: { $ref: "#/definitions/Comment" },
+  },
+  description: "獲取評論成功"
+}
+* #swagger.responses[404] = {
+  schema: { $ref: "#/definitions/ErrorCommentNotFound" },
+  description: "找不到評論"
+}
+* #swagger.security = [{
+  "Bearer": []
+}]
+}*/
+  "/",
+  handleErrorAsync(CommentController.getComment)
+);
+commentRouter.get(
+  /**
+   * #swagger.tags = ['Comment - 評論']
    * #swagger.description = '獲取評論'
    * #swagger.path = '/api/comment/{id}'
    * #swagger.parameters['id'] = {
