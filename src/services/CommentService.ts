@@ -33,6 +33,19 @@ export class CommentService
     return comment;
   }
 
+  static getCommentByUser = async (id: string, next: NextFunction) =>
+  {
+    const comments = await Comment.find({ author: id }).exec();
+    if (!comments) {
+      throw appError({
+        code: 404,
+        message: "使用者沒有評論",
+        next,
+      });
+    }
+    return comments;
+  }
+
   static updateComment = async (id: string, content: string) =>
   {
     const comment = await Comment.findByIdAndUpdate(

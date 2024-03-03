@@ -64,6 +64,14 @@ class CommentController {
     const comment = await CommentService.getComment(id, next);
     successHandle(res, "獲取評論成功", { comment });
   };
+
+  // 獲取使用者所有評論
+  public static getComments: RequestHandler = async (req, res, next) =>
+  {
+    const { id } = req.user as IUser;
+    const comments = await CommentService.getCommentByUser(id, next);
+    successHandle(res, "獲取所有評論成功", { comments });
+  };
 }
 
 export default CommentController;

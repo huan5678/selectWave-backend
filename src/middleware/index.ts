@@ -1,11 +1,13 @@
-import type { NextFunction, Response, Request } from "express";
+import type { NextFunction, Response, Request, RequestHandler } from "express";
 import session from "express-session";
+import { pathToRegexp } from 'path-to-regexp';
 import { object, string, number } from "yup";
 import { WebSocketServer } from 'ws';
 
 import { ApiExcludeProps, IUser, TokenPayload } from "@/types";
 import { TokenBlacklist, User } from "@/models";
 import { appError, getToken, handleErrorAsync, verifyToken } from "@/utils";
+
 
 export const verifyAdminSchema = object({
   iat: number().required(),
@@ -26,19 +28,24 @@ export const sessionMiddleware = session({
   resave: false,
 });
 
-export const verifyMiddleware =
-  (excludes: ApiExcludeProps[]) =>
-  async (req, res: Response, next: NextFunction) => {
+export const verifyMiddleware = (excludes: ApiExcludeProps[]): RequestHandler => {
+  return async (req, res, next) => {
     try {
-      const isExcluded = excludes.some(
-        ({ path, method }) => req.path === path && // 修改這裡進行完全匹配檢查
-            (!method || req.method.toLowerCase() === method.toLowerCase())
-      );
+      const path = req.path;
+      const method = req.method.toLowerCase();
+
+      const isExcluded = excludes.some(({ path: excludePath, method: excludeMethod }) => {
+        const match = pathToRegexp(excludePath).exec(path);
+        return match && (!excludeMethod || method === excludeMethod.toLowerCase());
+      });
+
       if (isExcluded) {
         return next();
       }
+
+      // 如果不是排除的路徑，則進行下一步，例如JWT驗證
       return isAuthor(req, res, next);
-    } catch (error: unknown) {
+    } catch (error) {
       throw appError({
         code: 403,
         message: `JWT error: ${(error as Error).message}`,
@@ -46,6 +53,7 @@ export const verifyMiddleware =
       });
     }
   };
+};
 
 export const isAuthor = handleErrorAsync(
   async (req, _res: Response, next: NextFunction) => {

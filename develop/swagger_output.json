@@ -609,7 +609,7 @@
         }
       }
     },
-    "/api/member/": {
+    "/api/member": {
       "get": {
         "tags": [
           "Member - 會員"
@@ -983,7 +983,7 @@
         ]
       }
     },
-    "/api/poll/": {
+    "/api/poll": {
       "get": {
         "tags": [
           "Poll - 提案"
@@ -1709,7 +1709,7 @@
         ]
       }
     },
-    "/api/tag/": {
+    "/api/tag": {
       "get": {
         "tags": [
           "Tag - 標籤"
@@ -2065,6 +2065,49 @@
               }
             },
             "description": "標籤刪除失敗"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/comment": {
+      "get": {
+        "tags": [
+          "Comment - 評論"
+        ],
+        "description": "獲取使用者所有評論",
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "獲取評論成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Comment"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "獲取評論成功"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ErrorCommentNotFound"
+            },
+            "description": "找不到評論"
           }
         },
         "security": [

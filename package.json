@@ -30,6 +30,7 @@
     "passport-github2": "^0.1.12",
     "passport-google-oauth20": "^2.0.0",
     "passport-line-auth": "^0.2.9",
+    "path-to-regexp": "^6.2.1",
     "ramda": "^0.29.1",
     "sirv": "^2.0.4",
     "swagger-ui-express": "^5.0.0",
