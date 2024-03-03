@@ -8,7 +8,7 @@ tagRouter.get(
   /**
    * #swagger.tags = ['Tag - 標籤']
    * #swagger.description = '獲取所有標籤'
-   * #swagger.path = '/api/tag/'
+   * #swagger.path = '/api/tag'
    * #swagger.parameters['q'] = {
     in: 'query',
     required: false,
@@ -79,7 +79,7 @@ tagRouter.post(
   /**
    * #swagger.tags = ['Tag - 標籤']
    * #swagger.description = '新增標籤'
-   * #swagger.path = '/api/tag/'
+   * #swagger.path = '/api/tag'
    * #swagger.parameters['name'] = {
     in: 'body',
     required: true,

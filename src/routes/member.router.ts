@@ -9,7 +9,7 @@ memberRouter.get(
   /**
    * #swagger.tags = ['Member - 會員']
    * #swagger.description = '獲取所有會員'
-   * #swagger.path = '/api/member/'
+   * #swagger.path = '/api/member'
    * #swagger.parameters['page'] = {
       in: 'query',
       required: false,
@@ -68,7 +68,7 @@ memberRouter.put(
   /**
    * #swagger.tags = ['Member - 會員']
    * #swagger.description = '更新會員資料'
-   * #swagger.path = '/api/member/'
+   * #swagger.path = '/api/member'
    * #swagger.parameters['body'] = {
       in: 'body',
       required: true,
