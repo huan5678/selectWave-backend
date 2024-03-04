@@ -44,7 +44,7 @@ voteRouter.post(
           "Bearer": []
         }]
   */
-  '/vote',
+  '/',
   handleErrorAsync(VoteController.vote),
 );
 
@@ -98,7 +98,7 @@ voteRouter.put(
         "Bearer": []
       }]
    */
-  '/vote/:id',
+  '/:id',
   handleErrorAsync(VoteController.updateVote),
 );
 
@@ -134,7 +134,7 @@ voteRouter.delete(
         "Bearer": []
       }]
    */
-  '/vote/:id',
+  '/:id',
   handleErrorAsync(VoteController.cancelVote),
 );
 
