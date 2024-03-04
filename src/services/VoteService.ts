@@ -51,32 +51,41 @@ class VoteService
     return vote;
   }
 
-  static addVote = async (optionId: string, user: IUser, next: NextFunction) =>
+  static addVote = async (voteId: string, user: IUser) =>
   {
-    const vote = await Vote.findByIdAndUpdate(
-      { id: optionId },
-      { $push: { voters: { user, createdTime: new Date() } } },
-      { new: true }
-    )
+    const vote = await Vote.findById(voteId).exec();
+    vote?.voters.push({ user: user.id, createdTime: new Date() });
+    await vote?.save();
+    const result = await Vote.findById(voteId)
       .populate("voters.user", "name avatar")
       .exec();
-    if (!vote) {
-      throw appError({ code: 404, message: "找不到選項", next });
-    }
-    return vote;
+    return result;
   }
 
   static cancelVote = async (voteId: string, user: IUser) =>
   {
-    const vote = await Vote.findByIdAndUpdate(
-      voteId,
-      { $pull: { voters: { user } } },
-      { new: true }
-    )
+    await Vote.updateOne({ _id: voteId }, { $pull: { voters: { user: user.id } } });
+    const result = await Vote.findById(voteId)
       .populate("voters.user", "name avatar")
       .exec();
-    return vote;
+    return result;
   }
+
+  static updateVote = async (voteId: string, newVoteId: string, user: IUser) => {
+    await Vote.findByIdAndUpdate(
+      voteId,
+      { $pull: { voters: { user: user.id } } },
+      { new: true }
+    );
+
+    const updatedVote = await Vote.findByIdAndUpdate(
+      newVoteId,
+      { $addToSet: { voters: { user: user.id, createdTime: new Date(), updatedTime: new Date() } } },
+      { new: true }
+    ).populate('voters.user', 'name avatar').exec();
+
+    return updatedVote;
+    }
 }
 
 export default VoteService;
