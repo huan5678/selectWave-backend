@@ -1,9 +1,14 @@
 import { Comment, Poll, User } from "@/models";
+import { IComment } from "@/types";
 import { appError } from "@/utils";
 import { NextFunction } from "express";
+import { FilterQuery } from "mongoose";
 
 export class CommentService
 {
+
+  static countDocuments = async (query: FilterQuery<IComment>) => Comment.countDocuments(query).exec();
+
   static createComment = async (author: string, content: string, pollId: string) =>
   {
     const comment = await Comment.create({
@@ -22,7 +27,9 @@ export class CommentService
 
   static getComment = async (id: string, next: NextFunction) =>
   {
-    const comment = await Comment.findById(id).exec();
+    const comment = await Comment.findById(id)
+      .populate('pollId', 'title id')
+      .exec();
     if (!comment) {
       throw appError({
         code: 404,
@@ -30,12 +37,24 @@ export class CommentService
         next,
       });
     }
-    return comment;
+    return comment
+  }
+
+  static getComments = async (queryConditions: FilterQuery<IComment>, sort: string, skip: number, limit: number) => {
+    const comments = await Comment.find(queryConditions)
+      .sort(sort || { createdTime: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('pollId', 'title id comments')
+      .exec();
+    return comments;
   }
 
   static getCommentByUser = async (id: string, next: NextFunction) =>
   {
-    const comments = await Comment.find({ author: id }).exec();
+    const comments = await Comment.find({ author: id })
+      .populate('pollId', 'title id comments')
+      .exec();
     if (!comments) {
       throw appError({
         code: 404,
@@ -52,7 +71,7 @@ export class CommentService
       id,
       { content, edited: true, updateTime: Date.now() },
       { new: true }
-    );
+    ).populate('pollId', 'title id');
     return comment;
   }
 

@@ -26,7 +26,7 @@ commentRouter.get(
 }]
 }*/
   "/",
-  handleErrorAsync(CommentController.getComment)
+  handleErrorAsync(CommentController.getComments)
 );
 commentRouter.get(
   /**
