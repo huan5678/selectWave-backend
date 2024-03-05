@@ -44,8 +44,8 @@ class CommentController {
     if (comment.author.id !== id) {
       throw appError({ code: 403, message: "沒有權限更新評論", next });
     }
-    const updatedComment = await CommentService.updateComment(commentId, content);
-    successHandle(res, "評論更新成功", { updatedComment });
+    const result = await CommentService.updateComment(commentId, content);
+    successHandle(res, "評論更新成功", { result });
   };
 
   // 刪除評論
@@ -61,16 +61,30 @@ class CommentController {
   public static getComment: RequestHandler = async (req, res, next) => {
     const { id } = req.params;
     if (!id) throw appError({ code: 400, message: "請輸入評論ID", next });
-    const comment = await CommentService.getComment(id, next);
-    successHandle(res, "獲取評論成功", { comment });
+    const result = await CommentService.getComment(id, next);
+    successHandle(res, "獲取評論成功", { result });
   };
 
   // 獲取使用者所有評論
-  public static getComments: RequestHandler = async (req, res, next) =>
-  {
-    const { id } = req.user as IUser;
-    const comments = await CommentService.getCommentByUser(id, next);
-    successHandle(res, "獲取所有評論成功", { comments });
+  public static getComments: RequestHandler = async (req, res) => {
+    let { page = 1, limit = 10, createdBy, sort } = req.query;
+
+    page = Math.max(Number(page), 1);
+    limit = Math.max(Number(limit), 1);
+    const queryConditions = {
+      ...(createdBy && { author: createdBy }),
+    };
+    const total = await CommentService.countDocuments(queryConditions);
+    const totalPages = Math.max(Math.ceil(total / limit), 1); // 確保 totalPages 至少為 1
+    page = Math.min(page, totalPages);
+    const skip = (page - 1) * limit; // 這裡現在不會是負數了
+    const result = await CommentService.getComments(
+      queryConditions,
+      sort as string,
+      skip,
+      limit
+    );
+    successHandle(res, "獲取所有評論成功", { result });
   };
 }
 

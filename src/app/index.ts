@@ -40,7 +40,7 @@ app.use(
       { path: '/auth/github/callback', method: 'GET' },
       { path: '/member', method: 'GET' },
       { path: '/member/:id', method: 'GET' },
-      { path: '/comment', method: 'GET' },
+      { path: '/comment/:id', method: 'GET' },
       { path: '/option', method: 'GET' },
       { path: '/poll/:id', method: 'GET' },
       { path: '/poll', method: 'GET' },
