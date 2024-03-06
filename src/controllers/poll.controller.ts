@@ -1,6 +1,6 @@
 import { NextFunction, RequestHandler, Response } from "express"; // Import missing modules
-import { appError, successHandle } from "@/utils";
-import { array, boolean, date, object, string } from "yup";
+import { appError, dateOrNull, processDate, successHandle } from "@/utils";
+import { DateSchema, array, boolean, date, object, string } from "yup";
 import { IVote, IUser, IOption, CreatePollRequest } from "@/types";
 import { CommentService, PollService, TagService, VoteService } from "@/services";
 
@@ -12,7 +12,7 @@ const pollSchema = object({
   description: string(),
   imageUrl: string(),
   tags: array().of(string()),
-  optionsData: array().of(
+  options: array().of(
     object({
       title: string()
         .required("請輸入選項標題")
@@ -29,7 +29,7 @@ const updatePollSchema = object({
   description: string(),
   imageUrl: string(),
   tags: array().of(string()),
-  optionsData: array().of(
+  options: array().of(
     object({
       id: string(),
       title: string()
@@ -38,17 +38,11 @@ const updatePollSchema = object({
       imageUrl: string(),
     })
   ),
-  startDate: date(),
-  endDate: date(),
+  startDate: date().transform(dateOrNull).nullable() as DateSchema<Date | null>,
+  endDate: date().transform(dateOrNull).nullable() as DateSchema<Date | null>,
   isPrivate: boolean(),
   status: string(),
 });
-
-const dateSchema = date()
-  .required("請輸入日期")
-  .test("date-validation", "日期應該晚於當前時間", function (value) {
-    return new Date(value) > new Date();
-  });
 
 class PollController {
   // 創建新投票
@@ -71,47 +65,29 @@ class PollController {
       description,
       imageUrl,
       tags,
-      optionsData,
-      startDate,
-      endDate,
+      options,
+      startDate: clientStartDate,
+      endDate: clientEndDate,
       isPrivate,
       status,
     } = req.body;
 
-    [
-      [startDate, endDate].map(
-        async (date) =>
-          date &&
-          (await dateSchema.validate(date).catch((err) => {
-            throw appError({ code: 400, message: err.errors.join(", "), next });
-          }))
-      ),
-    ];
-
     const now = new Date();
 
-    if (status !== "active" && startDate && new Date(startDate) < now) {
-      throw appError({ code: 400, message: "開始時間不能早於當前時間", next });
+    let startDate = clientStartDate && new Date(clientStartDate as Date);
+    let endDate = clientEndDate && new Date(clientEndDate as Date);
+
+    if (status === "active" || (startDate && startDate < now)) {
+      startDate = processDate(now);
     }
 
-    if (
-      (endDate && startDate && new Date(endDate) < new Date(startDate)) ||
-      (endDate && new Date(endDate) < now)
-    ) {
-      throw appError({
-        code: 400,
-        message: "結束時間不能早於開始時間或當前時間",
-        next,
-      });
-    }
-
-    if (status === "active" && endDate && new Date(endDate) < now) {
-      throw appError({ code: 400, message: "結束時間不能早於當前時間", next });
+    if (endDate && startDate && (endDate < startDate || endDate < now)) {
+      endDate = processDate(now, true);
     }
 
     let isStartNow = false;
 
-    if ((startDate && new Date(startDate) < now) || status === "active")
+    if (status === "active")
       isStartNow = true;
 
     const tagInstances =
@@ -124,14 +100,14 @@ class PollController {
       tags: tagInstances && tagInstances.map((tag) => tag.id),
       createdBy: req.user.id,
       isPrivate,
-      startDate: startDate ? new Date(startDate) : isStartNow ? now : null,
-      endDate: endDate ? new Date(endDate) : null,
+      startDate: startDate ? startDate : isStartNow ? now : null,
+      endDate: endDate ? endDate : null,
       status: status ? status : isStartNow ? "active" : "pending",
     });
 
     // 建立 Vote 資料
     const optionInstances = await VoteService.createOptions(
-      optionsData as IOption[],
+      options as IOption[],
       newPoll.id
     );
     newPoll.options = optionInstances.map((option) => option.id);
@@ -238,15 +214,17 @@ class PollController {
       description,
       imageUrl,
       tags,
-      optionsData,
-      startDate,
-      endDate,
+      options,
+      startDate: clientStartDate,
+      endDate: clientEndDate,
       isPrivate,
       status,
     } = req.body;
 
     const tagInstances =
       tags && (await TagService.createMultipleTags(tags as string[]));
+
+    const now = new Date();
 
     // 更新投票主體
     poll.title = title ?? poll.title;
@@ -259,18 +237,18 @@ class PollController {
       tagInstances.map((tag) => tag.id) ||
       poll.tags ||
       [];
-    poll.startDate = startDate ?? poll.startDate;
-    poll.endDate = endDate ?? poll.endDate;
+    poll.startDate = (clientStartDate && new Date(clientStartDate) < now ? processDate(clientStartDate) : clientStartDate) ?? poll.startDate;
+    poll.endDate = (clientEndDate && new Date(clientEndDate) < now ? processDate(clientEndDate, true) : clientEndDate) ?? poll.endDate;
     poll.isPrivate = isPrivate ?? poll.isPrivate;
     poll.status = status ?? poll.status;
 
     await poll.updateOne(poll).exec();
 
     // 處理選項更新
-    if (optionsData && optionsData.length > 0) {
+    if (options && options.length > 0) {
       const updatedOptions = await VoteService.updateOption(
         poll._id,
-        optionsData
+        options
       );
 
       poll.options = updatedOptions.map((option) => option?.id as IVote["_id"]);
