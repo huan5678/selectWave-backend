@@ -177,6 +177,16 @@ export const validateInput = async (schema: Schema, data, next: NextFunction) =>
   }
 };
 
+export const processDate = (dateString: Date, endOfDay = false) => {
+  const date = new Date(dateString);
+  if (endOfDay) {
+    date.setHours(23, 59, 59, 999); // 設置為當天結束時間
+  } else {
+    date.setHours(0, 0, 0, 0); // 設置為當天開始時間
+  }
+  return date;
+};
+
 const customEmitter = new EventEmitter();
 
 export default customEmitter;
