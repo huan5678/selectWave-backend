@@ -360,4 +360,42 @@ pollRouter.get(
   handleErrorAsync(PollController.endPoll),
 );
 
+//獲取提案中使用者所有評論
+pollRouter.get(
+  /**
+   * #swagger.tags = ['Poll - 提案']
+   * #swagger.description = '獲取提案中使用者所有評論'
+   * #swagger.path = '/api/poll/{id}/comment/user'
+   * #swagger.parameters['id'] = {
+    in: 'path',
+    required: true,
+    type: 'string',
+    description: '提案ID'
+    }
+   * #swagger.responses[200] = {
+    schema: {
+      status: true,
+      message: "獲取提案評論成功",
+      result: [
+        {
+        $ref: "#/definitions/Comment"
+        }
+      ]
+    },
+    description: "獲取提案評論成功"
+    }
+   * #swagger.responses[404] = {
+    schema: {
+      $ref: "#/definitions/ErrorPollNotFound"
+    },
+    description: "找不到提案"
+    }
+   * #swagger.security = [{
+    "Bearer": []
+    }]
+   */
+  '/:id/comment/user',
+  handleErrorAsync(PollController.getCommentsByUser),
+);
+
 export default pollRouter;

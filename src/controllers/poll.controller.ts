@@ -2,7 +2,7 @@ import { NextFunction, RequestHandler, Response } from "express"; // Import miss
 import { appError, successHandle } from "@/utils";
 import { array, boolean, date, object, string } from "yup";
 import { IVote, IUser, IOption, CreatePollRequest } from "@/types";
-import { PollService, TagService, VoteService } from "@/services";
+import { CommentService, PollService, TagService, VoteService } from "@/services";
 
 const pollSchema = object({
   title: string()
@@ -177,7 +177,7 @@ class PollController {
       limit
     );
 
-    successHandle(res, "獲取投票列表成功", { polls, total, page, limit });
+    successHandle(res, "獲取投票列表成功", { polls, total, page, totalPages, limit });
   };
 
   // 根據 ID 獲取投票詳情
@@ -368,6 +368,18 @@ class PollController {
       },
     ]);
     successHandle(res, "結束投票成功", { result: updatedPoll });
+  };
+
+  // 獲取提案中使用者所有評論
+  public static getCommentsByUser: RequestHandler = async (
+    req,
+    res: Response,
+    next
+  ) => {
+    const { id } = req.params;
+    const {id: userId} = req.user as IUser;
+    const comments = await CommentService.getCommentByPollAndUser(id, userId, next);
+    successHandle(res, "獲取使用者評論成功", { result: comments });
   };
 }
 

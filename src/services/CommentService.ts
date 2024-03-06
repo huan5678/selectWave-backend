@@ -65,6 +65,35 @@ export class CommentService
     return comments;
   }
 
+  static getCommentByPollAndUser = async (pollId: string, userId: string, next: NextFunction) =>
+  {
+    if (!pollId || !userId) {
+      throw appError({
+        code: 400,
+        message: "缺少必要的參數",
+        next,
+      });
+    }
+    const comments = await Comment.find({ pollId, author: userId })
+      .populate({
+        path: 'pollId',
+        select: 'title id description createdTime status imageUrl tags',
+        populate: {
+          path: 'tags',
+          select: 'name',
+        }
+    })
+    .exec();
+    if (!comments) {
+      throw appError({
+        code: 404,
+        message: "找不到評論",
+        next,
+      });
+    }
+    return comments;
+  }
+
   static updateComment = async (id: string, content: string) =>
   {
     const comment = await Comment.findByIdAndUpdate(

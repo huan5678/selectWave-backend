@@ -84,7 +84,7 @@ class CommentController {
       skip,
       limit
     );
-    successHandle(res, "獲取所有評論成功", { result });
+    successHandle(res, "獲取所有評論成功", { result, total, totalPages, page, limit });
   };
 }
 
