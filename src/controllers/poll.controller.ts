@@ -1,6 +1,6 @@
 import { NextFunction, RequestHandler, Response } from "express"; // Import missing modules
-import { appError, processDate, successHandle } from "@/utils";
-import { array, boolean, date, object, string } from "yup";
+import { appError, dateOrNull, processDate, successHandle } from "@/utils";
+import { DateSchema, array, boolean, date, object, string } from "yup";
 import { IVote, IUser, IOption, CreatePollRequest } from "@/types";
 import { PollService, TagService, VoteService } from "@/services";
 
@@ -38,8 +38,8 @@ const updatePollSchema = object({
       imageUrl: string(),
     })
   ),
-  startDate: date(),
-  endDate: date(),
+  startDate: date().transform(dateOrNull).nullable() as DateSchema<Date | null>,
+  endDate: date().transform(dateOrNull).nullable() as DateSchema<Date | null>,
   isPrivate: boolean(),
   status: string(),
 });
