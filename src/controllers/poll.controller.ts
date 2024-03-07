@@ -142,11 +142,11 @@ class PollController {
 
     const total = await PollService.countDocuments(queryConditions);
 
-    const totalPages = Math.ceil(total / limit); // 計算總頁數
+    const totalPages = Math.max(Math.ceil(total / limit), 1); // 計算總頁數
 
     page = Math.min(page, totalPages); // 確保請求的頁數不會超過總頁數
 
-    const skip = (total !== 0 && (page - 1) * limit) || 0;
+    const skip = (page - 1) * limit;
 
     const polls = await PollService.getPolls(
       queryConditions,
