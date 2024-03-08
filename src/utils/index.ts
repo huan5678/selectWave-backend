@@ -187,10 +187,6 @@ export const processDate = (dateString: Date, endOfDay = false) => {
   return date;
 };
 
-export const dateOrNull = (originalValue: string): Date | null => {
-  return originalValue.trim() === '' ? null : new Date(originalValue);
-};
-
 const customEmitter = new EventEmitter();
 
 export default customEmitter;

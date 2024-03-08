@@ -79,8 +79,8 @@ export interface IPoll extends Document {
   tags: string[];
   createdBy: IUser;
   createdTime: Date;
-  startDate: Date;
-  endDate: Date;
+  startDate: Date | null;
+  endDate: Date | null;
   isPrivate: boolean;
   totalVoters: number;
   like: {
