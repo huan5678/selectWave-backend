@@ -62,6 +62,10 @@ export class AuthService {
         message: '密碼強度不足，請確認是否具至少有 1 個數字， 1 個大寫英文， 1 個小寫英文， 1 個特殊符號，且長度至少為 8 個字元',
         next,
       });
+    const user = await User.findOne({ email });
+    if (user) {
+      throw appError({ code: 400, message: '此 Email 已被註冊', next });
+    }
     try {
       const memberData = await User.create({
           id: memberId,
