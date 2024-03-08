@@ -222,6 +222,8 @@ export class PollService {
     if (poll.createdBy.id !== userId) {
       throw appError({ code: 403, message: "您無法結束該投票", next });
     }
+    poll.status = "ended";
+    await poll.save();
   };
 
   static calculateResultsForPoll = async (id: string) => {
