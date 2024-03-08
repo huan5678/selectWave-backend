@@ -1,6 +1,6 @@
 import { NextFunction, RequestHandler, Response } from "express"; // Import missing modules
-import { appError, dateOrNull, processDate, successHandle } from "@/utils";
-import { DateSchema, array, boolean, date, object, string } from "yup";
+import { appError, processDate, successHandle } from "@/utils";
+import { array, boolean, object, string } from "yup";
 import { IVote, IUser, IOption, CreatePollRequest } from "@/types";
 import { CommentService, PollService, TagService, VoteService } from "@/services";
 
@@ -38,8 +38,6 @@ const updatePollSchema = object({
       imageUrl: string(),
     })
   ),
-  startDate: date().transform(dateOrNull).nullable() as DateSchema<Date | null>,
-  endDate: date().transform(dateOrNull).nullable() as DateSchema<Date | null>,
   isPrivate: boolean(),
   status: string(),
 });
@@ -189,13 +187,15 @@ class PollController {
   public static updatePoll: RequestHandler = async (req, res, next) => {
     const { id } = req.params;
     const { id: userId } = req.user as IUser;
-
     // 驗證更新資料
     await updatePollSchema
-      .validate(req.body)
-      .catch((err) =>
-        appError({ code: 400, message: err.errors.join(", "), next })
-      );
+    .validate(req.body)
+    .catch((err) =>
+    {
+      console.log('err', err);
+      throw appError({ code: 400, message: err.errors.join(", "), next });
+    });
+    console.log('check');
 
     const poll = await PollService.getPoll({ id, next });
 
@@ -225,6 +225,7 @@ class PollController {
 
     const tagInstances =
       tags && (await TagService.createMultipleTags(tags as string[]));
+    const tagIds = tagInstances.map(tag => tag._id);
 
     const now = new Date();
 
@@ -232,19 +233,13 @@ class PollController {
     poll.title = title ?? poll.title;
     poll.description = description ?? poll.description;
     poll.imageUrl = imageUrl ?? poll.imageUrl;
-    poll.tags =
-      (tagInstances &&
-        poll.tags &&
-        poll.tags.concat(tagInstances.map((tag) => tag.id))) ||
-      tagInstances.map((tag) => tag.id) ||
-      poll.tags ||
-      [];
+    poll.tags = tagIds ?? poll.tags;
     poll.startDate = (clientStartDate && new Date(clientStartDate) < now ? processDate(clientStartDate) : clientStartDate) ?? poll.startDate;
     poll.endDate = (clientEndDate && new Date(clientEndDate) < now ? processDate(clientEndDate, true) : clientEndDate) ?? poll.endDate;
     poll.isPrivate = isPrivate ?? poll.isPrivate;
     poll.status = status ?? poll.status;
 
-    await poll.updateOne(poll).exec();
+    await poll.save();
 
     // 處理選項更新
     if (options && options.length > 0) {

@@ -36,10 +36,10 @@ const pollSchema = new Schema<IPoll>({
     default: Date.now,
   },
   startDate: {
-    type: Date,
+    type: Date || null,
   },
   endDate: {
-    type: Date,
+    type: Date || null,
   },
   isPrivate: {
     type: Boolean, // true: 私人投票, false: 公開投票
