@@ -3,6 +3,7 @@ import { appError, processDate, successHandle } from "@/utils";
 import { array, boolean, object, string } from "yup";
 import { IVote, IUser, IOption, CreatePollRequest } from "@/types";
 import { CommentService, PollService, TagService, VoteService } from "@/services";
+import { Schema } from "mongoose";
 
 const pollSchema = object({
   title: string()
@@ -126,12 +127,17 @@ class PollController {
     page = Math.max(Number(page), 1);
     limit = Math.max(Number(limit), 1);
 
+    async function getMatchingTagIds(q: string): Promise<Schema.Types.ObjectId[]> {
+      const tags = await TagService.findTags({ name: { $regex: q, $options: "i" } });
+      return tags.map((tag) => tag._id);
+    }
+
     const queryConditions = {
       ...(q && {
         $or: [
           { title: { $regex: q, $options: "i" } },
           { description: { $regex: q, $options: "i" } },
-          { tags: { $in: [q] } },
+          { tags: { $in: await getMatchingTagIds(q as string) } },
         ],
       }),
       ...(status && { status: status }),
