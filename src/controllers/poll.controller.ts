@@ -122,7 +122,7 @@ class PollController {
 
   // 獲取所有投票
   public static getAllPolls: RequestHandler = async (req, res: Response) => {
-    let { page = 1, limit = 10, status, q, sort, createdBy } = req.query;
+    let { page = 1, limit = 12, status, q, sort, createdBy } = req.query;
 
     page = Math.max(Number(page), 1);
     limit = Math.max(Number(limit), 1);
