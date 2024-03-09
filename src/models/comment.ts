@@ -73,9 +73,11 @@ commentSchema.post('save', async function(doc, next) {
       }
     })
     .populate({
-      path: 'comments',
+      path: 'comments.comment',
+      select: 'content author createdTime edited updateTime',
       populate: {
         path: 'author',
+        select: 'name avatar',
       }
     });
 

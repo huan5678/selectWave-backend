@@ -2,7 +2,7 @@ import { Comment, Poll, User } from "@/models";
 import { IComment } from "@/types";
 import { appError } from "@/utils";
 import { NextFunction } from "express";
-import { FilterQuery } from "mongoose";
+import { FilterQuery, Types } from "mongoose";
 
 export class CommentService
 {
@@ -67,6 +67,19 @@ export class CommentService
       throw appError({
         code: 404,
         message: "使用者沒有評論",
+        next,
+      });
+    }
+    return comments;
+  }
+
+  static getCommentsByPoll = async (pollId: string, next: NextFunction) =>
+  {
+    const comments = await Comment.find({ pollId: { $eq: new Types.ObjectId(pollId) }, }).exec();
+    if (!comments) {
+      throw appError({
+        code: 404,
+        message: "找不到評論",
         next,
       });
     }

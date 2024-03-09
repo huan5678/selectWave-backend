@@ -44,6 +44,7 @@ app.use(
       { path: '/option', method: 'GET' },
       { path: '/poll/:id', method: 'GET' },
       { path: '/poll', method: 'GET' },
+      { path: '/poll/:id/comment', method: 'GET' },
       { path: '/mail/contact', method: 'POST' },
       { path: '/contact', method: 'POST' },
       { path: '/contact/subscribe', method: 'POST' },

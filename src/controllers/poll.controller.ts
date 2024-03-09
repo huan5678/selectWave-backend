@@ -174,10 +174,8 @@ class PollController {
       populates: [
         { path: "createdBy" },
         { path: "options" },
-        {
-          path: "comments.comment",
-          select: "content author createdTime updatedTime edited",
-        },
+        { path: "like", select: "name avatar" },
+        { path: "comments.comment", select: "content author createdTime edited updateTime" },
         {
           path: "isWinner.option",
           select: "title imageUrl",
@@ -362,6 +360,19 @@ class PollController {
     const comments = await CommentService.getCommentByPollAndUser(id, userId, next);
     successHandle(res, "獲取使用者評論成功", { result: comments });
   };
+
+  public static getCommentsByPoll: RequestHandler = async(
+    req,
+    res: Response,
+    next
+  ) => {
+    const { id } = req.params;
+    if (!id) {
+      throw appError({ code: 400, message: "請提供投票 ID", next });
+    }
+    const comments = await CommentService.getCommentsByPoll(id, next);
+    successHandle(res, "獲取投票評論成功", { result: comments });
+  }
 }
 
 export default PollController;
