@@ -16,10 +16,18 @@ export class CommentService
       content,
       pollId,
     });
-    await User.findByIdAndUpdate(author, { $push: { comments: comment.id } });
+    console.log(comment);
+    await User.findByIdAndUpdate(author, { $push: { comments: comment } });
     const result = await Poll.findByIdAndUpdate(
-      { id: pollId },
-      { $push: { comments: { comment } } },
+      pollId,
+      { $push: { comments: {
+            pollId: comment.pollId,
+            author: comment.author,
+            content: comment.content,
+            edited: false,
+            createdTime: comment.createdTime,
+            updateTime: comment.updateTime
+        } } },
       { new: true }
     );
     return result;

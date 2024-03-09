@@ -1504,6 +1504,61 @@
         ]
       }
     },
+    "/api/poll/{id}/comment/user": {
+      "get": {
+        "tags": [
+          "Poll - 提案"
+        ],
+        "description": "獲取提案中使用者所有評論",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "提案ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "獲取提案評論成功"
+                },
+                "result": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Comment"
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "獲取提案評論成功"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ErrorPollNotFound"
+            },
+            "description": "找不到提案"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
     "/api/vote": {
       "post": {
         "tags": [
