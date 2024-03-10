@@ -19,7 +19,7 @@ export class CommentService
     console.log(comment);
     await User.findByIdAndUpdate(author, { $push: { comments: comment } });
     const result = await Poll.findByIdAndUpdate(
-      pollId,
+      { id: pollId },
       { $push: { comments: {
             pollId: pollId,
             author: comment.author,
@@ -75,7 +75,7 @@ export class CommentService
 
   static getCommentsByPoll = async (pollId: string, next: NextFunction) =>
   {
-    const comments = await Comment.find({ pollId: { $eq: new Types.ObjectId(pollId) }, }).exec();
+    const comments = await Comment.find({ pollId: { $eq: new Types.ObjectId(pollId) }, }).sort({createdTime: -1}).exec();
     if (!comments) {
       throw appError({
         code: 404,
