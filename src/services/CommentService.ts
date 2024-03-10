@@ -21,7 +21,7 @@ export class CommentService
     const result = await Poll.findByIdAndUpdate(
       pollId,
       { $push: { comments: {
-            pollId: comment.pollId,
+            pollId: pollId,
             author: comment.author,
             content: comment.content,
             edited: false,
