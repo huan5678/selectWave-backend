@@ -4,13 +4,15 @@ import { appError } from "@/utils";
 import { NextFunction } from "express";
 import { FilterQuery, Types } from "mongoose";
 
-export class CommentService
-{
+export class CommentService {
+  static countDocuments = async (query: FilterQuery<IComment>) =>
+    Comment.countDocuments(query).exec();
 
-  static countDocuments = async (query: FilterQuery<IComment>) => Comment.countDocuments(query).exec();
-
-  static createComment = async (author: string, content: string, pollId: string) =>
-  {
+  static createComment = async (
+    author: string,
+    content: string,
+    pollId: string
+  ) => {
     const comment = await Comment.create({
       author,
       content,
@@ -20,23 +22,26 @@ export class CommentService
     await User.findByIdAndUpdate(author, { $push: { comments: comment } });
     const result = await Poll.findByIdAndUpdate(
       { id: pollId },
-      { $push: { comments: {
+      {
+        $push: {
+          comments: {
             pollId: pollId,
             author: comment.author,
             content: comment.content,
             edited: false,
             createdTime: comment.createdTime,
-            updateTime: comment.updateTime
-        } } },
+            updateTime: comment.updateTime,
+          },
+        },
+      },
       { new: true }
     );
     return result;
-  }
+  };
 
-  static getComment = async (id: string, next: NextFunction) =>
-  {
+  static getComment = async (id: string, next: NextFunction) => {
     const comment = await Comment.findById(id)
-      .populate('pollId', 'title id')
+      .populate("pollId", "title id")
       .exec();
     if (!comment) {
       throw appError({
@@ -45,23 +50,27 @@ export class CommentService
         next,
       });
     }
-    return comment
-  }
+    return comment;
+  };
 
-  static getComments = async (queryConditions: FilterQuery<IComment>, sort: string, skip: number, limit: number) => {
+  static getComments = async (
+    queryConditions: FilterQuery<IComment>,
+    sort: string,
+    skip: number,
+    limit: number
+  ) => {
     const comments = await Comment.find(queryConditions)
       .sort(sort || { createdTime: -1 })
       .skip(skip)
       .limit(limit)
-      .populate('pollId', 'title id comments')
+      .populate("pollId", "title id comments")
       .exec();
     return comments;
-  }
+  };
 
-  static getCommentByUser = async (id: string, next: NextFunction) =>
-  {
+  static getCommentByUser = async (id: string, next: NextFunction) => {
     const comments = await Comment.find({ author: id })
-      .populate('pollId', 'title id comments')
+      .populate("pollId", "title id comments")
       .exec();
     if (!comments) {
       throw appError({
@@ -71,11 +80,14 @@ export class CommentService
       });
     }
     return comments;
-  }
+  };
 
-  static getCommentsByPoll = async (pollId: string, next: NextFunction) =>
-  {
-    const comments = await Comment.find({ pollId: { $eq: new Types.ObjectId(pollId) }, }).sort({createdTime: -1}).exec();
+  static getCommentsByPoll = async (pollId: string, next: NextFunction) => {
+    const comments = await Comment.find({
+      pollId: { $eq: new Types.ObjectId(pollId) },
+    })
+      .sort({ createdTime: -1 })
+      .exec();
     if (!comments) {
       throw appError({
         code: 404,
@@ -84,10 +96,13 @@ export class CommentService
       });
     }
     return comments;
-  }
+  };
 
-  static getCommentByPollAndUser = async (pollId: string, userId: string, next: NextFunction) =>
-  {
+  static getCommentByPollAndUser = async (
+    pollId: string,
+    userId: string,
+    next: NextFunction
+  ) => {
     if (!pollId || !userId) {
       throw appError({
         code: 400,
@@ -97,14 +112,14 @@ export class CommentService
     }
     const comments = await Comment.find({ pollId, author: userId })
       .populate({
-        path: 'pollId',
-        select: 'title id description createdTime status imageUrl tags',
+        path: "pollId",
+        select: "title id description createdTime status imageUrl tags",
         populate: {
-          path: 'tags',
-          select: 'name',
-        }
-    })
-    .exec();
+          path: "tags",
+          select: "name",
+        },
+      })
+      .exec();
     if (!comments) {
       throw appError({
         code: 404,
@@ -113,20 +128,18 @@ export class CommentService
       });
     }
     return comments;
-  }
+  };
 
-  static updateComment = async (id: string, content: string) =>
-  {
+  static updateComment = async (id: string, content: string) => {
     const comment = await Comment.findByIdAndUpdate(
       id,
       { content, edited: true, updateTime: Date.now() },
       { new: true }
-    ).populate('pollId', 'title id');
+    ).populate("pollId", "title id");
     return comment;
-  }
+  };
 
-  static deleteComment = async (id: string, userId: string) =>
-  {
+  static deleteComment = async (id: string, userId: string) => {
     const deletedComment = await Comment.findByIdAndDelete(id).exec();
     if (!deletedComment) {
       throw appError({
@@ -141,7 +154,12 @@ export class CommentService
     );
     await User.findByIdAndUpdate(userId, { $pull: { comments: id } });
     return result;
-  }
+  };
+
+  static deleteCommentByPollId = async (pollId: string) => {
+    const result = await Comment.deleteMany({ pollId: pollId }).exec();
+    return result;
+  };
 }
 
 export default CommentService;

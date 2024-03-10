@@ -280,6 +280,7 @@ class PollController {
     }
     await PollService.deletePoll(id, next);
     await VoteService.deleteOptionByPollId(id);
+    await CommentService.deleteCommentByPollId(id);
     successHandle(res, "刪除投票成功", {});
   };
 
