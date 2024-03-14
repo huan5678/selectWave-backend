@@ -30,6 +30,10 @@ const commentSchema = new Schema<IComment>({
   updateTime: {
     type: Date,
   },
+  replies: [ {
+    type: Schema.Types.ObjectId,
+    ref: 'Reply',
+  }]
 }, {
   timestamps: { createdAt: 'createdTime', updatedAt: 'updateTime' },
   versionKey: false,
@@ -51,11 +55,12 @@ const commentSchema = new Schema<IComment>({
     },
 });
 
+
 commentSchema.pre(/^find/, function(next) {
   (this as IComment).populate([{
     path: 'author',
     select: 'name avatar'
-  }]);
+  } ]);
   next();
 });
 
@@ -104,6 +109,28 @@ commentSchema.post('save', async function(doc, next) {
     commentId: doc._id,
   });
 
+  next();
+});
+
+async function deleteReplies(replies: IComment[]) {
+  const Reply = model('Reply');
+
+  for (let reply of replies) {
+    // 如果該回覆還有嵌套回覆,遞迴刪除
+    if (reply.replies && reply.replies.length > 0) {
+      await deleteReplies(reply.replies);
+    }
+    // 刪除該回覆
+    await Reply.findByIdAndDelete(reply._id);
+  }
+}
+
+commentSchema.pre(/^remove/, async function (next)
+{
+  const comment = this as IComment;
+  // 遍歷所有回覆並刪除
+  await deleteReplies(comment.replies);
+  // 確保所有回覆都被刪除後,再刪除該comment
   next();
 });
 
