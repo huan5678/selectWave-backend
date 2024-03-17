@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { CallbackError, Schema, model } from 'mongoose';
 import customEmitter from '@/utils';
 import { IComment } from '@/types';
 
@@ -65,7 +65,9 @@ commentSchema.pre(/^find/, function(next) {
 });
 
 
-commentSchema.post('save', async function(doc, next) {
+commentSchema.post('save', async function (doc, next)
+{
+  try {
   const Poll = model('Poll');
 
   const poll = await Poll.findById(doc.pollId)
@@ -85,31 +87,47 @@ commentSchema.post('save', async function(doc, next) {
         select: 'name avatar',
       }
     });
+  
+  if (!poll) {
+      console.error('Poll not found for comment:', doc._id);
+      return next();
+    }
 
-  const userIdsToNotify = new Set();
+    if (!poll.createdBy) {
+      console.error('CreatedBy not populated for poll:', poll._id);
+      return next();
+    }
 
-  userIdsToNotify.add(poll.createdBy.id.toString());
+//   const userIdsToNotify = new Set();
 
-  poll.like.forEach(like => {
-    userIdsToNotify.add(like.user.id.toString());
-  });
+//  if (poll.createdBy) {
+//   userIdsToNotify.add(poll.createdBy.id.toString());
+// }
 
-  poll.options.forEach(option => {
-    option.voters.forEach(voter => {
-      userIdsToNotify.add(voter.user.id.toString());
-    });
-  });
+//   poll.like.forEach(like => {
+//     userIdsToNotify.add(like.user.id.toString());
+//   });
 
-  poll.comments.forEach(comment => {
-    userIdsToNotify.add(comment.author.id.toString());
-  });
+//   poll.options.forEach(option => {
+//     option.voters.forEach(voter => {
+//       userIdsToNotify.add(voter.user.id.toString());
+//     });
+//   });
 
-  customEmitter.emit('commentAdded', {
-    pollId: doc.pollId,
-    commentId: doc._id,
-  });
+//   poll.comments.forEach(comment => {
+//     userIdsToNotify.add(comment.author.id.toString());
+//   });
 
-  next();
+//   customEmitter.emit('commentAdded', {
+//     pollId: doc.pollId,
+//     commentId: doc._id,
+//   });
+
+    next();
+  } catch (error) {
+    console.error('Error in commentSchema post save middleware:', error);
+    next(error as CallbackError);
+  }
 });
 
 async function deleteReplies(replies: IComment[]) {

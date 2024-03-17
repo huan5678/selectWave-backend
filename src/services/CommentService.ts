@@ -13,30 +13,31 @@ export class CommentService {
     content: string,
     pollId: string
   ) => {
-    const comment = await Comment.create({
-      author,
-      content,
-      pollId,
-    });
-    console.log(comment);
-    await User.findByIdAndUpdate(author, { $push: { comments: comment } });
-    const result = await Poll.findByIdAndUpdate(
-      { id: pollId },
-      {
-        $push: {
-          comments: {
-            pollId: pollId,
-            author: comment.author,
-            content: comment.content,
-            edited: false,
-            createdTime: comment.createdTime,
-            updateTime: comment.updateTime,
-          },
-        },
-      },
-      { new: true }
-    );
-    return result;
+    try {
+      const authorObjectId = new Types.ObjectId(author);
+      const pollObjectId = new Types.ObjectId(pollId);
+      // 創建 Comment
+      const comment = new Comment({
+        author: authorObjectId,
+        content: content,
+        pollId: pollObjectId,
+      });
+
+      await comment.save();
+      // 更新 User 和 Poll
+      await User.findByIdAndUpdate(author, { $push: { comments: comment } });
+      await Poll.findByIdAndUpdate(
+        pollId,
+        { $push: { comments: comment } },
+        { new: true }
+      );
+      return comment;
+    } catch (error) {
+      throw appError({
+        code: 500,
+        message: (error as Error).message,
+      });
+    }
   };
 
   static getComment = async (id: string, next: NextFunction) => {
@@ -83,10 +84,22 @@ export class CommentService {
   };
 
   static getCommentsByPoll = async (pollId: string, next: NextFunction) => {
-    const comments = await Comment.find({
-      pollId: { $eq: new Types.ObjectId(pollId) },
-    })
+    const comments = await Comment.find({ pollId })
       .sort({ createdTime: -1 })
+      .populate([
+        {
+          path: "author",
+          select: "name avatar",
+        },
+        {
+          path: "replies",
+          select: "content author createdTime edited updateTime",
+          populate: {
+            path: "author",
+            select: "name avatar",
+          },
+        },
+      ])
       .exec();
     if (!comments) {
       throw appError({
@@ -133,7 +146,7 @@ export class CommentService {
   static updateComment = async (id: string, content: string) => {
     const comment = await Comment.findByIdAndUpdate(
       id,
-      { content, edited: true, updateTime: Date.now() },
+      { content, edited: true, updateTime: new Date() },
       { new: true }
     ).populate("pollId", "title id");
     return comment;
@@ -148,7 +161,7 @@ export class CommentService {
       });
     }
     const result = await Poll.findByIdAndUpdate(
-      { id: deletedComment.pollId },
+      deletedComment.pollId,
       { $pull: { comments: { comment: id } } },
       { new: true }
     );
