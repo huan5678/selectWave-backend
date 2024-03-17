@@ -10,3 +10,4 @@ export { default as thirdPartyAuthService } from "./ThirdPartyService";
 export { default as TokenBlackListService } from "./TokenBlackListService";
 export { default as VoteService } from "./VoteService";
 export { default as webSocketService } from "./webSocketService";
+export { default as ReplyCommentService } from "./ReplyCommentService";

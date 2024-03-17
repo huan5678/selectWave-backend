@@ -1559,6 +1559,56 @@
         ]
       }
     },
+    "/api/poll/{id}/comment": {
+      "get": {
+        "tags": [
+          "Poll - 提案"
+        ],
+        "description": "獲取提案評論",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "提案ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "獲取提案評論成功"
+                },
+                "result": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Comment"
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "獲取提案評論成功"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ErrorPollNotFound"
+            },
+            "description": "找不到提案"
+          }
+        }
+      }
+    },
     "/api/vote": {
       "post": {
         "tags": [
@@ -2272,19 +2322,19 @@
           },
           "400": {
             "schema": {
-              "$ref": "#/definitions/ErrorCommentFormat"
+              "$ref": "#/definitions/ErrorFormat"
             },
             "description": "請確實填寫評論資訊"
           },
           "403": {
             "schema": {
-              "$ref": "#/definitions/ErrorCommentUnauthorized"
+              "$ref": "#/definitions/ErrorUnauthorized"
             },
             "description": "沒有權限更新評論"
           },
           "404": {
             "schema": {
-              "$ref": "#/definitions/ErrorCommentNotFound"
+              "$ref": "#/definitions/ErrorNotFound"
             },
             "description": "找不到評論"
           }
@@ -2395,9 +2445,245 @@
           },
           "400": {
             "schema": {
-              "$ref": "#/definitions/ErrorCommentFormat"
+              "$ref": "#/definitions/ErrorFormat"
             },
             "description": "請確實填寫評論資訊"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/comment/reply/user": {
+      "get": {
+        "tags": [
+          "Comment - 評論"
+        ],
+        "description": "獲取使用者所有回覆評論",
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "獲取回覆成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Reply"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "獲取回覆成功"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/comment/{id}/reply": {
+      "post": {
+        "tags": [
+          "Comment - 評論"
+        ],
+        "description": "新增回覆",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "評論ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "新增回覆",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string",
+                  "example": "這是一則回覆"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "回覆創建成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Comment"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "回覆創建成功"
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/ErrorCommentFormat"
+            },
+            "description": "請確實填寫回覆資訊"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/comment/reply/{id}": {
+      "put": {
+        "tags": [
+          "Comment - 評論"
+        ],
+        "description": "更新回覆",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "回覆ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "更新回覆",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string",
+                  "example": "這是一則更新後的回覆"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "回覆更新成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Comment"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "回覆更新成功"
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/ErrorFormat"
+            },
+            "description": "請確實填寫回覆資訊"
+          },
+          "403": {
+            "schema": {
+              "$ref": "#/definitions/ErrorUnauthorized"
+            },
+            "description": "沒有權限更新回覆"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ErrorNotFound"
+            },
+            "description": "找不到回覆"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Comment - 評論"
+        ],
+        "description": "刪除回覆",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "回覆ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "回覆刪除成功"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "回覆刪除成功"
+          },
+          "403": {
+            "schema": {
+              "$ref": "#/definitions/ErrorUnauthorized"
+            },
+            "description": "沒有權限刪除回覆"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ErrorNotFound"
+            },
+            "description": "找不到回覆"
           }
         },
         "security": [
@@ -3309,6 +3595,45 @@
         }
       }
     },
+    "ErrorFormat": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "boolean",
+          "example": false
+        },
+        "message": {
+          "type": "string",
+          "example": "請確認輸入的欄位格式是否正確"
+        }
+      }
+    },
+    "ErrorNotFound": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "boolean",
+          "example": false
+        },
+        "message": {
+          "type": "string",
+          "example": "請確認 id 是否正確"
+        }
+      }
+    },
+    "ErrorUnauthorized": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "boolean",
+          "example": false
+        },
+        "message": {
+          "type": "string",
+          "example": "沒有權限進行此操作"
+        }
+      }
+    },
     "ErrorTokenExpired": {
       "type": "object",
       "properties": {
@@ -3331,7 +3656,7 @@
         },
         "message": {
           "type": "string",
-          "example": "驗證失敗，請重新登入！"
+          "example": "驗證失敗,請重新登入!"
         }
       }
     },
@@ -3383,20 +3708,7 @@
         },
         "message": {
           "type": "string",
-          "example": "Email 格式有誤，請確認輸入是否正確"
-        }
-      }
-    },
-    "ErrorInputFormat": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "boolean",
-          "example": false
-        },
-        "message": {
-          "type": "string",
-          "example": "請確認輸入的欄位格式是否正確"
+          "example": "Email 格式有誤,請確認輸入是否正確"
         }
       }
     },
@@ -3409,7 +3721,7 @@
         },
         "message": {
           "type": "string",
-          "example": "密碼強度不足，請確認是否具至少有 1 個數字， 1 個大寫英文， 1 個小寫英文， 1 個特殊符號，且長度至少為 8 個字元"
+          "example": "密碼強度不足,請確認是否具至少有 1 個數字,1 個大寫英文,1 個小寫英文,1 個特殊符號,且長度至少為 8 個字元"
         }
       }
     },
@@ -3423,6 +3735,19 @@
         "message": {
           "type": "string",
           "example": "此 Email 已註冊"
+        }
+      }
+    },
+    "ErrorMemberNotFound": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "boolean",
+          "example": false
+        },
+        "message": {
+          "type": "string",
+          "example": "無此使用者請確認使用者 id 是否正確"
         }
       }
     },
@@ -3448,7 +3773,7 @@
         },
         "message": {
           "type": "string",
-          "example": "檔案格式錯誤，僅限上傳 jpg、jpeg 與 png 格式。 圖片大小不可超過 2MB"
+          "example": "檔案格式錯誤,僅限上傳 jpg、jpeg 與 png 格式。圖片大小不可超過 2MB"
         }
       }
     },
@@ -3465,32 +3790,6 @@
         }
       }
     },
-    "ErrorMemberNotFound": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "boolean",
-          "example": false
-        },
-        "message": {
-          "type": "string",
-          "example": "無此使用者請確認使用者 id 是否正確"
-        }
-      }
-    },
-    "ErrorNoneMemberId": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "boolean",
-          "example": false
-        },
-        "message": {
-          "type": "string",
-          "example": "請提供使用者 id"
-        }
-      }
-    },
     "ErrorPollNotFound": {
       "type": "object",
       "properties": {
@@ -3501,19 +3800,6 @@
         "message": {
           "type": "string",
           "example": "無此投票請確認提案 id 是否正確"
-        }
-      }
-    },
-    "ErrorNonePollId": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "boolean",
-          "example": false
-        },
-        "message": {
-          "type": "string",
-          "example": "請提供提案 id"
         }
       }
     },
@@ -3604,7 +3890,7 @@
         },
         "message": {
           "type": "string",
-          "example": "無此評論請確認評論 id 是否正確"
+          "example": "無此留言請確認留言 id 是否正確"
         }
       }
     },
@@ -3617,20 +3903,7 @@
         },
         "message": {
           "type": "string",
-          "example": "請確實填寫評論資訊"
-        }
-      }
-    },
-    "ErrorCommentUnauthorized": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "boolean",
-          "example": false
-        },
-        "message": {
-          "type": "string",
-          "example": "沒有權限更新評論"
+          "example": "請確實填寫留言資訊"
         }
       }
     },

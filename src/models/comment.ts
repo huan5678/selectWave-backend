@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { CallbackError, Schema, model } from 'mongoose';
 import customEmitter from '@/utils';
 import { IComment } from '@/types';
 
@@ -30,6 +30,10 @@ const commentSchema = new Schema<IComment>({
   updateTime: {
     type: Date,
   },
+  replies: [ {
+    type: Schema.Types.ObjectId,
+    ref: 'Reply',
+  }]
 }, {
   timestamps: { createdAt: 'createdTime', updatedAt: 'updateTime' },
   versionKey: false,
@@ -51,16 +55,19 @@ const commentSchema = new Schema<IComment>({
     },
 });
 
+
 commentSchema.pre(/^find/, function(next) {
   (this as IComment).populate([{
     path: 'author',
     select: 'name avatar'
-  }]);
+  } ]);
   next();
 });
 
 
-commentSchema.post('save', async function(doc, next) {
+commentSchema.post('save', async function (doc, next)
+{
+  try {
   const Poll = model('Poll');
 
   const poll = await Poll.findById(doc.pollId)
@@ -80,30 +87,68 @@ commentSchema.post('save', async function(doc, next) {
         select: 'name avatar',
       }
     });
+  
+  if (!poll) {
+      console.error('Poll not found for comment:', doc._id);
+      return next();
+    }
 
-  const userIdsToNotify = new Set();
+    if (!poll.createdBy) {
+      console.error('CreatedBy not populated for poll:', poll._id);
+      return next();
+    }
 
-  userIdsToNotify.add(poll.createdBy.id.toString());
+//   const userIdsToNotify = new Set();
 
-  poll.like.forEach(like => {
-    userIdsToNotify.add(like.user.id.toString());
-  });
+//  if (poll.createdBy) {
+//   userIdsToNotify.add(poll.createdBy.id.toString());
+// }
 
-  poll.options.forEach(option => {
-    option.voters.forEach(voter => {
-      userIdsToNotify.add(voter.user.id.toString());
-    });
-  });
+//   poll.like.forEach(like => {
+//     userIdsToNotify.add(like.user.id.toString());
+//   });
 
-  poll.comments.forEach(comment => {
-    userIdsToNotify.add(comment.author.id.toString());
-  });
+//   poll.options.forEach(option => {
+//     option.voters.forEach(voter => {
+//       userIdsToNotify.add(voter.user.id.toString());
+//     });
+//   });
 
-  customEmitter.emit('commentAdded', {
-    pollId: doc.pollId,
-    commentId: doc._id,
-  });
+//   poll.comments.forEach(comment => {
+//     userIdsToNotify.add(comment.author.id.toString());
+//   });
 
+//   customEmitter.emit('commentAdded', {
+//     pollId: doc.pollId,
+//     commentId: doc._id,
+//   });
+
+    next();
+  } catch (error) {
+    console.error('Error in commentSchema post save middleware:', error);
+    next(error as CallbackError);
+  }
+});
+
+async function deleteReplies(replies: IComment[]) {
+  const Reply = model('Reply');
+
+  for (let reply of replies) {
+    // 如果該回覆還有嵌套回覆,遞迴刪除
+    if (reply.replies && reply.replies.length > 0) {
+      await deleteReplies(reply.replies);
+    }
+    // 刪除該回覆
+    await Reply.findByIdAndDelete(reply._id);
+  }
+}
+
+commentSchema.pre(/^remove/, async function (next)
+{
+  const comment = this as IComment;
+  // 遍歷所有回覆並刪除
+  await deleteReplies(comment.replies);
+  // 確保所有回覆都被刪除後,再刪除該comment
   next();
 });
 

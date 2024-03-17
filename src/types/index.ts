@@ -146,6 +146,7 @@ export interface IComment extends Document {
   createdTime: Date;
   edited: boolean;
   updateTime: Date;
+  replies: IComment[];
 }
 
 export interface ITag extends Document {
