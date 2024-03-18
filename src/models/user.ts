@@ -155,11 +155,8 @@ const userSchema = new Schema<IUser>(
     ],
     comments: [
       {
-        _id: false,
-        comment: {
-          type: Schema.Types.ObjectId,
-          ref: 'Comment',
-        },
+        type: Schema.Types.ObjectId,
+        ref: 'Comment',
       },
     ]
   },
