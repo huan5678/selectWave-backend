@@ -147,6 +147,8 @@ export interface IComment extends Document {
   edited: boolean;
   updateTime: Date;
   replies: IComment[];
+  commentId: IComment[ "_id" ];
+  isReply: boolean;
 }
 
 export interface ITag extends Document {

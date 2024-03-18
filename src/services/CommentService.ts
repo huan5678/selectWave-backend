@@ -40,13 +40,19 @@ export class CommentService {
     }
   };
 
-    static createReply = async (author: string, content: string, commentId: string) =>
-  {
-    const reply = await Comment.create({
-      author,
+    static createReply = async (pollId: string, author: string, content: string, commentId: string) =>
+    {
+      const authorObjectId = new Types.ObjectId(author);
+      const pollObjectId = new Types.ObjectId(pollId);
+      const commentObjectId = new Types.ObjectId(commentId);
+    const reply = new Comment({
+      pollId: pollObjectId,
+      author: authorObjectId,
       content,
-      commentId,
+      commentId: commentObjectId,
+      isReply: true,
     });
+    await reply.save();
     const result = await Comment.findByIdAndUpdate(
       commentId,
       {

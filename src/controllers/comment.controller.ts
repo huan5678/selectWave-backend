@@ -72,9 +72,9 @@ class CommentController {
     if (!id) throw appError({ code: 400, message: "請輸入評論ID", next });
     if (!(await validateInput(createCommentSchema, req.body, next))) return;
 
-    const { content } = req.body;
+    const { content, pollId } = req.body;
 
-    const result = await CommentService.createReply(userId, content, id);
+    const result = await CommentService.createReply(pollId, userId, content, id);
 
     successHandle(res, "回覆創建成功", { result });
   };

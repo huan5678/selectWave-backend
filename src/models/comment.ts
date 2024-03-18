@@ -19,11 +19,19 @@ const commentSchema = new Schema<IComment>({
     minLength: [1, '留言內容請大於 1 個字'],
     maxLength: [200, '留言內容長度過長，最多只能 200 個字'],
   },
+  commentId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Comment',
+  },
   createdTime: {
     type: Date,
     default: Date.now,
   },
   edited: {
+    type: Boolean,
+    default: false,
+  },
+  isReply: {
     type: Boolean,
     default: false,
   },
