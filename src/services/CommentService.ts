@@ -52,7 +52,8 @@ export class CommentService {
       commentId: commentObjectId,
       isReply: true,
     });
-    await reply.save();
+      await reply.save();
+      await User.findByIdAndUpdate(author, { $push: { comments: reply._id } });
     const result = await Comment.findByIdAndUpdate(
       commentId,
       {
@@ -193,13 +194,21 @@ export class CommentService {
   };
 
   static deleteComment = async (id: string, userId: string) => {
-    const deletedComment = await Comment.findByIdAndDelete(id).exec();
+    const deletedComment = await Comment.findById(id);
     if (!deletedComment) {
       throw appError({
         code: 404,
         message: "找不到評論",
       });
     }
+    if (deletedComment.author.toString() !== userId) {
+      throw appError({
+        code: 403,
+        message: "沒有權限刪除評論",
+      });
+    }
+    await Comment.findByIdAndDelete(id);
+    await Comment.findOneAndUpdate({ replies: id }, { $pull: { replies: id } });
     const result = await Poll.findByIdAndUpdate(
       deletedComment.pollId,
       { $pull: { comments: id } },

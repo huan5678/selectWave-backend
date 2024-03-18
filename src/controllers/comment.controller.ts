@@ -100,6 +100,7 @@ class CommentController {
     );
     successHandle(res, "獲取所有評論成功", { result, total, totalPages, page, limit });
   };
+
 }
 
 export default CommentController;
