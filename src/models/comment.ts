@@ -1,5 +1,5 @@
 import { CallbackError, Schema, model } from 'mongoose';
-import customEmitter from '@/utils';
+// import customEmitter from '@/utils';
 import { IComment } from '@/types';
 
 const commentSchema = new Schema<IComment>({
