@@ -25,10 +25,10 @@ export class CommentService {
 
       await comment.save();
       // 更新 User 和 Poll
-      await User.findByIdAndUpdate(author, { $push: { comments: comment } });
+      await User.findByIdAndUpdate(author, { $push: { comments: comment._id } });
       await Poll.findByIdAndUpdate(
         pollId,
-        { $push: { comments: comment } },
+        { $push: { comments: comment._id } },
         { new: true }
       );
       return comment;
@@ -39,6 +39,32 @@ export class CommentService {
       });
     }
   };
+
+    static createReply = async (author: string, content: string, commentId: string) =>
+  {
+    const reply = await Comment.create({
+      author,
+      content,
+      commentId,
+    });
+    const result = await Comment.findByIdAndUpdate(
+      commentId,
+      {
+        $push: {
+          replies: reply._id,
+        },
+      },
+      { new: true }
+    ).populate({
+    path: 'replies',
+    select: 'content author createdTime edited updateTime',
+    populate: {
+      path: 'author',
+      select: 'name avatar',
+    },
+  });
+    return result;
+  }
 
   static getComment = async (id: string, next: NextFunction) => {
     const comment = await Comment.findById(id)
@@ -93,11 +119,19 @@ export class CommentService {
         },
         {
           path: "replies",
-          select: "content author createdTime edited updateTime",
-          populate: {
+          select: "content author createdTime edited updateTime replies",
+          populate: [{
             path: "author",
             select: "name avatar",
-          },
+          }, {
+            path: "replies",
+            select: "content author createdTime edited updateTime",
+            populate: {
+              path: "author",
+              select: "name avatar",
+            },
+            },
+          ],
         },
       ])
       .exec();
@@ -162,7 +196,7 @@ export class CommentService {
     }
     const result = await Poll.findByIdAndUpdate(
       deletedComment.pollId,
-      { $pull: { comments: { comment: id } } },
+      { $pull: { comments: id } },
       { new: true }
     );
     await User.findByIdAndUpdate(userId, { $pull: { comments: id } });

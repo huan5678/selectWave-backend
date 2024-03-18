@@ -65,6 +65,20 @@ class CommentController {
     successHandle(res, "獲取評論成功", { result });
   };
 
+  static createReply: RequestHandler = async (req, res, next) =>
+  {
+    const { id } = req.params;
+    const { id: userId } = req.user as IUser;
+    if (!id) throw appError({ code: 400, message: "請輸入評論ID", next });
+    if (!(await validateInput(createCommentSchema, req.body, next))) return;
+
+    const { content } = req.body;
+
+    const result = await CommentService.createReply(userId, content, id);
+
+    successHandle(res, "回覆創建成功", { result });
+  };
+
   // 獲取使用者所有評論
   public static getComments: RequestHandler = async (req, res) => {
     let { page = 1, limit = 10, createdBy, sort } = req.query;

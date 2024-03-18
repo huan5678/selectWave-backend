@@ -1,4 +1,4 @@
-import { ReplyController, CommentController } from "@/controllers";
+import { CommentController } from "@/controllers";
 import { handleErrorAsync } from "@/utils";
 import { Router } from "express";
 
@@ -168,27 +168,6 @@ commentRouter.delete(
   handleErrorAsync(CommentController.deleteComment)
 );
 
-commentRouter.get(
-  /**
-   * #swagger.tags = ['Comment - 評論']
-   * #swagger.description = '獲取使用者所有回覆評論'
-   * #swagger.path = '/api/comment/reply/user'
-   * #swagger.responses[200] = {
-      schema: {
-        status: true,
-        message: "獲取回覆成功",
-        result: { $ref: "#/definitions/Reply" },
-      },
-      description: "獲取回覆成功"
-    }
-    * #swagger.security = [{
-      "Bearer": []
-    }]
-    */
-  "/reply/user",
-  handleErrorAsync(ReplyController.getReplyByUser)
-);
-
 // 新增回覆
 commentRouter.post(
   /**
@@ -227,92 +206,7 @@ commentRouter.post(
     }]
     */
   "/:id/reply",
-  handleErrorAsync(ReplyController.createReply)
+  handleErrorAsync(CommentController.createReply)
 );
-
-// 更新回覆
-commentRouter.put(
-  /**
-   * #swagger.tags = ['Comment - 評論']
-   * #swagger.description = '更新回覆'
-   * #swagger.path = '/api/comment/reply/{id}'
-   * #swagger.parameters['id'] = {
-      in: 'path',
-      required: true,
-      type: 'string',
-      description: '回覆ID'
-    }
-    * #swagger.parameters['body'] = {
-      in: 'body',
-      required: true,
-      type: 'object',
-      description: '更新回覆',
-      schema: {
-        content: '這是一則更新後的回覆'
-      }
-    }
-    * #swagger.responses[200] = {
-      schema: {
-        status: true,
-        message: "回覆更新成功",
-        result: { $ref: "#/definitions/Comment" },
-      },
-      description: "回覆更新成功"
-    }
-    * #swagger.responses[404] = {
-      schema: { $ref: "#/definitions/ErrorNotFound" },
-      description: "找不到回覆"
-    }
-    * #swagger.responses[403] = {
-      schema: { $ref: "#/definitions/ErrorUnauthorized" },
-      description: "沒有權限更新回覆"
-    }
-    * #swagger.responses[400] = {
-      schema: { $ref: "#/definitions/ErrorFormat" },
-      description: "請確實填寫回覆資訊"
-    }
-    * #swagger.security = [{
-      "Bearer": []
-    }]
-    */
-  "/reply/:id",
-  handleErrorAsync(ReplyController.updateReply)
-);
-
-// 刪除回覆
-commentRouter.delete(
-  /**
-   * #swagger.tags = ['Comment - 評論']
-   * #swagger.description = '刪除回覆'
-   * #swagger.path = '/api/comment/reply/{id}'
-   * #swagger.parameters['id'] = {
-      in: 'path',
-      required: true,
-      type: 'string',
-      description: '回覆ID'
-    }
-    * #swagger.responses[200] = {
-      schema: {
-        status: true,
-        message: "回覆刪除成功",
-      },
-      description: "回覆刪除成功"
-    }
-    * #swagger.responses[404] = {
-      schema: { $ref: "#/definitions/ErrorNotFound" },
-      description: "找不到回覆"
-    }
-    * #swagger.responses[403] = {
-      schema: { $ref: "#/definitions/ErrorUnauthorized" },
-      description: "沒有權限刪除回覆"
-    }
-    * #swagger.security = [{
-      "Bearer": []
-    }]
-    */
-  "/reply/:id",
-  handleErrorAsync(ReplyController.deleteReply)
-);
-
 
 export default commentRouter;

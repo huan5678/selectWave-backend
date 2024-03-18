@@ -1,124 +1,122 @@
-import { Schema, model } from 'mongoose';
-import customEmitter from '@/utils';
-import { IPoll } from '@/types';
+import { Schema, model } from "mongoose";
+import customEmitter from "@/utils";
+import { IPoll } from "@/types";
 
-
-const pollSchema = new Schema<IPoll>({
-  title: {
-    type: String,
-    required: [true, '請填寫投票標題'],
-    minLength: [1, '投票標題請大於 1 個字'],
-    maxLength: [50, '投票標題長度過長，最多只能 50 個字'],
-  },
-  description: {
-    type: String,
-    required: [true, '請填寫投票說明'],
-    minLength: [1, '投票說明請大於 1 個字'],
-    maxLength: [200, '投票說明長度過長，最多只能 200 個字'],
-  },
-  imageUrl: {
-    type: String,
-    default: 'https://i.imgur.com/D3hp8H6.png',
-  },
-  tags: [
-    {
+const pollSchema = new Schema<IPoll>(
+  {
+    title: {
+      type: String,
+      required: [true, "請填寫投票標題"],
+      minLength: [1, "投票標題請大於 1 個字"],
+      maxLength: [50, "投票標題長度過長，最多只能 50 個字"],
+    },
+    description: {
+      type: String,
+      required: [true, "請填寫投票說明"],
+      minLength: [1, "投票說明請大於 1 個字"],
+      maxLength: [200, "投票說明長度過長，最多只能 200 個字"],
+    },
+    imageUrl: {
+      type: String,
+      default: "https://i.imgur.com/D3hp8H6.png",
+    },
+    tags: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Tag",
+      },
+    ],
+    createdBy: {
       type: Schema.Types.ObjectId,
-      ref: 'Tag',
+      ref: "User",
+      required: [true, "請確實填寫投票發起者"],
     },
-  ],
-  createdBy: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: [true, '請確實填寫投票發起者'],
-  },
-  createdTime: {
-    type: Date,
-    default: Date.now,
-  },
-  startDate: {
-    type: Date || null,
-  },
-  endDate: {
-    type: Date || null,
-  },
-  isPrivate: {
-    type: Boolean, // true: 私人投票, false: 公開投票
-    default: false,
-  },
-  totalVoters: {
-    type: Number,
-    default: 0,
-  },
-  options: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'Vote',
+    createdTime: {
+      type: Date,
+      default: Date.now,
     },
-  ],
-  like: [
-    {
-      user: {
+    startDate: {
+      type: Date || null,
+    },
+    endDate: {
+      type: Date || null,
+    },
+    isPrivate: {
+      type: Boolean, // true: 私人投票, false: 公開投票
+      default: false,
+    },
+    totalVoters: {
+      type: Number,
+      default: 0,
+    },
+    options: [
+      {
         type: Schema.Types.ObjectId,
-        ref: 'User',
+        ref: "Vote",
       },
-    },
-  ],
-  comments: [
-    {
-      comment: {
+    ],
+    like: [
+      {
+        user: {
+          type: Schema.Types.ObjectId,
+          ref: "User",
+        },
+      },
+    ],
+    comments: [
+      {
         type: Schema.Types.ObjectId,
-        ref: 'Comment',
+        ref: "Comment",
       },
+    ],
+    status: {
+      type: String,
+      enum: ["pending", "active", "ended", "closed"],
+      default: "pending",
     },
-  ],
-  status: {
-    type: String,
-    enum: ['pending', 'active', 'ended', 'closed'],
-    default: 'pending',
+    isWinner: [
+      {
+        _id: false,
+        option: {
+          type: Schema.Types.ObjectId,
+          ref: "Vote",
+        },
+      },
+    ],
   },
-  isWinner: [
-    {
-      _id: false,
-      option: {
-        type: Schema.Types.ObjectId,
-        ref: 'Vote',
-      },
-    },
-  ],
-}, {
-  versionKey: false,
+  {
+    versionKey: false,
     timestamps: true,
     toJSON: {
       virtuals: true,
-      transform: function (_doc, ret)
-      {
+      transform: function (_doc, ret) {
         ret.id = ret._id;
         delete ret._id;
-      }
+      },
     },
     toObject: {
       virtuals: true,
-      transform: function (_doc, ret)
-      {
+      transform: function (_doc, ret) {
         ret.id = ret._id;
         delete ret._id;
-      }
+      },
     },
-});
+  }
+);
 
-pollSchema.pre('save', async function(next) {
+pollSchema.pre("save", async function (next) {
   // Only proceed if options are modified or it's a new document
-  if (this.isModified('options') || this.isNew) {
+  if (this.isModified("options") || this.isNew) {
     const poll = this;
-    const OptionModel = model('Vote');
+    const OptionModel = model("Vote");
 
     // Assuming `options` are the IDs of related Option documents
     const options = await OptionModel.find({
-      '_id': { $in: poll.options }
+      _id: { $in: poll.options },
     });
 
     let totalVoters = 0;
-    options.forEach(option => {
+    options.forEach((option) => {
       // Assuming each option document correctly populates the `voters` array
       totalVoters += option.voters.length;
     });
@@ -126,54 +124,68 @@ pollSchema.pre('save', async function(next) {
     poll.totalVoters = totalVoters;
   }
 
-  if (this.isNew || this.isModified('tags')) {
-    const addedTags = this.isNew ? this.tags : this.get('tags');
-    const TagModel = model('Tag');
+  if (this.isNew || this.isModified("tags")) {
+    const addedTags = this.isNew ? this.tags : this.get("tags");
+    const TagModel = model("Tag");
     // 計算新增和移除的標籤
     if (addedTags && addedTags.length > 0) {
-      await TagModel.updateMany({ _id: { $in: addedTags } }, { $inc: { usageCount: 1 } });
+      await TagModel.updateMany(
+        { _id: { $in: addedTags } },
+        { $inc: { usageCount: 1 } }
+      );
     }
   }
   next();
 });
 
-pollSchema.post('save', async function() {
-  customEmitter.emit('pollUpdated', {
+pollSchema.post("save", async function () {
+  customEmitter.emit("pollUpdated", {
     pollId: this._id,
     totalVoters: this.totalVoters,
   });
 });
 
-pollSchema.pre(/^find/, function (next)
-{
-  (this as IPoll)
-    .populate({
-      path: 'createdBy',
-      select: 'name avatar'
-    });
-  (this as IPoll).populate(
-    {
-      path: 'like',
-      select: 'name avatar',
-    });
-  (this as IPoll).populate(
-    {
-      path: 'isWinner.option',
-      select: 'title imageUrl'
-    }
-  );
-  (this as IPoll).populate(
-    {
-      path: 'tags',
-      select: 'name'
-    }
-  );
+pollSchema.pre(/^find/, function (next) {
+  (this as IPoll).populate({
+    path: "createdBy",
+    select: "name avatar",
+  });
+  (this as IPoll).populate({
+    path: "like",
+    select: "name avatar",
+  });
+  (this as IPoll).populate({
+    path: "isWinner.option",
+    select: "title imageUrl",
+  });
+  (this as IPoll).populate({
+    path: "tags",
+    select: "name",
+  });
+  (this as IPoll).populate({
+    path: "comments",
+    select: "content author createdTime edited updateTime replies",
+    populate: [
+      {
+      path: "author",
+      select: "name avatar",
+      },
+      {
+        path: "replies",
+        select: "content author createdTime edited updateTime",
+        populate: {
+          path: "author",
+          select: "name avatar",
+        },
+      },
+    ],
+  });
   next();
 });
 
-pollSchema.pre(/^remove/, async function(next) {
+pollSchema.pre(/^remove/, async function (next) {
   // 減少所有關聯標籤的 usageCount
-  const TagModel = model('Tag');
+  const TagModel = model("Tag");
   await TagModel.updateMany(
     { _id: { $in: (this as IPoll).tags } },
     { $inc: { usageCount: -1 } }
@@ -182,14 +194,13 @@ pollSchema.pre(/^remove/, async function(next) {
 });
 
 // 考慮性能，只在需要時進行關聯查詢
-pollSchema.virtual('optionsDetails', {
-  ref: 'Vote',
-  localField: 'options',
-  foreignField: '_id',
+pollSchema.virtual("optionsDetails", {
+  ref: "Vote",
+  localField: "options",
+  foreignField: "_id",
 });
 
 // 索引優化
 pollSchema.index({ createdBy: 1, startDate: 1, endDate: 1, status: 1 });
 
-
-export default model<IPoll>('Poll', pollSchema);
+export default model<IPoll>("Poll", pollSchema);
