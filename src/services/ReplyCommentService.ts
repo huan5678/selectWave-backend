@@ -10,7 +10,7 @@ export class ReplyCommentService
   static getReply = async (id: string) => Reply.findById(id)
       .select('content createdTime edited updateTime')
       .populate({
-        path: 'commentId',
+        path: 'replies',
         select: 'content createdTime edited updateTime',
         populate: {
           path: 'pollId',
@@ -23,7 +23,7 @@ export class ReplyCommentService
     const result = await Reply.find({ author: id })
       .select('content createdTime edited updateTime')
       .populate({
-        path: 'commentId',
+        path: 'replies',
         select: 'content createdTime edited updateTime',
         populate: {
           path: 'pollId',
@@ -77,13 +77,15 @@ export class ReplyCommentService
   {
     const reply = await Reply.findById(id);
     if (!reply) return null;
-    const result = await Comment.findByIdAndUpdate(id, {
+    await Comment.updateOne({
+      replies: id,
+    }, {
       $pull: {
         replies: id,
       },
     });
-    await Reply.findByIdAndDelete(id);
-    return result;
+    reply.deleteOne();
+    return true;
   }
 }
 

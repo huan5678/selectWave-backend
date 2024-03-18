@@ -6,4 +6,3 @@ export { default as MemberController } from './member.controller';
 export { default as PollController } from './poll.controller';
 export { default as CommentController } from './comment.controller';
 export { default as VoteController } from './vote.controller';
-export { default as ReplyController } from './reply.controller';

@@ -172,10 +172,12 @@ class PollController {
     const poll = await PollService.getPoll({
       id,
       populates: [
-        { path: "createdBy" },
         { path: "options" },
         { path: "like", select: "name avatar" },
-        { path: "comments.comment", select: "content author createdTime edited updateTime" },
+        {
+          path: "comments",
+          select: "content author createdTime edited updateTime",
+      },
         {
           path: "isWinner.option",
           select: "title imageUrl",

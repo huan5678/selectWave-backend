@@ -32,7 +32,7 @@ const commentSchema = new Schema<IComment>({
   },
   replies: [ {
     type: Schema.Types.ObjectId,
-    ref: 'Reply',
+    ref: 'Comment',
   }]
 }, {
   timestamps: { createdAt: 'createdTime', updatedAt: 'updateTime' },
@@ -131,7 +131,7 @@ commentSchema.post('save', async function (doc, next)
 });
 
 async function deleteReplies(replies: IComment[]) {
-  const Reply = model('Reply');
+  const Reply = model('Comment');
 
   for (let reply of replies) {
     // 如果該回覆還有嵌套回覆,遞迴刪除
