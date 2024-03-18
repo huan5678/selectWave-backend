@@ -201,7 +201,7 @@ export class CommentService {
         message: "找不到評論",
       });
     }
-    if (deletedComment.author.toString() !== userId) {
+    if (deletedComment.author.id !== userId) {
       throw appError({
         code: 403,
         message: "沒有權限刪除評論",
