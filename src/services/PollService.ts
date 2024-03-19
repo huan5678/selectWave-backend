@@ -1,6 +1,7 @@
 import { Poll, Vote, User } from "@/models";
 import { CreatePollRequest, IPoll, IUser, IVote } from "@/types";
 import { appError, Logger } from "@/utils";
+import { modelExists, modelFindByID } from "@/utils/modelCheck";
 import { NextFunction } from "express";
 import { FilterQuery } from "mongoose";
 
@@ -44,17 +45,12 @@ export class PollService {
     id: string;
     populates?: poulateOptions[];
     next?: NextFunction;
-  }) => {
+    }) =>
+  {
+    await modelFindByID("Poll", id, next as NextFunction);
     const poll = await Poll.findById(id)
       .populate(populates as poulateOptions[])
       .exec();
-    if (!poll) {
-      throw appError({
-        code: 404,
-        message: "找不到提案資訊請確認 ID 是否正確",
-        next,
-      });
-    }
     return poll;
   };
 
@@ -73,45 +69,24 @@ export class PollService {
   }
 
   static deletePoll = async (id: string, next: NextFunction) => {
-    const poll = await Poll.findById(id).exec();
-    if (!poll) {
-      throw appError({
-        code: 404,
-        message: "找不到提案資訊請確認 ID 是否正確",
-        next,
-      });
-    }
+    await modelFindByID("Poll", id, next);
     await Poll.findByIdAndDelete(id).exec();
   };
 
   static likePoll = async (
+    emoji: string,
     pollId: string,
     userId: string,
     next: NextFunction
-  ) => {
-    const poll = await Poll.findById(pollId).exec();
-    if (!poll) {
-      throw appError({
-        code: 404,
-        message: "找不到提案資訊請確認 ID 是否正確",
-        next,
-      });
-    }
+  ) =>
+  {
+    await modelFindByID("Poll", pollId, next);
+    const poll = await Poll.findById(pollId).exec() as IPoll;
     const user = await User.findById(userId).exec();
-
-    if (!poll) {
-      throw appError({ code: 404, message: "找不到投票", next });
-    }
-    const existingFollower = poll.like.find((like) => {
-      return like.user.toString() === userId;
-    });
-
-    if (existingFollower) {
-      throw appError({ code: 400, message: "您已經喜歡過此投票", next });
-    }
+    await modelExists("Poll", userId, "like", '已經喜歡過了', false);
     const result = await Poll.findOneAndUpdate(
       { id: pollId },
-      { $push: { like: { user } } },
+      { $push: { like: { user, emoji } } },
       { new: true }
     )
       .populate("like.user", { name: 1, avatar: 1 })
@@ -128,22 +103,15 @@ export class PollService {
     pollId: string,
     userId: string,
     next: NextFunction
-  ) => {
-    const poll = await Poll.findById(pollId).exec();
+  ) =>
+  {
+    await modelFindByID("Poll", pollId, next);
+    const poll = await Poll.findById(pollId).exec() as IPoll;
     const user = (await User.findById(userId).exec()) as IUser;
-
-    if (!poll) {
-      throw appError({ code: 404, message: "找不到投票", next });
-    }
-    const existingFollower = poll.like.find(
-      (like) => like.user.toString() === user.id
-    );
-    if (!existingFollower) {
-      throw appError({ code: 400, message: "您尚未喜歡過此投票", next });
-    }
+    await modelExists("Poll", userId, "like", '尚未喜歡過', true);
     const result = await Poll.findOneAndUpdate(
       { id: pollId },
-      { $pull: { like: { user } } },
+      { $pull: { like: { user: user._id } } },
       { new: true }
     )
       .populate("like.user", "name avatar")
@@ -154,6 +122,59 @@ export class PollService {
     ).exec();
     return result;
   };
+
+  static followPoll = async (
+    pollId: string,
+    userId: string,
+    next: NextFunction
+  ) =>
+  {
+    await modelFindByID("Poll", pollId, next);
+    const user = (await User.findById(userId).exec()) as IUser;
+    await modelExists("Poll", userId, "followers", '已經追蹤過了', false);
+    const result = await Poll.findOneAndUpdate(
+      { _id: pollId },
+      { $addToSet: { followers: user._id } },
+      { new: true }
+    )
+      .populate("followers", "name avatar")
+      .exec();
+
+    await User.findOneAndUpdate(
+      { _id: userId },
+      { $addToSet: { followPolls: pollId } },
+      { new: true }
+    ).exec();
+    return result;
+  }
+
+  static unFollowPoll = async (
+    pollId: string,
+    userId: string,
+    next: NextFunction
+  ) =>
+  {
+    await modelFindByID("Poll", pollId, next);
+    const poll = await Poll
+      .findById(pollId)
+      .exec() as IPoll;
+    const user
+      = await User.findById(userId).exec() as IUser;
+    await modelExists("Poll", userId, "followers", '尚未追蹤', true);
+    const result = await Poll.findOneAndUpdate(
+      { id: pollId },
+      { $pull: { followers: user._id } },
+      { new: true }
+    )
+      .populate("followers", "name avatar")
+      .exec();
+    await User.findOneAndUpdate(
+      { id: userId },
+      { $pull: { followedPolls: { poll } } },
+      { new: true }
+    ).exec();
+    return result;
+  }
 
   static startPollCheckService = async () => {
     Logger.log("Checking polls...", "INFO");

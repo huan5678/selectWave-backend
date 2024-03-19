@@ -53,8 +53,10 @@ export interface IUser extends Document {
   lineId?: string;
   discordId?: string;
   githubId?: string;
+  comments: IComment[ "_id" ][];
+  followPolls: IPoll[ "_id" ][];
   likedPolls: IPoll["_id"][];
-  comments: IComment["_id"][];
+  likedComments: IComment[ "_id" ][];
 }
 
 export interface CreateUserRequest {
@@ -84,6 +86,7 @@ export interface IPoll extends Document {
   isPrivate: boolean;
   totalVoters: number;
   like: {
+    emoji: string;
     user: IUser["_id"];
   }[];
   comments: {
@@ -96,6 +99,7 @@ export interface IPoll extends Document {
   isWinner: {
     option: IVote["_id"];
   }[];
+  followers: IUser[ "_id" ][];
 }
 
 export interface CreatePollRequest {
@@ -149,6 +153,10 @@ export interface IComment extends Document {
   replies: IComment[];
   commentId: IComment[ "_id" ];
   isReply: boolean;
+  likers: {
+    emoji: string;
+    user: IUser["_id"];
+  }[];
 }
 
 export interface ITag extends Document {

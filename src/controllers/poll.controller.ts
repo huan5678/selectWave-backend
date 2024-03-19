@@ -1,7 +1,7 @@
 import { NextFunction, RequestHandler, Response } from "express"; // Import missing modules
 import { appError, processDate, successHandle } from "@/utils";
 import { array, boolean, object, string } from "yup";
-import { IVote, IUser, IOption, CreatePollRequest } from "@/types";
+import { IVote, IUser, IOption, CreatePollRequest, IPoll } from "@/types";
 import { CommentService, PollService, TagService, VoteService } from "@/services";
 import { Schema } from "mongoose";
 
@@ -203,7 +203,7 @@ class PollController {
     });
     console.log('check');
 
-    const poll = await PollService.getPoll({ id, next });
+    const poll = await PollService.getPoll({ id, next }) as IPoll;
 
     if (poll.createdBy.id !== userId) {
       throw appError({ code: 403, message: "您無法更新該投票", next });
@@ -290,7 +290,11 @@ class PollController {
   public static likePoll: RequestHandler = async (req, res: Response, next) => {
     const { id } = req.params;
     const { id: UserId } = req.user as IUser;
-    const result = await PollService.likePoll(id, UserId, next);
+    const { emoji } = req.body;
+    if (!emoji || emoji === "" || typeof emoji !== "string" || !emoji.trim() || !emoji.trim().length) {
+      throw appError({ code: 400, message: "請填入emoji", next });
+    }
+    const result = await PollService.likePoll(emoji, id, UserId, next);
     successHandle(res, "喜歡投票成功", { result });
   };
 
@@ -310,6 +314,36 @@ class PollController {
     const result = await PollService.unlikePoll(id, userId, next);
 
     successHandle(res, "取消喜歡投票成功", { result });
+  };
+
+  // 追蹤收藏投票
+  public static followPoll: RequestHandler = async (
+    req,
+    res: Response,
+    next
+  ) => {
+    const { id } = req.params;
+    if (!id) {
+      throw appError({ code: 400, message: "請提供投票 ID", next });
+    }
+    const { id: userId } = req.user as IUser;
+    const result = await PollService.followPoll(id, userId, next);
+    successHandle(res, "追蹤收藏投票成功", { result });
+  };
+
+  // 取消追蹤收藏投票
+  public static unFollowPoll: RequestHandler = async (
+    req,
+    res: Response,
+    next
+  ) => {
+    const { id } = req.params;
+    if (!id) {
+      throw appError({ code: 400, message: "請提供投票 ID", next });
+    }
+    const { id: userId } = req.user as IUser;
+    const result = await PollService.unFollowPoll(id, userId, next);
+    successHandle(res, "取消追蹤收藏投票成功", { result });
   };
 
   // 開始投票

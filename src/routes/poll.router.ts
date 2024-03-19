@@ -218,7 +218,7 @@ pollRouter.delete(
   handleErrorAsync(PollController.deletePoll),
 );
 
-pollRouter.get(
+pollRouter.post(
   /**
    * #swagger.tags = ['Poll - 提案']
    * #swagger.description = '提案按讚'
@@ -228,6 +228,14 @@ pollRouter.get(
     required: true,
     type: 'string',
     description: '提案ID'
+    }
+    * #swagger.parameters['body'] = {
+    in: 'body',
+    required: true,
+    type: 'string',
+    schema: {
+      emoji: "👍"
+    },
     }
    * #swagger.responses[200] = {
     schema: {
@@ -252,6 +260,46 @@ pollRouter.get(
   '/:id/like',
   handleErrorAsync(PollController.likePoll),
 );
+
+pollRouter.get(
+  /**
+   * #swagger.tags = ['Poll - 提案']
+   * #swagger.description = '收藏提案'
+   * #swagger.path = '/api/poll/{id}/follow'
+   * #swagger.parameters['id'] = {
+    in: 'path',
+    required: true,
+    type: 'string',
+    description: '提案ID'
+    }
+   * #swagger.responses[200] = {
+    schema: {
+    status: true,
+    message: "收藏提案成功",
+    result: {
+    $ref: "#/definitions/Poll"
+    }
+    },
+    description: "收藏提案成功"
+    }
+   * #swagger.responses[404] = {
+    schema: {
+    $ref: "#/definitions/ErrorPollNotFound"
+    },
+    description: "找不到提案"
+    }
+   * #swagger.security = [{
+    "Bearer": []
+    }]
+   */
+  '/:id/follow',
+  handleErrorAsync(PollController.followPoll),
+)
+
+pollRouter.get(
+  '/:id/un-follow',
+  handleErrorAsync(PollController.unFollowPoll),
+)
 
 pollRouter.delete(
   /**
