@@ -34,7 +34,8 @@ class ThirdPartyAuthController
   public static async loginWithDiscord(req, res, _next) {
     passport.authenticate('discord')(req, res);
   }
-  public static async discordCallback(req, res, next) {
+  public static async discordCallback(req, res, next)
+  {
     await thirdPartyAuthService.discordCallback(req, res, next);
   }
   public static async loginWithGithub(req, res, _next) {

@@ -146,11 +146,14 @@ const userSchema = new Schema<IUser>(
     },
     likedPolls: [
       {
-        _id: false,
-        poll: {
           type: Schema.Types.ObjectId,
           ref: 'Poll',
         },
+    ],
+    likedComments: [
+      {
+          type: Schema.Types.ObjectId,
+          ref: 'Comment',
       },
     ],
     comments: [
@@ -158,7 +161,13 @@ const userSchema = new Schema<IUser>(
         type: Schema.Types.ObjectId,
         ref: 'Comment',
       },
-    ]
+    ],
+    followPolls: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Poll',
+      },
+    ],
   },
   {
     versionKey: false,

@@ -57,6 +57,10 @@ const pollSchema = new Schema<IPoll>(
     ],
     like: [
       {
+        emoji: {
+          type: String,
+          required: [ true, "請填寫 emoji" ],
+        },
         user: {
           type: Schema.Types.ObjectId,
           ref: "User",
@@ -81,6 +85,12 @@ const pollSchema = new Schema<IPoll>(
           type: Schema.Types.ObjectId,
           ref: "Vote",
         },
+      },
+    ],
+    followers: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
       },
     ],
   },

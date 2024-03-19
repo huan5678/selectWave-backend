@@ -1299,7 +1299,7 @@
       }
     },
     "/api/poll/{id}/like": {
-      "get": {
+      "post": {
         "tags": [
           "Poll - 提案"
         ],
@@ -1311,6 +1311,20 @@
             "required": true,
             "type": "string",
             "description": "提案ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "emoji": {
+                  "type": "string",
+                  "example": "👍"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -1398,6 +1412,76 @@
             "Bearer": []
           }
         ]
+      }
+    },
+    "/api/poll/{id}/follow": {
+      "get": {
+        "tags": [
+          "Poll - 提案"
+        ],
+        "description": "收藏提案",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "提案ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "收藏提案成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Poll"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "收藏提案成功"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ErrorPollNotFound"
+            },
+            "description": "找不到提案"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/poll/{id}/un-follow": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
       }
     },
     "/api/poll/{id}/start": {

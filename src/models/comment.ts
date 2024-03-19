@@ -41,7 +41,19 @@ const commentSchema = new Schema<IComment>({
   replies: [ {
     type: Schema.Types.ObjectId,
     ref: 'Comment',
-  }]
+  } ],
+  likers: [
+    {
+      emoji: {
+        type: String,
+        required: [true, '請填寫 emoji'],
+      },
+      user: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    },
+  ],
 }, {
   timestamps: { createdAt: 'createdTime', updatedAt: 'updateTime' },
   versionKey: false,
