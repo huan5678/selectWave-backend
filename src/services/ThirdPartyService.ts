@@ -7,7 +7,7 @@ import { Strategy as DiscordStrategy, Scope } from "passport-discord-auth";
 import { Strategy as GitHubStrategy } from "passport-github2";
 import { User } from "@/models";
 import { IUser } from "@/types";
-import { generateToken, randomPassword } from "@/utils";
+import { appError, generateToken, randomPassword } from "@/utils";
 import config from "./config";
 
 const tokenHeader = {
@@ -258,71 +258,64 @@ class thirdPartyAuthService {
     }
   }
 
-  static async discordCallback(req, _res, _next)
+  static async discordCallback(req, res, _next)
   {
-    console.log(req.query);
-    // const result = passport.authenticate('discord')(req, res);
-    // console.log(result);
-    // const { code } = req.query as { code: string };
-    // const url = "https://discord.com/api/oauth2/token";
-    // const body = new URLSearchParams({
-    //   client_id: config.discordClientId as string,
-    //   client_secret: config.discordClientSecret as string,
-    //   code,
-    //   redirect_uri: config.discordRedirectUrl,
-    //   grant_type: "authorization_code",
-    //   scope: "identify email",
-    // });
-    // try {
-    //   const response = await axios.post(
-    //     url,
-    //     body,
-    //     {
-    //       headers: tokenHeader,
-    //     }
-    //   );
+    const { code } = req.query as { code: string };
+    const url = "https://discord.com/api/oauth2/token";
+    const body = new URLSearchParams({
+      client_id: config.discordClientId as string,
+      client_secret: config.discordClientSecret as string,
+      code,
+      redirect_uri: config.discordRedirectUrl,
+      grant_type: "authorization_code",
+    });
+    try {
+      const response = await axios.post(
+        url,
+        body,
+        {
+          headers: tokenHeader,
+        }
+      );
 
-    //   const { access_token } = response.data;
+      const { access_token } = response.data;
+      const { data } = await axios.get("https://discord.com/api/v10/users/@me", {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      });
+        const { id, email, global_name } = data;
+        const avatar = `https://cdn.discordapp.com/avatars/${id}/${data.avatar}.png`;
+      const name = global_name;
+      const user =
+        ((await User.findOne({ email })) as unknown as IUser) ||
+        ((await User.findOne({ discordId: id })) as unknown as IUser);
 
-    //   const { data } = await axios.get("https://discord.com/api/oauth2/@me", {
-    //     headers: {
-    //       Authorization: `Bearer ${access_token}`,
-    //     },
-    //   });
+      if (!user) {
+        const userData = await User.create({
+          name,
+          email,
+          avatar,
+          password: randomPassword(),
+          discordId: id,
+          isValidator: true,
+        });
+        const authToken = generateToken({ userId: userData._id });
 
-    //   const { id, email } = data.user;
-    //   const avatar = `https://cdn.discordapp.com/avatars/${id}/${data.avatar}.png`;
-    //   const name = data.username;
+        res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
+      }
+      if (user) {
+        const authToken = generateToken({ userId: user._id });
 
-    //   const user =
-    //     ((await User.findOne({ email })) as unknown as IUser) ||
-    //     ((await User.findOne({ discordId: id })) as unknown as IUser);
-
-    //   if (!user) {
-    //     const userData = await User.create({
-    //       name,
-    //       email,
-    //       avatar,
-    //       password: randomPassword(),
-    //       discordId: id,
-    //       isValidator: true,
-    //     });
-    //     const authToken = generateToken({ userId: userData._id });
-
-    //     res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
-    //   }
-    //   if (user) {
-    //     const authToken = generateToken({ userId: user._id });
-
-    //     res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
-    //   }
-    // } catch (error) {
-    //   console.log(error);
-    // }
+        res.redirect(`${process.env.FRONTEND_DOMAIN}/#/?token=${authToken}`);
+      }
+    } catch (error) {
+      appError({ code: 500, message: `Discord 登入失敗 ${(error as Error).message}` });
+    }
   }
 
   static async githubCallback(req, res, _next) {
-    const code = req.query.code as string;
+    const { code } = req.query as { code: string };
     const options = {
       code,
       client_id: config.githubClientId as string,
@@ -330,16 +323,15 @@ class thirdPartyAuthService {
       redirect_uri: config.githubRedirectUrl as string,
     };
     const url = "https://github.com/login/oauth/access_token";
-    const queryString = new URLSearchParams(options).toString();
-    const response = await axios.post(url, queryString, {
+    const body = new URLSearchParams(options);
+    const response = await axios.post(url, body, {
       headers: tokenHeader,
     });
-
-    const { access_token } = response.data;
-
+    const searchParams = new URLSearchParams(response.data);
+    const accessToken = searchParams.get('access_token');
     const { data } = await axios.get("https://api.github.com/user", {
       headers: {
-        Authorization: `Bearer ${access_token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
