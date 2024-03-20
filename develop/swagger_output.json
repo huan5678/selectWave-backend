@@ -1363,6 +1363,70 @@
           }
         ]
       },
+      "put": {
+        "tags": [
+          "Poll - 提案"
+        ],
+        "description": "更新提案按讚",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "提案ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "emoji": {
+                  "type": "string",
+                  "example": "😂"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "更新提案按讚成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Poll"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "更新提案按讚成功"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ErrorPollNotFound"
+            },
+            "description": "找不到提案"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
       "delete": {
         "tags": [
           "Poll - 提案"
@@ -1466,22 +1530,56 @@
         ]
       }
     },
-    "/poll/{id}/un-follow": {
+    "/api/poll/{id}/un-follow": {
       "get": {
-        "description": "",
+        "tags": [
+          "Poll - 提案"
+        ],
+        "description": "取消追蹤提案",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "提案ID"
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "取消追蹤提案成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Poll"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "取消追蹤提案成功"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ErrorPollNotFound"
+            },
+            "description": "找不到提案"
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       }
     },
     "/api/poll/{id}/start": {
@@ -2599,6 +2697,188 @@
               "$ref": "#/definitions/ErrorCommentFormat"
             },
             "description": "請確實填寫回覆資訊"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/comment/{id}/like": {
+      "post": {
+        "tags": [
+          "Comment - 評論"
+        ],
+        "description": "按讚回覆",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "評論ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "按讚回覆",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "emoji": {
+                  "type": "string",
+                  "example": "👍"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "按讚成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Comment"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "按讚成功"
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/ErrorCommentFormat"
+            },
+            "description": "已經按讚過了"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Comment - 評論"
+        ],
+        "description": "更新按讚回覆",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "評論ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "更新按讚回覆",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "emoji": {
+                  "type": "string",
+                  "example": "😂"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "更新按讚成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Comment"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "更新按讚成功"
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/ErrorCommentFormat"
+            },
+            "description": "尚未按讚過"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Comment - 評論"
+        ],
+        "description": "取消按讚回覆",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "評論ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "取消按讚成功"
+                },
+                "result": {
+                  "$ref": "#/definitions/Comment"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "取消按讚成功"
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/ErrorCommentFormat"
+            },
+            "description": "尚未按讚過"
           }
         },
         "security": [

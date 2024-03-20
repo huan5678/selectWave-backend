@@ -1,5 +1,7 @@
 import { User } from "@/models";
+import { IUser } from "@/types";
 import { appError } from "@/utils";
+import { modelFindByID } from "@/utils/modelCheck";
 import { NextFunction } from "express";
 
 class MemberService
@@ -20,8 +22,9 @@ class MemberService
     return users;
   }
 
-  static getMemberById = async (id: string, next: NextFunction) =>
+  static getMemberById = async (id: string) =>
   {
+    await modelFindByID("User", id);
     const user = await User.findById(id)
       .select("-coin -updatedAt -isValidator")
       .populate({
@@ -33,12 +36,6 @@ class MemberService
         select: { createdBy: 0, like: 0, comments: 0, options: 0, isPrivate: 0, createdTime: 0, createdAt: 0, updatedAt: 0 }
       })
       .exec();
-    if (!user)
-      throw appError({
-        code: 404,
-        message: "無此使用者請確認使用者 id 是否正確",
-        next,
-      });
     return user;
   }
 
@@ -53,8 +50,8 @@ class MemberService
 
   static addMemberFollower = async (id: string, targetID: string, next: NextFunction) =>
   {
-    const user = await User.findById(id);
-    if (!user) throw appError({ code: 404, message: "找不到使用者", next });
+    await modelFindByID("User", id);
+    const user = await User.findById(id) as IUser;
     const isAlreadyFollowing =
       user.following &&
       user.following.some(
@@ -78,8 +75,8 @@ class MemberService
 
   static deleteMemberFollower = async (id: string, targetID: string, next: NextFunction) =>
   {
-    const user = await User.findById(id);
-    if (!user) throw appError({ code: 404, message: "找不到使用者", next });
+    await modelFindByID("User", id);
+    const user = await User.findById(id) as IUser;
 
     const isFollowing =
       user.following &&

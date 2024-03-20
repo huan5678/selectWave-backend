@@ -1,157 +1,160 @@
-import { CallbackError, Schema, model } from 'mongoose';
+import { CallbackError, Schema, model } from "mongoose";
 // import customEmitter from '@/utils';
-import { IComment } from '@/types';
+import { IComment } from "@/types";
 
-const commentSchema = new Schema<IComment>({
-  pollId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Poll',
-    required: [true, '請確實填寫投票 ID'],
-  },
-  author: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: [true, '請確實填寫留言者 ID'],
-  },
-  content: {
-    type: String,
-    required: [true, '請填寫留言內容'],
-    minLength: [1, '留言內容請大於 1 個字'],
-    maxLength: [200, '留言內容長度過長，最多只能 200 個字'],
-  },
-  commentId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Comment',
-  },
-  createdTime: {
-    type: Date,
-    default: Date.now,
-  },
-  edited: {
-    type: Boolean,
-    default: false,
-  },
-  isReply: {
-    type: Boolean,
-    default: false,
-  },
-  updateTime: {
-    type: Date,
-  },
-  replies: [ {
-    type: Schema.Types.ObjectId,
-    ref: 'Comment',
-  } ],
-  likers: [
-    {
-      emoji: {
-        type: String,
-        required: [true, '請填寫 emoji'],
-      },
-      user: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-      },
+const commentSchema = new Schema<IComment>(
+  {
+    pollId: {
+      type: Schema.Types.ObjectId,
+      ref: "Poll",
+      required: [true, "請確實填寫投票 ID"],
     },
-  ],
-}, {
-  timestamps: { createdAt: 'createdTime', updatedAt: 'updateTime' },
-  versionKey: false,
+    author: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "請確實填寫留言者 ID"],
+    },
+    content: {
+      type: String,
+      required: [true, "請填寫留言內容"],
+      minLength: [1, "留言內容請大於 1 個字"],
+      maxLength: [200, "留言內容長度過長，最多只能 200 個字"],
+    },
+    commentId: {
+      type: Schema.Types.ObjectId,
+      ref: "Comment",
+    },
+    createdTime: {
+      type: Date,
+      default: Date.now,
+    },
+    edited: {
+      type: Boolean,
+      default: false,
+    },
+    isReply: {
+      type: Boolean,
+      default: false,
+    },
+    updateTime: {
+      type: Date,
+    },
+    replies: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Comment",
+      },
+    ],
+    likers: [
+      {
+        _id: false,
+        emoji: {
+          type: String,
+          required: [true, "請填寫 emoji"],
+        },
+        user: {
+          type: Schema.Types.ObjectId,
+          ref: "User",
+        },
+      },
+    ],
+  },
+  {
+    timestamps: { createdAt: "createdTime", updatedAt: "updateTime" },
+    versionKey: false,
     toJSON: {
       virtuals: true,
-      transform: function (_doc, ret)
-      {
+      transform: function (_doc, ret) {
         ret.id = ret._id;
         delete ret._id;
-      }
+      },
     },
     toObject: {
       virtuals: true,
-      transform: function (_doc, ret)
-      {
+      transform: function (_doc, ret) {
         ret.id = ret._id;
         delete ret._id;
-      }
+      },
     },
-});
+  }
+);
 
-
-commentSchema.pre(/^find/, function(next) {
-  (this as IComment).populate([{
-    path: 'author',
-    select: 'name avatar'
-  } ]);
+commentSchema.pre(/^find/, function (next) {
+  (this as IComment).populate([
+    {
+      path: "author",
+      select: "name avatar",
+    },
+  ]);
   next();
 });
 
-
-commentSchema.post('save', async function (doc, next)
-{
+commentSchema.post("save", async function (doc, next) {
   try {
-  const Poll = model('Poll');
+    const Poll = model("Poll");
 
-  const poll = await Poll.findById(doc.pollId)
-    .populate('createdBy')
-    .populate('like.user')
-    .populate({
-      path: 'options',
-      populate: {
-        path: 'voters.user',
-      }
-    })
-    .populate({
-      path: 'comments.comment',
-      select: 'content author createdTime edited updateTime',
-      populate: {
-        path: 'author',
-        select: 'name avatar',
-      }
-    });
-  
-  if (!poll) {
-      console.error('Poll not found for comment:', doc._id);
+    const poll = await Poll.findById(doc.pollId)
+      .populate("createdBy")
+      .populate("like.user")
+      .populate({
+        path: "options",
+        populate: {
+          path: "voters.user",
+        },
+      })
+      .populate({
+        path: "comments.comment",
+        select: "content author createdTime edited updateTime",
+        populate: {
+          path: "author",
+          select: "name avatar",
+        },
+      });
+
+    if (!poll) {
+      console.error("Poll not found for comment:", doc._id);
       return next();
     }
 
     if (!poll.createdBy) {
-      console.error('CreatedBy not populated for poll:', poll._id);
+      console.error("CreatedBy not populated for poll:", poll._id);
       return next();
     }
 
-//   const userIdsToNotify = new Set();
+    //   const userIdsToNotify = new Set();
 
-//  if (poll.createdBy) {
-//   userIdsToNotify.add(poll.createdBy.id.toString());
-// }
+    //  if (poll.createdBy) {
+    //   userIdsToNotify.add(poll.createdBy.id.toString());
+    // }
 
-//   poll.like.forEach(like => {
-//     userIdsToNotify.add(like.user.id.toString());
-//   });
+    //   poll.like.forEach(like => {
+    //     userIdsToNotify.add(like.user.id.toString());
+    //   });
 
-//   poll.options.forEach(option => {
-//     option.voters.forEach(voter => {
-//       userIdsToNotify.add(voter.user.id.toString());
-//     });
-//   });
+    //   poll.options.forEach(option => {
+    //     option.voters.forEach(voter => {
+    //       userIdsToNotify.add(voter.user.id.toString());
+    //     });
+    //   });
 
-//   poll.comments.forEach(comment => {
-//     userIdsToNotify.add(comment.author.id.toString());
-//   });
+    //   poll.comments.forEach(comment => {
+    //     userIdsToNotify.add(comment.author.id.toString());
+    //   });
 
-//   customEmitter.emit('commentAdded', {
-//     pollId: doc.pollId,
-//     commentId: doc._id,
-//   });
+    //   customEmitter.emit('commentAdded', {
+    //     pollId: doc.pollId,
+    //     commentId: doc._id,
+    //   });
 
     next();
   } catch (error) {
-    console.error('Error in commentSchema post save middleware:', error);
+    console.error("Error in commentSchema post save middleware:", error);
     next(error as CallbackError);
   }
 });
 
 async function deleteReplies(replies: IComment[]) {
-  const Reply = model('Comment');
+  const Reply = model("Comment");
 
   for (let reply of replies) {
     // 如果該回覆還有嵌套回覆,遞迴刪除
@@ -163,8 +166,7 @@ async function deleteReplies(replies: IComment[]) {
   }
 }
 
-commentSchema.pre(/^remove/, async function (next)
-{
+commentSchema.pre(/^remove/, async function (next) {
   const comment = this as IComment;
   // 遍歷所有回覆並刪除
   await deleteReplies(comment.replies);
@@ -175,4 +177,4 @@ commentSchema.pre(/^remove/, async function (next)
 // 優化：提高查詢效率
 commentSchema.index({ pollId: 1, author: 1 });
 
-export default model<IComment>('Comment', commentSchema);
+export default model<IComment>("Comment", commentSchema);

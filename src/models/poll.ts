@@ -57,9 +57,10 @@ const pollSchema = new Schema<IPoll>(
     ],
     like: [
       {
+        _id: false,
         emoji: {
           type: String,
-          required: [ true, "請填寫 emoji" ],
+          required: [true, "請填寫 emoji"],
         },
         user: {
           type: Schema.Types.ObjectId,
@@ -161,7 +162,7 @@ pollSchema.pre(/^find/, function (next) {
     select: "name avatar",
   });
   (this as IPoll).populate({
-    path: "like",
+    path: "like.user",
     select: "name avatar",
   });
   (this as IPoll).populate({
@@ -171,24 +172,6 @@ pollSchema.pre(/^find/, function (next) {
   (this as IPoll).populate({
     path: "tags",
     select: "name",
-  });
-  (this as IPoll).populate({
-    path: "comments",
-    select: "content author createdTime edited updateTime replies",
-    populate: [
-      {
-      path: "author",
-      select: "name avatar",
-      },
-      {
-        path: "replies",
-        select: "content author createdTime edited updateTime",
-        populate: {
-          path: "author",
-          select: "name avatar",
-        },
-      },
-    ],
   });
   next();
 });

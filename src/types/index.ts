@@ -236,6 +236,10 @@ export type TokenPayload = {
   exp: number;
 };
 
+export type ModelType = 'User' | 'Poll' | 'Comment' | 'Tag' | 'Vote';
+export type Model = IUser | IPoll | IComment | ITag | IVote;
+export type ModelSelect<T> = T extends 'User' ? IUser : T extends 'Poll' ? IPoll : T extends 'Comment' ? IComment : T extends 'Tag' ? ITag : IVote;
+
 declare global {
   namespace Express {
     export interface Request {

@@ -1,17 +1,17 @@
 import { RequestHandler } from "express";
 import { appError, successHandle } from "@/utils";
-import { IUser } from "@/types";
+import { IUser, IVote } from "@/types";
 import { MemberService, PollService, VoteService } from "@/services";
 class VoteController {
   // 投票
   public static vote: RequestHandler = async (req, res, next) => {
-    const { optionId } = req.body;
+    const { optionId } = req.body as { optionId: string };
     const { id } = req.user as IUser;
     await PollService.checkPollStartVote(optionId, next);
-    const vote = await VoteService.getVote(optionId, next);
-    const user = await MemberService.getMemberById(id, next);
-    if (vote?.voters.some((voter) => voter.user._id.toString() === id)) {
-      throw appError({ code: 400, message: "您已經對此選項投過票", next });
+    const vote = await VoteService.getVote(optionId, next) as IVote;
+    const user = await MemberService.getMemberById(id) as IUser;
+    if (vote.voters.some((voter) => voter.user._id.toString() === id)) {
+      throw appError({ code: 400, message: "您已經對此選項投過票" });
     }
     // 添加投票者
     const result = await VoteService.addVote(optionId, user);
@@ -25,18 +25,18 @@ class VoteController {
     const { newVoteId } = req.body;
 
     await PollService.checkPollStartVote(voteId, next);
-    const vote = await VoteService.getVote(voteId, next);
-    const user = await MemberService.getMemberById(id, next);
+    const newVote = await VoteService.getVote(voteId, next) as IVote;
+    if (!newVote) {
+      throw appError({ code: 404, message: "找不到新投票選項", next });
+    }
+    const vote = await VoteService.getVote(voteId, next) as IVote;
+    const user = await MemberService.getMemberById(id) as IUser;
 
     const voter = vote.voters.find((voter) => voter.user._id.toString() === id);
     if (!voter) {
       throw appError({ code: 400, message: "找不到投票者", next });
     }
 
-    const newVote = await VoteService.getVote(voteId, next);
-    if (!newVote) {
-      throw appError({ code: 404, message: "找不到新投票選項", next });
-    }
     const result = await VoteService.updateVote(voteId, newVoteId, user);
 
     successHandle(res, "更改投票成功", { result });
@@ -48,8 +48,8 @@ class VoteController {
     const { id: voteId } = req.params;
 
     await PollService.checkPollStartVote(voteId, next);
-    const vote = await VoteService.getVote(voteId, next);
-    const user = await MemberService.getMemberById(id, next);
+    const vote = await VoteService.getVote(voteId, next) as IVote;
+    const user = await MemberService.getMemberById(id) as IUser;
 
     if (!vote.voters.find((voter) => voter.user._id.toString() === id)) {
       throw appError({ code: 400, message: "您尚未對此選項投票", next });

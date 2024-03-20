@@ -209,4 +209,118 @@ commentRouter.post(
   handleErrorAsync(CommentController.createReply)
 );
 
+// 按讚回覆
+commentRouter.post(
+  /**
+   * #swagger.tags = ['Comment - 評論']
+   * #swagger.description = '按讚回覆'
+   * #swagger.path = '/api/comment/{id}/like'
+   * #swagger.parameters['id'] = {
+      in: 'path',
+      required: true,
+      type: 'string',
+      description: '評論ID'
+    }
+    * #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      type: 'object',
+      description: '按讚回覆',
+      schema: {
+        emoji: '👍'
+      }
+    }
+    * #swagger.responses[200] = {
+      schema: {
+        status: true,
+        message: "按讚成功",
+        result: { $ref: "#/definitions/Comment" },
+      },
+      description: "按讚成功"
+    }
+    * #swagger.responses[400] = {
+      schema: { $ref: "#/definitions/ErrorCommentFormat" },
+      description: "已經按讚過了"
+    }
+    * #swagger.security = [{
+      "Bearer": []
+    }]
+    */
+  "/:id/like",
+  handleErrorAsync(CommentController.likeComment)
+);
+
+// 更新按讚回覆
+commentRouter.put(
+  /**
+   * #swagger.tags = ['Comment - 評論']
+   * #swagger.description = '更新按讚回覆'
+   * #swagger.path = '/api/comment/{id}/like'
+   * #swagger.parameters['id'] = {
+      in: 'path',
+      required: true,
+      type: 'string',
+      description: '評論ID'
+    }
+    * #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      type: 'object',
+      description: '更新按讚回覆',
+      schema: {
+        emoji: '😂'
+      }
+    }
+    * #swagger.responses[200] = {
+      schema: {
+        status: true,
+        message: "更新按讚成功",
+        result: { $ref: "#/definitions/Comment" },
+      },
+      description: "更新按讚成功"
+    }
+    * #swagger.responses[400] = {
+      schema: { $ref: "#/definitions/ErrorCommentFormat" },
+      description: "尚未按讚過"
+    }
+    * #swagger.security = [{
+      "Bearer": []
+    }]
+    */
+  "/:id/like",
+  handleErrorAsync(CommentController.updateLikeComment)
+);
+
+// 取消按讚回覆
+commentRouter.delete(
+  /**
+   * #swagger.tags = ['Comment - 評論']
+   * #swagger.description = '取消按讚回覆'
+   * #swagger.path = '/api/comment/{id}/like'
+   * #swagger.parameters['id'] = {
+      in: 'path',
+      required: true,
+      type: 'string',
+      description: '評論ID'
+    }
+    * #swagger.responses[200] = {
+      schema: {
+        status: true,
+        message: "取消按讚成功",
+        result: { $ref: "#/definitions/Comment" },
+      },
+      description: "取消按讚成功"
+    }
+    * #swagger.responses[400] = {
+      schema: { $ref: "#/definitions/ErrorCommentFormat" },
+      description: "尚未按讚過"
+    }
+    * #swagger.security = [{
+      "Bearer": []
+    }]
+    */
+  "/:id/like",
+  handleErrorAsync(CommentController.unlikeComment)
+);
+
 export default commentRouter;

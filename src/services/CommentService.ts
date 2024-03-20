@@ -1,10 +1,12 @@
 import { Comment, Poll, User } from "@/models";
-import { IComment } from "@/types";
+import { IComment, IUser } from "@/types";
 import { appError } from "@/utils";
+import { modelExists, modelFindByID } from "@/utils/modelCheck";
 import { NextFunction } from "express";
 import { FilterQuery, Types } from "mongoose";
 
-export class CommentService {
+export class CommentService
+{
   static countDocuments = async (query: FilterQuery<IComment>) =>
     Comment.countDocuments(query).exec();
 
@@ -12,7 +14,8 @@ export class CommentService {
     author: string,
     content: string,
     pollId: string
-  ) => {
+  ) =>
+  {
     try {
       const authorObjectId = new Types.ObjectId(author);
       const pollObjectId = new Types.ObjectId(pollId);
@@ -40,11 +43,11 @@ export class CommentService {
     }
   };
 
-    static createReply = async (pollId: string, author: string, content: string, commentId: string) =>
-    {
-      const authorObjectId = new Types.ObjectId(author);
-      const pollObjectId = new Types.ObjectId(pollId);
-      const commentObjectId = new Types.ObjectId(commentId);
+  static createReply = async (pollId: string, author: string, content: string, commentId: string) =>
+  {
+    const authorObjectId = new Types.ObjectId(author);
+    const pollObjectId = new Types.ObjectId(pollId);
+    const commentObjectId = new Types.ObjectId(commentId);
     const reply = new Comment({
       pollId: pollObjectId,
       author: authorObjectId,
@@ -52,8 +55,8 @@ export class CommentService {
       commentId: commentObjectId,
       isReply: true,
     });
-      await reply.save();
-      await User.findByIdAndUpdate(author, { $push: { comments: reply._id } });
+    await reply.save();
+    await User.findByIdAndUpdate(author, { $push: { comments: reply._id } });
     const result = await Comment.findByIdAndUpdate(
       commentId,
       {
@@ -63,27 +66,22 @@ export class CommentService {
       },
       { new: true }
     ).populate({
-    path: 'replies',
-    select: 'content author createdTime edited updateTime',
-    populate: {
-      path: 'author',
-      select: 'name avatar',
-    },
-  });
+      path: 'replies',
+      select: 'content author createdTime edited updateTime',
+      populate: {
+        path: 'author',
+        select: 'name avatar',
+      },
+    });
     return result;
   }
 
-  static getComment = async (id: string, next: NextFunction) => {
+  static getComment = async (id: string) =>
+  {
+    await modelFindByID("Comment", id);
     const comment = await Comment.findById(id)
       .populate("pollId", "title id")
       .exec();
-    if (!comment) {
-      throw appError({
-        code: 404,
-        message: "找不到評論",
-        next,
-      });
-    }
     return comment;
   };
 
@@ -92,7 +90,8 @@ export class CommentService {
     sort: string,
     skip: number,
     limit: number
-  ) => {
+  ) =>
+  {
     const comments = await Comment.find(queryConditions)
       .sort(sort || { createdTime: -1 })
       .skip(skip)
@@ -102,7 +101,8 @@ export class CommentService {
     return comments;
   };
 
-  static getCommentByUser = async (id: string, next: NextFunction) => {
+  static getCommentByUser = async (id: string, next: NextFunction) =>
+  {
     const comments = await Comment.find({ author: id })
       .populate("pollId", "title id comments")
       .exec();
@@ -116,7 +116,8 @@ export class CommentService {
     return comments;
   };
 
-  static getCommentsByPoll = async (pollId: string, next: NextFunction) => {
+  static getCommentsByPoll = async (pollId: string, next: NextFunction) =>
+  {
     const comments = await Comment.find({ pollId })
       .sort({ createdTime: -1 })
       .populate([
@@ -127,7 +128,7 @@ export class CommentService {
         {
           path: "replies",
           select: "content author createdTime edited updateTime replies",
-          populate: [{
+          populate: [ {
             path: "author",
             select: "name avatar",
           }, {
@@ -137,7 +138,7 @@ export class CommentService {
               path: "author",
               select: "name avatar",
             },
-            },
+          },
           ],
         },
       ])
@@ -156,7 +157,8 @@ export class CommentService {
     pollId: string,
     userId: string,
     next: NextFunction
-  ) => {
+  ) =>
+  {
     if (!pollId || !userId) {
       throw appError({
         code: 400,
@@ -184,7 +186,8 @@ export class CommentService {
     return comments;
   };
 
-  static updateComment = async (id: string, content: string) => {
+  static updateComment = async (id: string, content: string) =>
+  {
     const comment = await Comment.findByIdAndUpdate(
       id,
       { content, edited: true, updateTime: new Date() },
@@ -193,14 +196,10 @@ export class CommentService {
     return comment;
   };
 
-  static deleteComment = async (id: string, userId: string) => {
-    const deletedComment = await Comment.findById(id);
-    if (!deletedComment) {
-      throw appError({
-        code: 404,
-        message: "找不到評論",
-      });
-    }
+  static deleteComment = async (id: string, userId: string) =>
+  {
+    await modelFindByID("Comment", id);
+    const deletedComment = await Comment.findById(id) as IComment;
     if (deletedComment.author.id !== userId) {
       throw appError({
         code: 403,
@@ -218,10 +217,120 @@ export class CommentService {
     return result;
   };
 
-  static deleteCommentByPollId = async (pollId: string) => {
+  static deleteCommentByPollId = async (pollId: string) =>
+  {
     const result = await Comment.deleteMany({ pollId: pollId }).exec();
     return result;
   };
+
+  // 按讚回覆
+  static likeComment = async (emoji: string, commentId: string, userId: string) =>
+  {
+    await modelFindByID('User', userId);
+    const user = await User.findById(userId).exec() as IUser;
+    const comment = await modelFindByID('Comment', commentId);
+    await modelExists('Comment', userId, 'likers.user', '已經按讚過了', false);
+    const result = await Comment.findOneAndUpdate(
+      { _id: commentId },
+      { $push: { likers: { user: user._id, emoji } } },
+      { new: true }
+    ).populate([
+      {
+        path: 'likers.user',
+        select: 'name avatar',
+      },
+      {
+        path: 'replies',
+        select: 'content author createdTime edited updateTime likers',
+        populate: [
+          {
+          path: 'author',
+          select: 'name avatar',
+          },
+          {
+            path: 'likers.user',
+            select: 'name avatar',
+          },
+        ],
+      },
+    ]).exec();
+    await User.findOneAndUpdate(
+      { _id: userId },
+      { $push: { likedComments: comment._id } },
+      { new: true }
+    ).exec();
+    return result;
+  }
+  // 更新按讚回覆
+  static updateLikeComment = async (emoji: string, commentId: string, userId: string) => {
+    await modelFindByID('User', userId);
+    const user = await User.findById(userId).exec() as IUser;
+    await modelFindByID('Comment', commentId);
+    await modelExists('Comment', userId, 'likers.user', '尚未按讚過', true);
+    const result = await Comment.findOneAndUpdate(
+      { _id: commentId, 'likers.user': user._id },
+      { $set: { 'likers.$.emoji': emoji } },
+      { new: true }
+    ).populate([
+      {
+        path: 'likers.user',
+        select: 'name avatar',
+      },
+      {
+        path: 'replies',
+        select: 'content author createdTime edited updateTime likers',
+        populate: [
+          {
+          path: 'author',
+          select: 'name avatar',
+          },
+          {
+            path: 'likers.user',
+            select: 'name avatar',
+          },
+        ],
+      },
+    ]).exec();
+    return result;
+  }
+
+  // 取消按讚回覆
+  static unlikeComment = async (commentId: string, userId: string) =>
+  {
+    await modelFindByID('User', userId);
+    const user = await User.findById(userId).exec() as IUser;
+    await modelFindByID('Comment', commentId);
+    await modelExists('Comment', userId, 'likers.user', '尚未按讚過', true);
+    const result = await Comment.findOneAndUpdate(
+      { _id: commentId },
+      { $pull: { likers: { user: user._id } } },
+      { new: true }
+    ).populate([
+      {
+        path: 'likers.user',
+        select: 'name avatar',
+      },
+      {
+        path: 'replies',
+        select: 'content author createdTime edited updateTime likers',
+        populate: [
+          {
+          path: 'author',
+          select: 'name avatar',
+          },
+          {
+            path: 'likers.user',
+            select: 'name avatar',
+          },
+        ],
+      },
+    ]).exec();
+    await User.findOneAndUpdate(
+      { _id: userId },
+      { $pull: { likedComments: { comment: commentId } } }
+    ).exec();
+    return result;
+  }
 }
 
 export default CommentService;

@@ -31,7 +31,7 @@ class MemberController {
     if (!id) {
       throw appError({ code: 400, message: "請提供使用者 id", next });
     }
-    const user = await MemberService.getMemberById(id, next);
+    const user = await MemberService.getMemberById(id);
 
     return successHandle(res, "成功取的使用者資訊", { result: user });
   };

@@ -31,7 +31,7 @@ export class PollService {
   ) => {
     return await Poll.find(queryConditions)
       .sort(sort || { createdAt: -1 })
-      .select("-comments -options")
+      .select("-comments -options -followers -isWinner -updatedAt")
       .skip(skip)
       .limit(limit)
       .exec();
@@ -40,14 +40,12 @@ export class PollService {
   static getPoll = async ({
     id,
     populates = [],
-    next,
   }: {
     id: string;
     populates?: poulateOptions[];
-    next?: NextFunction;
     }) =>
   {
-    await modelFindByID("Poll", id, next as NextFunction);
+    await modelFindByID("Poll", id);
     const poll = await Poll.findById(id)
       .populate(populates as poulateOptions[])
       .exec();
@@ -68,8 +66,8 @@ export class PollService {
     return poll;
   }
 
-  static deletePoll = async (id: string, next: NextFunction) => {
-    await modelFindByID("Poll", id, next);
+  static deletePoll = async (id: string) => {
+    await modelFindByID("Poll", id);
     await Poll.findByIdAndDelete(id).exec();
   };
 
@@ -77,48 +75,68 @@ export class PollService {
     emoji: string,
     pollId: string,
     userId: string,
-    next: NextFunction
   ) =>
   {
-    await modelFindByID("Poll", pollId, next);
-    const poll = await Poll.findById(pollId).exec() as IPoll;
-    const user = await User.findById(userId).exec();
-    await modelExists("Poll", userId, "like", '已經喜歡過了', false);
+    const poll = await modelFindByID("Poll", pollId);
+    const user = await User.findById(userId).exec() as IUser;
+    await modelExists("Poll", userId, "like.user", '已經按讚過了', false);
     const result = await Poll.findOneAndUpdate(
-      { id: pollId },
-      { $push: { like: { user, emoji } } },
+      { _id: pollId },
+      { $push: { like: { user: user._id, emoji } } },
       { new: true }
     )
       .populate("like.user", { name: 1, avatar: 1 })
       .exec();
     await User.findOneAndUpdate(
-      { id: userId },
-      { $push: { likedPolls: { poll } } },
+      { _id: userId },
+      {  $addToSet:  { likedPolls: poll._id } },
       { new: true }
     ).exec();
     return result;
   };
 
+  static updateLikePoll = async (
+    emoji: string,
+    pollId: string,
+    userId: string,
+  ) =>
+  {
+    await modelFindByID("Poll", pollId);
+    const user = await User.findById(userId).exec() as IUser;
+    const originEmoji = await Poll.findOne({ "like.user": userId }).exec();
+    if (!originEmoji) {
+      throw appError({ code: 404, message: "未對投票按讚" });
+    }
+    await modelExists("Poll", userId, "like.user", '尚未按讚過', true);
+    const result = await Poll.findOneAndUpdate(
+      { _id: pollId, "like.user": user._id },
+      { $set: { "like.$.emoji": emoji } },
+      { new: true }
+    )
+      .populate("like.user", "name avatar")
+      .exec();
+    return result;
+  }
+
   static unlikePoll = async (
     pollId: string,
     userId: string,
-    next: NextFunction
   ) =>
   {
-    await modelFindByID("Poll", pollId, next);
+    await modelFindByID("Poll", pollId);
     const poll = await Poll.findById(pollId).exec() as IPoll;
     const user = (await User.findById(userId).exec()) as IUser;
-    await modelExists("Poll", userId, "like", '尚未喜歡過', true);
+    await modelExists("Poll", userId, "like.user", '尚未按讚過', true);
     const result = await Poll.findOneAndUpdate(
-      { id: pollId },
+      { _id: pollId },
       { $pull: { like: { user: user._id } } },
       { new: true }
     )
       .populate("like.user", "name avatar")
       .exec();
     await User.findOneAndUpdate(
-      { id: userId },
-      { $pull: { likedPolls: { poll } } }
+      { _id: userId },
+      { $pull: { likedPolls: poll._id } }
     ).exec();
     return result;
   };
@@ -126,10 +144,9 @@ export class PollService {
   static followPoll = async (
     pollId: string,
     userId: string,
-    next: NextFunction
   ) =>
   {
-    await modelFindByID("Poll", pollId, next);
+    await modelFindByID("Poll", pollId);
     const user = (await User.findById(userId).exec()) as IUser;
     await modelExists("Poll", userId, "followers", '已經追蹤過了', false);
     const result = await Poll.findOneAndUpdate(
@@ -151,10 +168,9 @@ export class PollService {
   static unFollowPoll = async (
     pollId: string,
     userId: string,
-    next: NextFunction
   ) =>
   {
-    await modelFindByID("Poll", pollId, next);
+    await modelFindByID("Poll", pollId);
     const poll = await Poll
       .findById(pollId)
       .exec() as IPoll;
@@ -208,10 +224,8 @@ export class PollService {
 
 
   static startPoll = async (id: string, req, next: NextFunction) => {
-    const poll = await Poll.findById(id).exec();
-    if (!poll) {
-      throw appError({ code: 404, message: "找不到投票", next });
-    }
+    const poll = await Poll.findById(id).exec() as IPoll;
+    await modelFindByID("Poll", id);
     if (poll.status !== "pending") {
       throw appError({ code: 400, message: "投票已經開始或是結束", next });
     }
@@ -226,9 +240,7 @@ export class PollService {
 
   static endPoll = async (id: string, userId: string, next: NextFunction) => {
     const poll = (await Poll.findById(id).exec()) as IPoll;
-    if (!poll) {
-      throw appError({ code: 404, message: "找不到投票", next });
-    }
+    await modelFindByID("Poll", id);
     if (poll.status === "pending") {
       throw appError({ code: 400, message: "投票未開始無法結束", next });
     }

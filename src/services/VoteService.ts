@@ -1,6 +1,7 @@
 import { Vote } from "@/models";
 import { IOption, IUser } from "@/types";
 import { appError } from "@/utils";
+import { modelFindByID } from "@/utils/modelCheck";
 import { NextFunction } from "express";
 
 class VoteService
@@ -36,7 +37,9 @@ class VoteService
       })
     );
   };
-  static deleteOption = async (optionId: string) => {
+  static deleteOption = async (optionId: string) =>
+  {
+    await modelFindByID('Vote', optionId);
     return await Vote.findByIdAndDelete(optionId);
   };
   static deleteOptionByPollId = async (pollId: string) => {
