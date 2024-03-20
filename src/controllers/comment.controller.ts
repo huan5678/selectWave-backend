@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 import { appError, successHandle, validateInput } from "@/utils";
 import { object, string } from "yup";
-import { IUser } from "@/types";
+import { IComment, IUser } from "@/types";
 import { CommentService } from "@/services";
 
 const createCommentSchema = object({
@@ -18,6 +18,12 @@ const updateCommentSchema = object({
     .min(1, "評論內容請大於 1 個字")
     .max(200, "評論內容長度過長，最多只能 200 個字"),
 });
+
+const emojiSchema = object({
+  emoji: string()
+    .matches(/([\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])+/)
+    .required("請輸入表情符號"),
+})
 
 class CommentController {
   // 創建新評論
@@ -39,7 +45,7 @@ class CommentController {
       throw appError({ code: 400, message: "請輸入評論ID", next });
     }
     const { content } = req.body;
-    const comment = await CommentService.getComment(commentId, next);
+    const comment = await CommentService.getComment(commentId) as IComment;
 
     if (comment.author.id !== id) {
       throw appError({ code: 403, message: "沒有權限更新評論", next });
@@ -61,7 +67,7 @@ class CommentController {
   public static getComment: RequestHandler = async (req, res, next) => {
     const { id } = req.params;
     if (!id) throw appError({ code: 400, message: "請輸入評論ID", next });
-    const result = await CommentService.getComment(id, next);
+    const result = await CommentService.getComment(id);
     successHandle(res, "獲取評論成功", { result });
   };
 
@@ -100,6 +106,38 @@ class CommentController {
     );
     successHandle(res, "獲取所有評論成功", { result, total, totalPages, page, limit });
   };
+
+  // 按讚回覆
+
+  public static likeComment: RequestHandler = async (req, res, next) =>
+  {
+    const { id } = req.params;
+    const { id: userId } = req.user as IUser;
+    const { emoji } = req.body;
+    if (!(await validateInput(emojiSchema, req.body, next))) return;
+    const result = await CommentService.likeComment(emoji, id, userId);
+    successHandle(res, "按讚回覆成功", { result });
+  }
+
+  // 更新按讚回覆
+  public static updateLikeComment: RequestHandler = async (req, res, next) =>
+  {
+    const { id } = req.params;
+    const { id: userId } = req.user as IUser;
+    const { emoji } = req.body;
+    if (!(await validateInput(emojiSchema, req.body, next))) return;
+    const result = await CommentService.updateLikeComment(emoji, id, userId);
+    successHandle(res, "更新按讚回覆成功", { result });
+  }
+
+  // 取消按讚回覆
+  public static unlikeComment: RequestHandler = async (req, res) =>
+  {
+    const { id } = req.params;
+    const { id: userId } = req.user as IUser;
+    const result = await CommentService.unlikeComment(id, userId);
+    successHandle(res, "取消按讚回覆成功", { result });
+  }
 
 }
 

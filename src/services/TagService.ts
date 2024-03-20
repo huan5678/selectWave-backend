@@ -1,12 +1,14 @@
 import { Tag } from "@/models";
 import { ITag } from "@/types";
 import { appError } from "@/utils";
+import { modelExists, modelFindByID } from "@/utils/modelCheck";
 import { NextFunction } from "express";
 
 class TagService {
   static createTag = async (name: string, next:NextFunction): Promise<ITag> =>
   {
     const tag = await Tag.findOne({ name }).exec();
+    await modelExists('Tag', name, 'name', '已存在', false);
     if (tag) {
       throw appError({ code: 400, message: "標籤已存在", next });
     }
@@ -17,15 +19,21 @@ class TagService {
     return Tag.find(query).sort({ createdAt: -1 }).exec();
   }
 
-  static findTagById =  async (id: string): Promise<ITag | null> => {
+  static findTagById = async (id: string): Promise<ITag | null> =>
+  {
+    await modelFindByID('Tag', id);
     return Tag.findById(id).exec();
   }
 
-  static updateTag = async (id: string, name: string): Promise<ITag | null> => {
+  static updateTag = async (id: string, name: string): Promise<ITag | null> =>
+  {
+    await modelFindByID('Tag', id);
     return Tag.findByIdAndUpdate(id, { name }, { new: true }).exec();
   }
 
-  static deleteTag = async (id: string): Promise<ITag | null> => {
+  static deleteTag = async (id: string): Promise<ITag | null> =>
+  {
+    await modelFindByID('Tag', id);
     return Tag.findByIdAndDelete(id).exec();
   }
 
