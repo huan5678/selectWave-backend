@@ -229,7 +229,7 @@ export class CommentService
     await modelFindByID('User', userId);
     const user = await User.findById(userId).exec() as IUser;
     const comment = await modelFindByID('Comment', commentId);
-    await modelExists('Comment', userId, 'likers.user', '已經按讚過了', false);
+    await modelExists('Comment', commentId, userId, 'likers.user', '已經按讚過了', false);
     const result = await Comment.findOneAndUpdate(
       { _id: commentId },
       { $push: { likers: { user: user._id, emoji } } },
@@ -266,7 +266,7 @@ export class CommentService
     await modelFindByID('User', userId);
     const user = await User.findById(userId).exec() as IUser;
     await modelFindByID('Comment', commentId);
-    await modelExists('Comment', userId, 'likers.user', '尚未按讚過', true);
+    await modelExists('Comment', commentId, userId, 'likers.user', '尚未按讚過', true);
     const result = await Comment.findOneAndUpdate(
       { _id: commentId, 'likers.user': user._id },
       { $set: { 'likers.$.emoji': emoji } },
@@ -300,7 +300,7 @@ export class CommentService
     await modelFindByID('User', userId);
     const user = await User.findById(userId).exec() as IUser;
     await modelFindByID('Comment', commentId);
-    await modelExists('Comment', userId, 'likers.user', '尚未按讚過', true);
+    await modelExists('Comment', commentId, userId, 'likers.user', '尚未按讚過', true);
     const result = await Comment.findOneAndUpdate(
       { _id: commentId },
       { $pull: { likers: { user: user._id } } },

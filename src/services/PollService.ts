@@ -79,7 +79,7 @@ export class PollService {
   {
     const poll = await modelFindByID("Poll", pollId);
     const user = await User.findById(userId).exec() as IUser;
-    await modelExists("Poll", userId, "like.user", '已經按讚過了', false);
+    await modelExists("Poll", pollId, userId, "like.user", '已經按讚過了', false);
     const result = await Poll.findOneAndUpdate(
       { _id: pollId },
       { $push: { like: { user: user._id, emoji } } },
@@ -107,7 +107,7 @@ export class PollService {
     if (!originEmoji) {
       throw appError({ code: 404, message: "未對投票按讚" });
     }
-    await modelExists("Poll", userId, "like.user", '尚未按讚過', true);
+    await modelExists("Poll", pollId, userId, "like.user", '尚未按讚過', true);
     const result = await Poll.findOneAndUpdate(
       { _id: pollId, "like.user": user._id },
       { $set: { "like.$.emoji": emoji } },
@@ -126,7 +126,7 @@ export class PollService {
     await modelFindByID("Poll", pollId);
     const poll = await Poll.findById(pollId).exec() as IPoll;
     const user = (await User.findById(userId).exec()) as IUser;
-    await modelExists("Poll", userId, "like.user", '尚未按讚過', true);
+    await modelExists("Poll", pollId, userId, "like.user", '尚未按讚過', true);
     const result = await Poll.findOneAndUpdate(
       { _id: pollId },
       { $pull: { like: { user: user._id } } },
@@ -148,7 +148,7 @@ export class PollService {
   {
     await modelFindByID("Poll", pollId);
     const user = (await User.findById(userId).exec()) as IUser;
-    await modelExists("Poll", userId, "followers", '已經追蹤過了', false);
+    await modelExists("Poll", pollId, userId, "followers", '已經追蹤過了', false);
     const result = await Poll.findOneAndUpdate(
       { _id: pollId },
       { $addToSet: { followers: user._id } },
@@ -176,7 +176,7 @@ export class PollService {
       .exec() as IPoll;
     const user
       = await User.findById(userId).exec() as IUser;
-    await modelExists("Poll", userId, "followers", '尚未追蹤', true);
+    await modelExists("Poll", pollId, userId, "followers", '尚未追蹤', true);
     const result = await Poll.findOneAndUpdate(
       { id: pollId },
       { $pull: { followers: user._id } },

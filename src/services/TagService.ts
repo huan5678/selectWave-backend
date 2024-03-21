@@ -1,17 +1,12 @@
 import { Tag } from "@/models";
 import { ITag } from "@/types";
-import { appError } from "@/utils";
 import { modelExists, modelFindByID } from "@/utils/modelCheck";
-import { NextFunction } from "express";
 
 class TagService {
-  static createTag = async (name: string, next:NextFunction): Promise<ITag> =>
+  static createTag = async (name: string): Promise<ITag> =>
   {
-    const tag = await Tag.findOne({ name }).exec();
-    await modelExists('Tag', name, 'name', '已存在', false);
-    if (tag) {
-      throw appError({ code: 400, message: "標籤已存在", next });
-    }
+    const tag = await Tag.findOne({ name }).exec() as ITag;
+    await modelExists('Tag', tag._id, name, 'name', '已存在', false);
     return Tag.create({ name });
   }
 
