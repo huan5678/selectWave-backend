@@ -20,6 +20,7 @@ export async function modelFindByID(model: ModelType, id: string)
 
 export async function modelExists(
   model: ModelType,
+  modelId: string,
   id: string,
   target: string,
   message: string,
@@ -35,7 +36,8 @@ export async function modelExists(
     }
   }
   targetName = model === 'User' ? '使用者' : model === 'Poll' ? '提案' : model === 'Comment' ? '評論' : model === 'Tag' ? '標籤' : '選項';
-  const result = await models(model).findOne({ [ target ]: id }).exec() as ModelSelect<ModelType>;
+  const result = await models(model).findOne({ _id: modelId, [ target ]: id }).exec() as ModelSelect<ModelType>;
+  console.log(result);
   checkExists(result);
   return result;
 }
