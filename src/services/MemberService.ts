@@ -53,22 +53,22 @@ class MemberService
     await modelFindByID("User", id);
     const user = await User.findById(id) as IUser;
     const isAlreadyFollowing =
-      user.following &&
-      user.following.some(
+      user.followingUsers &&
+      user.followingUsers.some(
         (following) => following.user.id.toString() === targetID
       );
     if (isAlreadyFollowing)
       throw appError({ code: 400, message: "您已經追蹤了該使用者", next });
 
     const resultUserData = await User.findOneAndUpdate(
-      { id, "following.user": { $ne: targetID } },
-      { $addToSet: { following: { user: targetID } } },
+      { id, "followingUsers.user": { $ne: targetID } },
+      { $addToSet: { followingUsers: { user: targetID } } },
       { new: true }
     ).select("-coin -updatedAt -isValidator -isSubscribed");
 
     await User.findOneAndUpdate(
       { id: targetID },
-      { $addToSet: { followers: { user: id } } }
+      { $addToSet: { followedUsers: { user: id } } }
     );
     return resultUserData;
   }
@@ -79,8 +79,8 @@ class MemberService
     const user = await User.findById(id) as IUser;
 
     const isFollowing =
-      user.following &&
-      user.following.some(
+      user.followingUsers &&
+      user.followingUsers.some(
         (following) => following.user.id.toString() === targetID
       );
     if (!isFollowing)
@@ -92,12 +92,12 @@ class MemberService
 
     await User.findOneAndUpdate(
       { id: id },
-      { $pull: { following: { user: targetID } } }
+      { $pull: { followingUsers: { user: targetID } } }
     );
 
     await User.findOneAndUpdate(
       { id: targetID },
-      { $pull: { followers: { user: id } } }
+      { $pull: { followedUsers: { user: id } } }
     );
 
     return true;

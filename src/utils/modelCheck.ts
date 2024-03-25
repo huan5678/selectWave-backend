@@ -37,7 +37,6 @@ export async function modelExists(
   }
   targetName = model === 'User' ? '使用者' : model === 'Poll' ? '提案' : model === 'Comment' ? '評論' : model === 'Tag' ? '標籤' : '選項';
   const result = await models(model).findOne({ _id: modelId, [ target ]: id }).exec() as ModelSelect<ModelType>;
-  console.log(result);
   checkExists(result);
   return result;
 }

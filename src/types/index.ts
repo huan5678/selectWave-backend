@@ -34,11 +34,11 @@ export interface IUser extends Document {
       id: string;
     }
   ];
-  followers?: {
+  followedUsers?: {
     user: IUser["_id"];
     createdAt: Date;
   }[];
-  following?: {
+  followingUsers?: {
     user: IUser["_id"];
     createdAt: Date;
   }[];
