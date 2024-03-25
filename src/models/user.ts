@@ -68,7 +68,7 @@ const userSchema = new Schema<IUser>(
     birthday: {
       type: Date,
     },
-    followers: [
+    followedUsers: [
       {
         _id: false,
         user: { type: Schema.Types.ObjectId, ref: "User" },
@@ -78,7 +78,7 @@ const userSchema = new Schema<IUser>(
         },
       },
     ],
-    following: [
+    followingUsers: [
       {
         _id: false,
         user: { type: Schema.Types.ObjectId, ref: "User" },
@@ -164,12 +164,6 @@ const userSchema = new Schema<IUser>(
         ref: "Comment",
       },
     ],
-    followPolls: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Poll",
-      },
-    ],
   },
   {
     versionKey: false,
@@ -212,7 +206,7 @@ userSchema.post("save", async function () {
   if (this.isModified("followers")) {
     customEmitter.emit("userUpdated", {
       userId: this._id,
-      followers: this.followers,
+      followers: this.followedUsers,
     });
   }
 });

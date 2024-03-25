@@ -31,7 +31,7 @@ export class PollService {
   ) => {
     return await Poll.find(queryConditions)
       .sort(sort || { createdAt: -1 })
-      .select("-comments -options -followers -isWinner -updatedAt")
+      .select("-comments -options -like -isWinner -updatedAt")
       .skip(skip)
       .limit(limit)
       .exec();
@@ -178,14 +178,15 @@ export class PollService {
       = await User.findById(userId).exec() as IUser;
     await modelExists("Poll", pollId, userId, "followers", '尚未追蹤', true);
     const result = await Poll.findOneAndUpdate(
-      { id: pollId },
+      { _id: pollId },
       { $pull: { followers: user._id } },
       { new: true }
     )
       .populate("followers", "name avatar")
       .exec();
+    console.log(result);
     await User.findOneAndUpdate(
-      { id: userId },
+      { _id: userId },
       { $pull: { followedPolls: { poll } } },
       { new: true }
     ).exec();

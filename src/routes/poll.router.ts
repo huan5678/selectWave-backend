@@ -376,7 +376,7 @@ pollRouter.get(
 )
 
 // 取消追蹤提案
-pollRouter.get(
+pollRouter.delete(
   /**
    * #swagger.tags = ['Poll - 提案']
    * #swagger.description = '取消追蹤提案'
@@ -407,7 +407,7 @@ pollRouter.get(
     "Bearer": []
     }]
    */
-  '/:id/un-follow',
+  '/:id/follow',
   handleErrorAsync(PollController.unFollowPoll),
 )
 
