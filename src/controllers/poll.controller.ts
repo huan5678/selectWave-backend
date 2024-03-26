@@ -4,6 +4,12 @@ import { array, boolean, object, string } from "yup";
 import { IVote, IUser, IOption, CreatePollRequest, IPoll } from "@/types";
 import { CommentService, PollService, TagService, VoteService } from "@/services";
 import { Schema } from "mongoose";
+import { modelFindByID } from "@/utils/modelCheck";
+
+async function getMatchingTagIds(q: string): Promise<Schema.Types.ObjectId[]> {
+  const tags = await TagService.findTags({ name: { $regex: q, $options: "i" } });
+  return tags.map((tag) => tag._id);
+}
 
 const pollSchema = object({
   title: string()
@@ -133,11 +139,6 @@ class PollController {
     page = Math.max(Number(page), 1);
     limit = Math.max(Number(limit), 1);
 
-    async function getMatchingTagIds(q: string): Promise<Schema.Types.ObjectId[]> {
-      const tags = await TagService.findTags({ name: { $regex: q, $options: "i" } });
-      return tags.map((tag) => tag._id);
-    }
-
     const queryConditions = {
       ...(q && {
         $or: [
@@ -196,6 +197,52 @@ class PollController {
       ],
     });
     successHandle(res, "獲取投票詳細資訊成功", { poll });
+  };
+
+  public static getPollByUser: RequestHandler = async (
+    req,
+    res: Response,
+  ) =>
+  {
+    const { id } = req.params;
+    await modelFindByID("User", id);
+    let { page = 1, limit = 12, status, q, sort, createdBy } = req.query;
+
+    page = Math.max(Number(page), 1);
+    limit = Math.max(Number(limit), 1);
+
+    console.log(id, req.user?.id);
+
+    const queryConditions = {
+      ...(q && {
+        $or: [
+          { title: { $regex: q, $options: "i" } },
+          { description: { $regex: q, $options: "i" } },
+          { tags: { $in: await getMatchingTagIds(q as string) } },
+        ],
+      }),
+      ...(status && { status: status }),
+      ...(createdBy && { createdBy: createdBy }),
+      createdBy: id,
+      ...(id === req.user?.id ? {} : { isPrivate: false }),
+    };
+
+    const total = await PollService.countDocuments(queryConditions);
+
+    const totalPages = Math.max(Math.ceil(total / limit), 1); // 計算總頁數
+
+    page = Math.min(page, totalPages); // 確保請求的頁數不會超過總頁數
+
+    const skip = (page - 1) * limit;
+
+    const polls = await PollService.getPolls(
+      queryConditions,
+      sort as string,
+      skip,
+      limit
+    );
+
+    successHandle(res, "獲取使用者投票成功", { polls, total, page, totalPages, limit });
   };
 
   // 更新投票資訊

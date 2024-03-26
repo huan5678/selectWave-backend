@@ -70,6 +70,80 @@ pollRouter.get(
 pollRouter.get(
   /**
    * #swagger.tags = ['Poll - 提案']
+   * #swagger.description = '獲取使用者所有提案'
+   * #swagger.path = '/api/poll/user/{id}'
+   * #swagger.parameters['id'] = {
+    in: 'path',
+    required: true,
+    type: 'string',
+    description: '使用者ID',
+  }
+  * #swagger.parameters['page'] = {
+    in: 'query',
+    required: false,
+    type: 'number',
+    description: '頁碼',
+  }
+  * #swagger.parameters['limit'] = {
+    in: 'query',
+    required: false,
+    type: 'number',
+    description: '每頁記錄數',
+  }
+  * #swagger.parameters['q'] = {
+    in: 'query',
+    required: false,
+    type: 'string',
+    description: '搜尋關鍵字',
+  }
+  * #swagger.parameters['status'] = {
+    in: 'query',
+    required: false,
+    type: 'string',
+    schema: {
+      enum: ["active", "pending", "closed"],
+    },
+    description: '提案狀態',
+  }
+  * #swagger.parameters['sort'] = {
+    in: 'query',
+    required: false,
+    type: 'string',
+    description: '排序欄位 使用欄位名稱表示升冪 例如: createdTime, 加上-為降冪 例如: -createdTime',
+  }
+  * #swagger.responses[200] = {
+    schema: {
+      status: true,
+      message: "獲取提案列表成功",
+      result: [
+        {
+          $ref: "#/definitions/Poll"
+        },
+      ],
+    },
+    description: "獲取提案列表成功"
+  }
+  * #swagger.responses[404] = {
+    schema: {
+      $ref: "#/definitions/ErrorPollNotFound"
+    },
+    description: "找不到提案"
+  }
+  * #swagger.responses[403] = {
+    schema: {
+      $ref: "#/definitions/ErrorForbidden"
+    },
+    description: "無權限獲取提案列表"
+  }
+  * #swagger.security = [{
+    "Bearer": []
+  }]
+  */
+  '/user/:id', handleErrorAsync(PollController.getPollByUser));
+
+pollRouter.get(
+  /**
+   * #swagger.tags = ['Poll - 提案']
    * #swagger.description = '根據 ID 獲取提案詳情'
    * #swagger.path = '/api/poll/{id}'
    * #swagger.parameters['id'] = {
