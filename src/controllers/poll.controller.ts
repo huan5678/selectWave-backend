@@ -148,6 +148,7 @@ class PollController {
       }),
       ...(status && { status: status }),
       ...(createdBy && { createdBy: createdBy }),
+      ...(createdBy ? (createdBy === req.user?.id ? {} : { isPrivate: false }) : { isPrivate: false }),
     };
 
     const total = await PollService.countDocuments(queryConditions);
